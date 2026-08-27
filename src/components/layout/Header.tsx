@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, User, Heart, ShoppingBag, Menu, X, ArrowRight } from 'lucide-react';
+import { Search, User, Heart, ShoppingBag, Menu, X, ArrowRight, ChevronRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { PRODUCTS } from '@/data/products';
@@ -67,13 +67,13 @@ export const Header: React.FC = () => {
     { name: 'Cables', href: '/shop/cables' },
     { name: 'Power Banks', href: '/shop/power-banks' },
     { name: 'Audio', href: '/shop/audio' },
-    { name: 'Car Accessories', href: '/shop/car-accessories' },
+    { name: 'More Accessories', href: '/shop/car-accessories' },
     { name: 'Deals', href: '/deals', isDeals: true }
   ];
 
   return (
     <header className="site">
-      <div className="header-row wrap" style={{ paddingLeft: 0, paddingRight: 0 }}>
+      <div className="header-row wrap">
         {/* Mobile menu toggle */}
         <button
           className="mobile-toggle"
@@ -84,37 +84,39 @@ export const Header: React.FC = () => {
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Brand Logo */}
-        <Link href="/" className="logo">
+        {/* Brand Logo matching Home Page (1).png */}
+        <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
           <Image
             src="/images/logo.png"
             alt="CellCentral Logo"
             width={160}
-            height={40}
+            height={42}
             className="logo-mark"
             priority
           />
           <div>
-            <div className="logo-word">
-              <span className="c1">Cell</span>
-              <span className="c2">Central</span>
+            <div className="logo-word" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <span style={{ color: '#0B63F6' }}>CELL</span>
+              <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
             </div>
-            <div className="logo-sub">MOBILE ACCESSORIES</div>
+            <div className="logo-sub" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', color: '#0B1E3D' }}>
+              MOBILE ACCESSORIES
+            </div>
           </div>
         </Link>
 
-        {/* Live Search Bar */}
+        {/* Search Bar matching Home Page (1).png */}
         <div className="search-bar" ref={searchRef}>
           <form onSubmit={handleSearchSubmit} style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
             <input
               type="text"
-              placeholder="Search for products, brands or devices…"
+              placeholder="Search for products, brands or devices..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery.trim().length > 1 && setIsSearchOpen(true)}
             />
             <button type="submit" className="search-btn" aria-label="Search">
-              <Search size={16} />
+              <Search size={16} color="#fff" />
             </button>
           </form>
 
@@ -129,7 +131,7 @@ export const Header: React.FC = () => {
                 background: '#fff',
                 borderRadius: '12px',
                 boxShadow: '0 10px 30px rgba(11,30,61,0.18)',
-                border: '1px solid var(--gray-100)',
+                border: '1px solid var(--gray-200)',
                 padding: '12px',
                 zIndex: 50
               }}
@@ -175,28 +177,75 @@ export const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Header Action Buttons */}
-        <div className="header-actions">
-          <Link href="/wishlist" className="h-action">
-            <Heart size={21} />
-            <span>Wishlist</span>
+        {/* Header Action Buttons matching Home Page (1).png (Account, Wishlist, Cart) */}
+        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          {/* Account */}
+          <Link
+            href="/shop"
+            className="h-action"
+            style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', gap: '6px', color: '#0B1E3D', textDecoration: 'none' }}
+          >
+            <User size={18} />
+            <span style={{ fontSize: '13px', fontWeight: 700 }}>Account</span>
+          </Link>
+
+          {/* Wishlist */}
+          <Link
+            href="/wishlist"
+            className="h-action"
+            style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', gap: '6px', color: '#0B1E3D', textDecoration: 'none', position: 'relative' }}
+          >
+            <Heart size={18} />
+            <span style={{ fontSize: '13px', fontWeight: 700 }}>Wishlist</span>
             {wishlistCount > 0 && <span className="cart-count" style={{ background: 'var(--pink)' }}>{wishlistCount}</span>}
           </Link>
-          <button onClick={openDrawer} className="h-action" aria-label="View Shopping Cart">
-            <ShoppingBag size={21} />
-            <span>Cart</span>
-            {itemCount > 0 && <span className="cart-count">{itemCount}</span>}
+
+          {/* Cart */}
+          <button
+            onClick={openDrawer}
+            className="h-action"
+            aria-label="View Shopping Cart"
+            style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', gap: '6px', color: '#0B1E3D', background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}
+          >
+            <ShoppingBag size={18} />
+            <span style={{ fontSize: '13px', fontWeight: 700 }}>Cart</span>
+            <span className="cart-count" style={{ background: '#FF3D5A' }}>{itemCount}</span>
           </button>
         </div>
       </div>
 
-      {/* Main Navigation Bar */}
-      <nav className="mainnav">
-        <div className="navrow wrap" style={{ paddingLeft: 0, paddingRight: 0 }}>
-          <Link href="/shop" className="navcat">
-            <Menu size={15} />
-            Shop All
+      {/* Main Navigation Bar matching Home Page (1).png */}
+      <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff' }}>
+        <div className="navrow wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* SHOP BY CATEGORY BUTTON */}
+          <Link
+            href="/shop"
+            className="navcat"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              background: '#0B1E3D',
+              color: '#fff',
+              padding: '11px 18px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              fontSize: '13px',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              marginRight: '8px'
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Menu size={15} />
+              <span>SHOP BY CATEGORY</span>
+            </span>
+            <ChevronRight size={14} />
           </Link>
+
+          {/* Navigation Links */}
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -204,6 +253,14 @@ export const Header: React.FC = () => {
                 key={link.name}
                 href={link.href}
                 className={`navlink ${link.isDeals ? 'deals' : ''} ${isActive ? 'active' : ''}`}
+                style={{
+                  fontSize: '13.5px',
+                  fontWeight: 700,
+                  color: link.isDeals ? '#FF3D5A' : '#0B1E3D',
+                  padding: '12px 14px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
               >
                 {link.name}
               </Link>

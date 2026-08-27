@@ -1,113 +1,113 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="site">
+    <footer style={{ background: '#FFFFFF', color: '#47506B', borderTop: '1px solid var(--gray-200)', paddingTop: '56px', paddingBottom: '32px' }}>
       <div className="wrap">
-        <div className="foot-grid">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1.4fr repeat(4, 1fr)',
+            gap: '36px',
+            paddingBottom: '48px',
+            borderBottom: '1px solid var(--gray-200)'
+          }}
+          className="foot-grid-custom"
+        >
           {/* Brand Info */}
-          <div className="foot-brand">
-            <div className="logo">
+          <div>
+            <Link href="/" className="logo" style={{ textDecoration: 'none', marginBottom: '16px', display: 'inline-flex' }}>
               <Image
-                src="/images/logo-footer.png"
-                alt="CellCentral"
-                width={180}
-                height={40}
-                style={{ objectFit: 'contain', width: 'auto', height: '36px' }}
+                src="/images/logo.png"
+                alt="CellCentral Logo"
+                width={150}
+                height={38}
+                style={{ objectFit: 'contain' }}
               />
-            </div>
-            <p>Your premier destination for high-performance mobile accessories and power solutions in Canada.</p>
-            <div className="foot-social">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <svg viewBox="0 0 24 24" fill="#fff" width="16" height="16">
-                  <path d="M13.5 21v-7.5H16l.5-3H13.5V8.2c0-.9.3-1.5 1.6-1.5H16.6V4.2c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1v2.3H7.7v3H10.2V21z" />
-                </svg>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" width="16" height="16">
-                  <rect x="3" y="3" width="18" height="18" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.3" cy="6.7" r="1" />
-                </svg>
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <svg viewBox="0 0 24 24" fill="#fff" width="16" height="16">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-                <svg viewBox="0 0 24 24" fill="#fff" width="16" height="16">
-                  <path d="M10 15l6-3-6-3z" />
-                  <rect x="2.5" y="5.5" width="19" height="13" rx="2.5" fill="none" stroke="#fff" strokeWidth="1.6" />
-                </svg>
-              </a>
+              <div style={{ marginLeft: '6px' }}>
+                <div style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
+                  <span style={{ color: '#0B63F6' }}>CELL</span>
+                  <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
+                </div>
+                <div style={{ fontSize: '8px', fontWeight: 800, letterSpacing: '0.14em', color: '#0B1E3D', marginTop: '2px' }}>
+                  MOBILE ACCESSORIES
+                </div>
+              </div>
+            </Link>
+            <p style={{ fontSize: '13.5px', color: '#47506B', lineHeight: 1.5, marginTop: '14px', maxWidth: '280px' }}>
+              Your one-stop shop for premium mobile accessories in Canada.
+            </p>
+            <div style={{ fontSize: '12px', color: '#8891A5', marginTop: '20px' }}>
+              © 2026 CellCentral.ca | All rights reserved.
             </div>
           </div>
 
-          {/* Shop Links */}
-          <div className="foot-col">
-            <h5>Shop</h5>
-            <Link href="/shop/phone-cases">Phone Cases</Link>
-            <Link href="/shop/screen-protectors">Screen Protectors</Link>
-            <Link href="/shop/chargers">Fast Chargers</Link>
-            <Link href="/shop/cables">Braided Cables</Link>
-            <Link href="/shop/power-banks">MagSafe Power Banks</Link>
-            <Link href="/shop/audio">Wireless Audio</Link>
-            <Link href="/deals">Special Deals</Link>
+          {/* SHOP Column */}
+          <div>
+            <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
+              SHOP
+            </h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <Link href="/shop/phone-cases" style={{ color: '#47506B', textDecoration: 'none' }}>Phone Cases</Link>
+              <Link href="/shop/screen-protectors" style={{ color: '#47506B', textDecoration: 'none' }}>Screen Protectors</Link>
+              <Link href="/shop/chargers" style={{ color: '#47506B', textDecoration: 'none' }}>Chargers</Link>
+              <Link href="/shop/cables" style={{ color: '#47506B', textDecoration: 'none' }}>Cables</Link>
+              <Link href="/shop/power-banks" style={{ color: '#47506B', textDecoration: 'none' }}>Power Banks</Link>
+              <Link href="/shop/audio" style={{ color: '#47506B', textDecoration: 'none' }}>Audio</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>All Accessories</Link>
+              <Link href="/deals" style={{ color: '#FF3D5A', fontWeight: 700, textDecoration: 'none' }}>Deals</Link>
+            </div>
           </div>
 
-          {/* Customer Service */}
-          <div className="foot-col">
-            <h5>Customer Support</h5>
-            <Link href="/shop">Shipping Information</Link>
-            <Link href="/shop">Returns &amp; Exchanges</Link>
-            <Link href="/shop">1-Year Warranty Claim</Link>
-            <Link href="/shop">Track Your Order</Link>
-            <Link href="/shop">Frequently Asked Questions</Link>
-            <Link href="/shop">Contact Canadian Support</Link>
+          {/* CUSTOMER SERVICE Column */}
+          <div>
+            <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
+              CUSTOMER SERVICE
+            </h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Contact Us</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Shipping Information</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Returns &amp; Exchanges</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Warranty</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>FAQs</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Track Your Order</Link>
+            </div>
           </div>
 
-          {/* Company */}
-          <div className="foot-col">
-            <h5>About Us</h5>
-            <Link href="/brands">Our Story</Link>
-            <Link href="/brands">Why CellCentral</Link>
-            <Link href="/brands">Certified Brand Partners</Link>
-            <Link href="/brands">B2B &amp; Bulk Orders</Link>
-            <Link href="/brands">Eco &amp; Recycling</Link>
+          {/* ABOUT US Column */}
+          <div>
+            <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
+              ABOUT US
+            </h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <Link href="/brands" style={{ color: '#47506B', textDecoration: 'none' }}>Our Story</Link>
+              <Link href="/brands" style={{ color: '#47506B', textDecoration: 'none' }}>Why CellCentral</Link>
+              <Link href="/brands" style={{ color: '#47506B', textDecoration: 'none' }}>Become a Retail Partner</Link>
+              <Link href="/brands" style={{ color: '#47506B', textDecoration: 'none' }}>Bulk Orders</Link>
+              <Link href="/brands" style={{ color: '#47506B', textDecoration: 'none' }}>Careers</Link>
+            </div>
           </div>
 
-          {/* Guarantees */}
-          <div className="foot-col">
-            <h5>Our Promise</h5>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#AEBEDD' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Truck size={16} color="var(--blue-light)" />
-                <span>Free Shipping over $49</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={16} color="#1EA672" />
-                <span>1-Year Peace of Mind</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <RotateCcw size={16} color="var(--orange)" />
-                <span>30-Day Easy Returns</span>
-              </div>
+          {/* ACCOUNT Column */}
+          <div>
+            <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
+              ACCOUNT
+            </h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>My Account</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Order History</Link>
+              <Link href="/wishlist" style={{ color: '#47506B', textDecoration: 'none' }}>Wishlist</Link>
+              <Link href="/shop" style={{ color: '#47506B', textDecoration: 'none' }}>Newsletter</Link>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="foot-bottom">
-          <div>© {new Date().getFullYear()} CellCentral / Celtronics. All rights reserved. Proudly Canadian 🇨🇦</div>
-          <div>
-            <Link href="/shop">Privacy Policy</Link>
-            <Link href="/shop">Terms of Service</Link>
-            <Link href="/shop">PCI-DSS Secure Checkout</Link>
-          </div>
+        {/* Bottom Bar: Privacy & Terms */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '24px', paddingTop: '20px', fontSize: '12px', color: '#8891A5' }}>
+          <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Privacy Policy</Link>
+          <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Terms of Service</Link>
         </div>
       </div>
     </footer>

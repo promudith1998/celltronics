@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, Check, Truck } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -18,6 +18,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { openQuickView } = useQuickView();
+  const [justAdded, setJustAdded] = useState(false);
 
   const isFavorite = isInWishlist(product.id);
   const outOfStock = !product.inStock || product.badge === 'out';
@@ -27,6 +28,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.stopPropagation();
     if (!outOfStock) {
       addItem(product, 1);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
     }
   };
 
@@ -46,8 +49,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="pcard">
       {/* Product Media Area */}
       <div className="pcard-media">
-        <Link href={`/product/${product.id}`} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ProductIcon type={product.iconType} size="56%" />
+        <Link
+          href={`/product/${product.id}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+        >
+          <ProductIcon type={product.iconType} size="68%" />
         </Link>
 
         {/* Badges */}
@@ -80,7 +93,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Product Card Details */}
       <div className="pcard-body">
-        <span className="pcard-brand">{product.brand}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="pcard-brand">{product.brand}</span>
+          {/* Color variant dots preview */}
+          {product.colors && product.colors.length > 1 && (
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              {product.colors.slice(0, 3).map((col, idx) => (
+                <span
+                  key={idx}
+                  title={col.name}
+                  style={{
+                    width: '9px',
+                    height: '9px',
+                    borderRadius: '50%',
+                    background: col.colorHex || '#CBD5E1',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    display: 'inline-block'
+                  }}
+                />
+              ))}
+              {product.colors.length > 3 && (
+                <span style={{ fontSize: '9px', color: 'var(--gray-400)', fontWeight: 600 }}>
+                  +{product.colors.length - 3}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         <Link href={`/product/${product.id}`}>
           <h3 className="pcard-name">{product.name}</h3>
         </Link>
@@ -107,15 +147,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        {/* Add to Cart CTA */}
+        {/* Add to Cart CTA with feedback */}
         <button
-          className="pcard-add"
+          className={`pcard-add ${justAdded ? 'added' : ''}`}
           disabled={outOfStock}
           onClick={handleAddToCart}
-          style={outOfStock ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
+          style={
+            outOfStock
+              ? { opacity: 0.6, cursor: 'not-allowed' }
+              : justAdded
+              ? { background: '#1EA672', color: '#fff' }
+              : undefined
+          }
         >
           {outOfStock ? (
             'OUT OF STOCK'
+          ) : justAdded ? (
+            <>
+              <Check size={14} /> ADDED TO CART
+            </>
           ) : (
             <>
               <ShoppingBag size={14} /> ADD TO CART
