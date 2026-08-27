@@ -53,7 +53,15 @@ export const QuickViewModal: React.FC = () => {
               position: 'relative'
             }}
           >
-            <ProductIcon type={quickViewProduct.iconType} size="60%" />
+            {quickViewProduct.imageUrl ? (
+              <img
+                src={quickViewProduct.imageUrl}
+                alt={quickViewProduct.name}
+                style={{ width: '80%', height: '80%', objectFit: 'contain', borderRadius: '12px' }}
+              />
+            ) : (
+              <ProductIcon type={quickViewProduct.iconType} size="60%" />
+            )}
             {quickViewProduct.badge && (
               <span
                 className={`badge badge-${quickViewProduct.badge}`}

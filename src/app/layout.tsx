@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Space_Grotesk, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/context/ToastContext';
+import { AdminProductProvider } from '@/context/AdminProductContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { QuickViewProvider } from '@/context/QuickViewContext';
@@ -64,21 +65,24 @@ export default function RootLayout({
         </svg>
 
         <ToastProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <QuickViewProvider>
-                <TopBar />
-                <Header />
-                <main>{children}</main>
-                <Footer />
-                <CartDrawer />
-                <QuickViewModal />
-                <Toast />
-              </QuickViewProvider>
-            </WishlistProvider>
-          </CartProvider>
+          <AdminProductProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <QuickViewProvider>
+                  <TopBar />
+                  <Header />
+                  <main>{children}</main>
+                  <Footer />
+                  <CartDrawer />
+                  <QuickViewModal />
+                  <Toast />
+                </QuickViewProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </AdminProductProvider>
         </ToastProvider>
       </body>
     </html>
   );
 }
+

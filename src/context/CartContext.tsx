@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Product, ProductVariant } from '@/types/product';
 import { CartItem, CouponDiscount } from '@/types/cart';
-import { PROMO_CODES } from '@/data/products';
+import { useAdminProducts } from './AdminProductContext';
 import { useToast } from './ToastContext';
 
 interface CartContextType {
@@ -41,6 +41,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { showToast } = useToast();
+  const { validatePromoCode } = useAdminProducts();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -127,18 +128,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   }, [removeItem]);
 
+  const currentSubtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
   const applyCoupon = useCallback((code: string): boolean => {
-    const trimmed = code.trim().toUpperCase();
-    const found = PROMO_CODES.find((c) => c.code.toUpperCase() === trimmed);
-    if (found) {
-      setAppliedCoupon(found);
-      showToast('Coupon Applied!', `${found.code}: ${found.description}`, 'success');
+    const result = validatePromoCode(code, currentSubtotal);
+    if (result.valid && result.promo) {
+      setAppliedCoupon({
+        code: result.promo.code,
+        discountPercent: result.promo.discountPercent,
+        discountAmount: result.promo.discountAmount,
+        description: result.promo.description
+      });
+      showToast('Coupon Applied! 🎉', result.message, 'success');
       return true;
     } else {
-      showToast('Invalid Promo Code', 'Please check the code and try again.', 'error');
+      showToast('Coupon Error', result.message, 'error');
       return false;
     }
-  }, [showToast]);
+  }, [validatePromoCode, currentSubtotal, showToast]);
 
   const removeCoupon = useCallback(() => {
     setAppliedCoupon(null);

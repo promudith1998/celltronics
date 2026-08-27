@@ -19,6 +19,7 @@ import {
   Filter
 } from 'lucide-react';
 import { PRODUCTS, CATEGORIES, BRANDS, DEVICE_MODELS } from '@/data/products';
+import { useAdminProducts } from '@/context/AdminProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { ProductCategory, Product } from '@/types/product';
@@ -36,6 +37,8 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { products: adminProducts } = useAdminProducts();
+  const PRODUCTS_DATA = adminProducts.length > 0 ? adminProducts : PRODUCTS;
 
   // Search Param Initializers
   const queryParam = searchParams.get('q') || '';
@@ -117,7 +120,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return PRODUCTS_DATA.filter((product) => {
       // Category filter
       if (selectedCategory !== 'all' && product.category !== selectedCategory) {
         return false;
@@ -160,11 +163,11 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       if (sortBy === 'newest') return (b.badge === 'new' ? 1 : 0) - (a.badge === 'new' ? 1 : 0);
       return 0; // Default: featured
     });
-  }, [selectedCategory, selectedBrands, minPrice, maxPrice, selectedModels, inStockOnly, searchQuery, sortBy]);
+  }, [PRODUCTS_DATA, selectedCategory, selectedBrands, minPrice, maxPrice, selectedModels, inStockOnly, searchQuery, sortBy]);
 
   // Brand product counts
   const getBrandCount = (brand: string) => {
-    return PRODUCTS.filter((p) => {
+    return PRODUCTS_DATA.filter((p) => {
       if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
       return p.brand === brand;
     }).length;
@@ -175,7 +178,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
   const displayDescription = currentCatObj ? currentCatObj.description : categoryDescription;
 
   // Recommended products for empty or small result sets
-  const topRecommendations = PRODUCTS.filter((p) => p.badge === 'best' || p.rating >= 4.8).slice(0, 4);
+  const topRecommendations = PRODUCTS_DATA.filter((p) => p.badge === 'best' || p.rating >= 4.8).slice(0, 4);
 
   return (
     <div className="wrap" style={{ paddingTop: '20px', paddingBottom: '72px' }}>
@@ -340,11 +343,11 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
               transition: 'all 0.15s ease'
             }}
           >
-            All Categories ({PRODUCTS.length})
+            All Categories ({PRODUCTS_DATA.length})
           </button>
           {CATEGORIES.map((cat) => {
             const isSel = selectedCategory === cat.id;
-            const count = PRODUCTS.filter((p) => p.category === cat.id).length;
+            const count = PRODUCTS_DATA.filter((p) => p.category === cat.id).length;
             return (
               <button
                 key={cat.id}
@@ -555,7 +558,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
                 />
                 All Categories
               </span>
-              <span className="n">{PRODUCTS.length}</span>
+              <span className="n">{PRODUCTS_DATA.length}</span>
             </label>
             {CATEGORIES.map((cat) => (
               <label key={cat.id} className="filter-row">
@@ -568,7 +571,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
                   />
                   {cat.name}
                 </span>
-                <span className="n">{PRODUCTS.filter((p) => p.category === cat.id).length}</span>
+                <span className="n">{PRODUCTS_DATA.filter((p) => p.category === cat.id).length}</span>
               </label>
             ))}
           </div>

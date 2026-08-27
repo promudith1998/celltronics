@@ -44,6 +44,8 @@ export interface Product {
   inStock: boolean;
   stockCount?: number;
   iconType: 'case' | 'charger' | 'cable' | 'power' | 'audio' | 'screen' | 'mount';
+  imageUrl?: string;
+  galleryImages?: string[];
   description: string;
   longDescription?: string;
   features: string[];
@@ -55,3 +57,4 @@ export interface Product {
   warranty: string;
   reviews?: ProductReview[];
 }
+

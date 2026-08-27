@@ -60,7 +60,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             padding: '16px'
           }}
         >
-          <ProductIcon type={product.iconType} size="68%" />
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              style={{ width: '100%', height: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }}
+            />
+          ) : (
+            <ProductIcon type={product.iconType} size="68%" />
+          )}
         </Link>
 
         {/* Badges */}

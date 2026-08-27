@@ -105,9 +105,24 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar: Privacy & Terms */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '24px', paddingTop: '20px', fontSize: '12px', color: '#8891A5' }}>
-          <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Privacy Policy</Link>
-          <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Terms of Service</Link>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+            paddingTop: '20px',
+            fontSize: '12px',
+            color: '#8891A5'
+          }}
+        >
+          <div>© 2026 CellCentral Canada. Built for fast performance &amp; high durability.</div>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Privacy Policy</Link>
+            <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Terms of Service</Link>
+            <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Accessibility</Link>
+          </div>
         </div>
       </div>
     </footer>

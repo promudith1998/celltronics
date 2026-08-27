@@ -73,7 +73,7 @@ export default function HomePage() {
             <div>
               <h1
                 style={{
-                  fontSize: '56px',
+                  fontSize: 'clamp(34px, 4.8vw, 56px)',
                   fontWeight: 900,
                   lineHeight: 1.05,
                   letterSpacing: '-0.03em',
@@ -87,7 +87,7 @@ export default function HomePage() {
 
               <p
                 style={{
-                  fontSize: '17px',
+                  fontSize: '16px',
                   color: '#E2E8F0',
                   lineHeight: 1.45,
                   marginBottom: '28px',
@@ -256,7 +256,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Trust Value Badges (Matching Home Page (1).png) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', paddingLeft: '16px' }}>
+            <div className="hero-badges-row-custom" style={{ display: 'flex', flexDirection: 'column', gap: '28px', paddingLeft: '16px' }}>
               {/* Badge 1: 1-Year Warranty */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div
@@ -365,8 +365,9 @@ export default function HomePage() {
             className="cat-icons-grid"
           >
             {/* 1. CHARGERS (Green Circle) */}
-            <Link href="/shop/chargers" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/chargers" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -388,8 +389,9 @@ export default function HomePage() {
             </Link>
 
             {/* 2. CABLES (Blue Circle) */}
-            <Link href="/shop/cables" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/cables" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -411,8 +413,9 @@ export default function HomePage() {
             </Link>
 
             {/* 3. CASES (Purple Circle) */}
-            <Link href="/shop/phone-cases" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/phone-cases" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -436,8 +439,9 @@ export default function HomePage() {
             </Link>
 
             {/* 4. SCREEN PROTECTORS (Pink Circle) */}
-            <Link href="/shop/screen-protectors" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/screen-protectors" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -460,8 +464,9 @@ export default function HomePage() {
             </Link>
 
             {/* 5. AUDIO (Orange Circle) */}
-            <Link href="/shop/audio" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/audio" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -483,8 +488,9 @@ export default function HomePage() {
             </Link>
 
             {/* 6. WIRELESS (Teal Circle) */}
-            <Link href="/shop/power-banks" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/power-banks" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -508,8 +514,9 @@ export default function HomePage() {
             </Link>
 
             {/* 7. POWER BANKS (Dark Navy Circle) */}
-            <Link href="/shop/power-banks" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <Link href="/shop/power-banks" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div
+                className="cat-circle"
                 style={{
                   width: '76px',
                   height: '76px',
@@ -553,6 +560,7 @@ export default function HomePage() {
             {/* Card 1: Phone Cases */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -584,6 +592,7 @@ export default function HomePage() {
             {/* Card 2: Screen Protectors */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -614,6 +623,7 @@ export default function HomePage() {
             {/* Card 3: Chargers */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -645,6 +655,7 @@ export default function HomePage() {
             {/* Card 4: Cables */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -675,6 +686,7 @@ export default function HomePage() {
             {/* Card 5: Power Banks */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -704,6 +716,7 @@ export default function HomePage() {
             {/* Card 6: Car Accessories */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div
+                className="pop-circle"
                 style={{
                   width: '120px',
                   height: '120px',
@@ -1061,9 +1074,9 @@ export default function HomePage() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               flexWrap: 'wrap',
-              gap: '24px',
+              gap: '28px 40px',
               padding: '0 20px',
               marginBottom: '32px'
             }}

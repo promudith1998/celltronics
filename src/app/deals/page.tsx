@@ -3,12 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { Tag, Sparkles, ArrowRight } from 'lucide-react';
+import { useAdminProducts } from '@/context/AdminProductContext';
 import { PRODUCTS, PROMO_CODES } from '@/data/products';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function DealsPage() {
-  const dealProducts = PRODUCTS.filter((p) => p.badge === 'sale' || (p.wasPrice && p.wasPrice > p.price));
+  const { products, promoCodes, campaigns } = useAdminProducts();
+  const activeProducts = products.length > 0 ? products : PRODUCTS;
+  const activePromos = promoCodes.length > 0 ? promoCodes.filter((p) => p.isActive) : PROMO_CODES;
+
+  const dealProducts = activeProducts.filter((p) => p.badge === 'sale' || (p.wasPrice && p.wasPrice > p.price));
 
   return (
     <div className="wrap" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
@@ -36,7 +41,7 @@ export default function DealsPage() {
         </p>
 
         <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-          {PROMO_CODES.map((promo) => (
+          {activePromos.map((promo) => (
             <div
               key={promo.code}
               style={{

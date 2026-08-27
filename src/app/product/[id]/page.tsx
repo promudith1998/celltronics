@@ -26,6 +26,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useToast } from '@/context/ToastContext';
+import { useAdminProducts } from '@/context/AdminProductContext';
 import { ProductVariant, ProductReview } from '@/types/product';
 
 interface ProductPageProps {
@@ -35,7 +36,8 @@ interface ProductPageProps {
 }
 
 export default function ProductDetailPage({ params }: ProductPageProps) {
-  const product = PRODUCTS.find((p) => p.id === params.id);
+  const { products } = useAdminProducts();
+  const product = products.find((p) => p.id === params.id) || PRODUCTS.find((p) => p.id === params.id);
   if (!product) {
     notFound();
   }
@@ -48,23 +50,57 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
   const outOfStock = !product.inStock || product.badge === 'out';
 
   // Variant & Qty State
-  const [selectedColor, setSelectedColor] = useState<ProductVariant>(product.colors[0] || { name: 'Default' });
-  const [selectedModel, setSelectedModel] = useState<string>(product.models[0] || 'Default');
+  const [selectedColor, setSelectedColor] = useState<ProductVariant>(
+    product.colors[0] || { name: 'Standard' }
+  );
+  const [selectedModel, setSelectedModel] = useState<string>(product.models[0] || '');
   const [quantity, setQuantity] = useState<number>(1);
   const [activeThumb, setActiveThumb] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews' | 'shipping'>('desc');
+  const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping' | 'reviews'>('desc');
 
-  // Customer Review Submission State
-  const [reviewsList, setReviewsList] = useState<ProductReview[]>(product.reviews || []);
+  // Customer Reviews State
+  const [reviewsList, setReviewsList] = useState<ProductReview[]>(
+    product.reviews || [
+      {
+        id: 'rev-1',
+        author: 'Marc D.',
+        rating: 5,
+        date: '2 days ago',
+        title: 'Outstanding quality and super fast shipping!',
+        comment: 'Received this in Toronto in just 2 days. The build quality exceeds expectations.',
+        verified: true,
+        location: 'Toronto, ON'
+      },
+      {
+        id: 'rev-2',
+        author: 'Sarah K.',
+        rating: 5,
+        date: '1 week ago',
+        title: 'Exactly what I needed',
+        comment: 'Very solid and durable feel. The MagSafe hold is very strong.',
+        verified: true,
+        location: 'Vancouver, BC'
+      }
+    ]
+  );
+
+  // New Review Form State
   const [newReviewAuthor, setNewReviewAuthor] = useState('');
+  const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewTitle, setNewReviewTitle] = useState('');
   const [newReviewComment, setNewReviewComment] = useState('');
-  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewLocation, setNewReviewLocation] = useState('');
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const handleAddToCart = () => {
     if (!outOfStock) {
       addItem(product, quantity, selectedColor, selectedModel);
+      showToast(
+        'Added to Cart! 🛍️',
+        `${quantity}x ${product.name} (${selectedColor.name}) added to your bag.`,
+        'success'
+      );
     }
   };
 
@@ -75,17 +111,26 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
     }
   };
 
+  const handleWishlist = () => {
+    toggleWishlist(product);
+    showToast(
+      isFavorite ? 'Removed from Wishlist' : 'Saved to Wishlist! ❤️',
+      isFavorite ? `${product.name} was removed.` : `${product.name} was added to your favorites.`,
+      isFavorite ? 'info' : 'success'
+    );
+  };
+
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
-      showToast('Link Copied', 'Product link copied to clipboard.', 'info');
+      showToast('Link Copied! 📋', 'Product link copied to your clipboard.', 'info');
     }
   };
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newReviewAuthor.trim() || !newReviewComment.trim()) {
-      showToast('Missing Fields', 'Please fill in your name and review comment.', 'error');
+      showToast('Missing Fields', 'Please fill in your name and review comment.', 'warning');
       return;
     }
     const newRev: ProductReview = {
@@ -96,25 +141,30 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
       title: newReviewTitle.trim() || 'Great product',
       comment: newReviewComment.trim(),
       verified: true,
-      location: 'Canada'
+      location: newReviewLocation.trim() || 'Canada'
     };
     setReviewsList([newRev, ...reviewsList]);
-    showToast('Review Submitted', 'Thank you for your verified customer review!', 'success');
+    showToast('Review Submitted! ⭐', 'Thank you for your verified customer review.', 'success');
     setNewReviewAuthor('');
     setNewReviewTitle('');
     setNewReviewComment('');
+    setNewReviewLocation('');
     setShowReviewForm(false);
   };
 
-  // Recommended products (excluding current)
-  const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  const relatedProducts = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
+
+  const galleryImages = [
+    product.imageUrl,
+    ...(product.galleryImages || [])
+  ].filter(Boolean) as string[];
 
   return (
-    <div className="wrap" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
-      {/* Breadcrumb Navigation */}
+    <div className="pdp-wrap wrap">
+      {/* Breadcrumbs Navigation */}
       <Breadcrumbs
         items={[
-          { label: 'Shop', href: '/shop' },
+          { label: 'Shop All', href: '/shop' },
           { label: product.categoryName, href: `/shop/${product.category}` },
           { label: product.name }
         ]}
@@ -122,10 +172,18 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
 
       {/* Main PDP Grid */}
       <div className="pdp">
-        {/* Left Column: Interactive Product Gallery */}
+        {/* Left Column: Media Gallery */}
         <div className="pdp-gallery">
-          <div className="pdp-main">
-            <ProductIcon type={product.iconType} size="50%" />
+          <div className="pdp-main-img">
+            {galleryImages.length > 0 ? (
+              <img
+                src={galleryImages[activeThumb] || galleryImages[0]}
+                alt={product.name}
+                style={{ width: '82%', height: '82%', objectFit: 'contain', borderRadius: '16px' }}
+              />
+            ) : (
+              <ProductIcon type={product.iconType} size="65%" />
+            )}
             {product.badge && (
               <span
                 className={`badge badge-${product.badge}`}
@@ -141,16 +199,29 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
 
           {/* Thumbnail Angles */}
           <div className="pdp-thumbs">
-            {[0, 1, 2, 3].map((idx) => (
-              <div
-                key={idx}
-                className={`pdp-thumb ${activeThumb === idx ? 'active' : ''}`}
-                onClick={() => setActiveThumb(idx)}
-                aria-label={`View angle ${idx + 1}`}
-              >
-                <ProductIcon type={product.iconType} size="56%" />
-              </div>
-            ))}
+            {galleryImages.length > 0 ? (
+              galleryImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  className={`pdp-thumb ${activeThumb === idx ? 'active' : ''}`}
+                  onClick={() => setActiveThumb(idx)}
+                  aria-label={`View photo ${idx + 1}`}
+                >
+                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+              ))
+            ) : (
+              [0, 1, 2, 3].map((idx) => (
+                <div
+                  key={idx}
+                  className={`pdp-thumb ${activeThumb === idx ? 'active' : ''}`}
+                  onClick={() => setActiveThumb(idx)}
+                  aria-label={`View angle ${idx + 1}`}
+                >
+                  <ProductIcon type={product.iconType} size="56%" />
+                </div>
+              ))
+            )}
           </div>
 
           {/* Security & Warranty Trust Pill */}
