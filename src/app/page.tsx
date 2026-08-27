@@ -15,6 +15,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
+import { subscribeNewsletterInDb } from '@/lib/supabaseService';
 
 export default function HomePage() {
   const { showToast } = useToast();
@@ -24,6 +25,7 @@ export default function HomePage() {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newsletterEmail.trim() && newsletterEmail.includes('@')) {
+      subscribeNewsletterInDb(newsletterEmail.trim()).catch(() => {});
       showToast('Welcome to the VIP Club! 🎉', 'You have been subscribed. Check your inbox for your 15% discount code!', 'success');
       setNewsletterEmail('');
     } else {

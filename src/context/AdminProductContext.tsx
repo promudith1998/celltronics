@@ -1,9 +1,22 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { Product, ProductCategory } from '@/types/product';
 import { PromotionCampaign, PromoCode, AdminStats } from '@/types/admin';
 import { PRODUCTS, PROMO_CODES as DEFAULT_PROMO_CODES } from '@/data/products';
+import {
+  checkSupabaseConnection,
+  fetchProductsFromDb,
+  upsertProductInDb,
+  deleteProductFromDb,
+  seedProductsToDb,
+  fetchCampaignsFromDb,
+  upsertCampaignInDb,
+  deleteCampaignFromDb,
+  fetchPromoCodesFromDb,
+  upsertPromoCodeInDb,
+  deletePromoCodeFromDb
+} from '@/lib/supabaseService';
 
 const INITIAL_CAMPAIGNS: PromotionCampaign[] = [
   {
@@ -60,12 +73,21 @@ const INITIAL_PROMO_CODES: PromoCode[] = DEFAULT_PROMO_CODES.map((p) => ({
   usedCount: Math.floor(Math.random() * 85) + 12
 }));
 
+export interface SupabaseStatus {
+  connected: boolean;
+  tablesExist: boolean;
+  message: string;
+  isChecking: boolean;
+  lastChecked?: string;
+}
+
 interface AdminProductContextType {
   products: Product[];
   campaigns: PromotionCampaign[];
   promoCodes: PromoCode[];
   stats: AdminStats;
   isLoaded: boolean;
+  supabaseStatus: SupabaseStatus;
   
   // Product Operations
   addProduct: (product: Omit<Product, 'id'>) => Product;
@@ -86,6 +108,11 @@ interface AdminProductContextType {
   togglePromoCode: (code: string) => void;
   validatePromoCode: (code: string, subtotal: number) => { valid: boolean; discountAmount: number; message: string; promo?: PromoCode };
   
+  // Supabase Database Sync Operations
+  checkDatabaseConnection: () => Promise<SupabaseStatus>;
+  syncCatalogToSupabase: () => Promise<{ success: boolean; count: number; message: string }>;
+  refreshFromSupabase: () => Promise<boolean>;
+
   // Data Backup & Recovery
   resetToDefaults: () => void;
   exportBackupJSON: () => string;
@@ -105,8 +132,50 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [campaigns, setCampaigns] = useState<PromotionCampaign[]>(INITIAL_CAMPAIGNS);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>(INITIAL_PROMO_CODES);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [supabaseStatus, setSupabaseStatus] = useState<SupabaseStatus>({
+    connected: false,
+    tablesExist: false,
+    message: 'Checking Supabase connection...',
+    isChecking: true
+  });
 
-  // Hydrate from localStorage on client mount
+  // Check Supabase connection and optionally load from DB
+  const checkDb = useCallback(async () => {
+    setSupabaseStatus((prev) => ({ ...prev, isChecking: true }));
+    const status = await checkSupabaseConnection();
+    const fullStatus: SupabaseStatus = {
+      ...status,
+      isChecking: false,
+      lastChecked: new Date().toLocaleTimeString()
+    };
+    setSupabaseStatus(fullStatus);
+
+    // If tables exist, attempt to load products and promotions from Supabase
+    if (status.connected && status.tablesExist) {
+      try {
+        const [dbProducts, dbCampaigns, dbPromos] = await Promise.all([
+          fetchProductsFromDb(),
+          fetchCampaignsFromDb(),
+          fetchPromoCodesFromDb()
+        ]);
+
+        if (dbProducts && dbProducts.length > 0) {
+          setProducts(dbProducts);
+        }
+        if (dbCampaigns && dbCampaigns.length > 0) {
+          setCampaigns(dbCampaigns);
+        }
+        if (dbPromos && dbPromos.length > 0) {
+          setPromoCodes(dbPromos);
+        }
+      } catch (err) {
+        console.warn('Failed to load initial Supabase data:', err);
+      }
+    }
+    return fullStatus;
+  }, []);
+
+  // Hydrate from localStorage on client mount, then verify Supabase
   useEffect(() => {
     try {
       const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
@@ -127,10 +196,11 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.error('Failed to load admin stored data:', e);
     } finally {
       setIsLoaded(true);
+      checkDb();
     }
-  }, []);
+  }, [checkDb]);
 
-  // Save changes to localStorage
+  // Save changes to localStorage cache
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
@@ -179,7 +249,7 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [products, campaigns, promoCodes]);
 
   // ----------------------------------------------------
-  // Product Operations
+  // Product Operations (Local + Supabase Sync)
   // ----------------------------------------------------
   const addProduct = (productData: Omit<Product, 'id'>): Product => {
     const slugId = productData.name
@@ -193,22 +263,34 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
 
     setProducts((prev) => [newProduct, ...prev]);
+
+    // Persist to Supabase if connected
+    upsertProductInDb(newProduct).catch((e) => console.warn('Supabase sync error:', e));
+
     return newProduct;
   };
 
   const updateProduct = (id: string, updates: Partial<Product>) => {
+    let updatedProduct: Product | null = null;
+
     setProducts((prev) =>
       prev.map((p) => {
         if (p.id === id) {
-          return { ...p, ...updates };
+          updatedProduct = { ...p, ...updates };
+          return updatedProduct;
         }
         return p;
       })
     );
+
+    if (updatedProduct) {
+      upsertProductInDb(updatedProduct).catch((e) => console.warn('Supabase sync error:', e));
+    }
   };
 
   const deleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    deleteProductFromDb(id).catch((e) => console.warn('Supabase sync error:', e));
   };
 
   const bulkApplyCategoryDiscount = (category: string, discountPercent: number) => {
@@ -217,13 +299,15 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (category === 'all' || p.category === category) {
           const originalPrice = p.wasPrice || p.price;
           const newPrice = Math.max(1, Number((originalPrice * (1 - discountPercent / 100)).toFixed(2)));
-          return {
+          const updated: Product = {
             ...p,
             wasPrice: originalPrice,
             price: newPrice,
             badge: discountPercent > 0 ? 'sale' : p.badge,
             badgeText: discountPercent > 0 ? `-${discountPercent}%` : p.badgeText
           };
+          upsertProductInDb(updated).catch(() => {});
+          return updated;
         }
         return p;
       })
@@ -231,7 +315,7 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   // ----------------------------------------------------
-  // Campaign Operations
+  // Campaign Operations (Local + Supabase Sync)
   // ----------------------------------------------------
   const addCampaign = (campaignData: Omit<PromotionCampaign, 'id'>): PromotionCampaign => {
     const newCamp: PromotionCampaign = {
@@ -239,51 +323,82 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
       id: `camp-${Date.now().toString()}`
     };
     setCampaigns((prev) => [newCamp, ...prev]);
+    upsertCampaignInDb(newCamp).catch((e) => console.warn('Supabase sync error:', e));
     return newCamp;
   };
 
   const updateCampaign = (id: string, updates: Partial<PromotionCampaign>) => {
     setCampaigns((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+      prev.map((c) => {
+        if (c.id === id) {
+          const updated = { ...c, ...updates };
+          upsertCampaignInDb(updated).catch((e) => console.warn('Supabase sync error:', e));
+          return updated;
+        }
+        return c;
+      })
     );
   };
 
   const deleteCampaign = (id: string) => {
     setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    deleteCampaignFromDb(id).catch((e) => console.warn('Supabase sync error:', e));
   };
 
   const toggleCampaign = (id: string) => {
     setCampaigns((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isActive: !c.isActive } : c))
+      prev.map((c) => {
+        if (c.id === id) {
+          const updated = { ...c, isActive: !c.isActive };
+          upsertCampaignInDb(updated).catch((e) => console.warn('Supabase sync error:', e));
+          return updated;
+        }
+        return c;
+      })
     );
   };
 
   // ----------------------------------------------------
-  // Promo Code Operations
+  // Promo Code Operations (Local + Supabase Sync)
   // ----------------------------------------------------
   const addPromoCode = (promo: PromoCode) => {
     const normalizedCode = promo.code.toUpperCase().trim();
+    const newPromo = { ...promo, code: normalizedCode };
     setPromoCodes((prev) => {
       const filtered = prev.filter((p) => p.code.toUpperCase() !== normalizedCode);
-      return [{ ...promo, code: normalizedCode }, ...filtered];
+      return [newPromo, ...filtered];
     });
+    upsertPromoCodeInDb(newPromo).catch((e) => console.warn('Supabase sync error:', e));
   };
 
   const updatePromoCode = (code: string, updates: Partial<PromoCode>) => {
     setPromoCodes((prev) =>
-      prev.map((p) => (p.code.toUpperCase() === code.toUpperCase() ? { ...p, ...updates } : p))
+      prev.map((p) => {
+        if (p.code.toUpperCase() === code.toUpperCase()) {
+          const updated = { ...p, ...updates };
+          upsertPromoCodeInDb(updated).catch((e) => console.warn('Supabase sync error:', e));
+          return updated;
+        }
+        return p;
+      })
     );
   };
 
   const deletePromoCode = (code: string) => {
     setPromoCodes((prev) => prev.filter((p) => p.code.toUpperCase() !== code.toUpperCase()));
+    deletePromoCodeFromDb(code).catch((e) => console.warn('Supabase sync error:', e));
   };
 
   const togglePromoCode = (code: string) => {
     setPromoCodes((prev) =>
-      prev.map((p) =>
-        p.code.toUpperCase() === code.toUpperCase() ? { ...p, isActive: !p.isActive } : p
-      )
+      prev.map((p) => {
+        if (p.code.toUpperCase() === code.toUpperCase()) {
+          const updated = { ...p, isActive: !p.isActive };
+          upsertPromoCodeInDb(updated).catch((e) => console.warn('Supabase sync error:', e));
+          return updated;
+        }
+        return p;
+      })
     );
   };
 
@@ -323,6 +438,44 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
       message: `Promo code applied! Saved $${discount.toFixed(2)}`,
       promo: found
     };
+  };
+
+  // ----------------------------------------------------
+  // Supabase One-Click Sync & Refresh
+  // ----------------------------------------------------
+  const syncCatalogToSupabase = async (): Promise<{ success: boolean; count: number; message: string }> => {
+    const res = await seedProductsToDb(products);
+    if (!res.success) {
+      return {
+        success: false,
+        count: 0,
+        message: 'Failed to push catalog to Supabase. Check if tables are created in Supabase SQL editor.'
+      };
+    }
+
+    // Also seed campaigns and promo codes
+    for (const c of campaigns) {
+      await upsertCampaignInDb(c);
+    }
+    for (const p of promoCodes) {
+      await upsertPromoCodeInDb(p);
+    }
+
+    await checkDb();
+    return {
+      success: true,
+      count: res.count,
+      message: `Successfully synchronized ${res.count} products, ${campaigns.length} campaigns, and ${promoCodes.length} promo codes to Supabase!`
+    };
+  };
+
+  const refreshFromSupabase = async (): Promise<boolean> => {
+    const dbProducts = await fetchProductsFromDb();
+    if (dbProducts && dbProducts.length > 0) {
+      setProducts(dbProducts);
+      return true;
+    }
+    return false;
   };
 
   // ----------------------------------------------------
@@ -378,6 +531,7 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         promoCodes,
         stats,
         isLoaded,
+        supabaseStatus,
         addProduct,
         updateProduct,
         deleteProduct,
@@ -391,6 +545,9 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         deletePromoCode,
         togglePromoCode,
         validatePromoCode,
+        checkDatabaseConnection: checkDb,
+        syncCatalogToSupabase,
+        refreshFromSupabase,
         resetToDefaults,
         exportBackupJSON,
         importBackupJSON

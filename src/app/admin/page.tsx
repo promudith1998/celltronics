@@ -28,7 +28,11 @@ import {
   ExternalLink,
   ShieldCheck,
   Eye,
-  Check
+  Check,
+  Database,
+  Cloud,
+  CheckCircle,
+  Copy
 } from 'lucide-react';
 import { useAdminProducts } from '@/context/AdminProductContext';
 import { useToast } from '@/context/ToastContext';
@@ -46,6 +50,7 @@ export default function AdminPage() {
     campaigns,
     promoCodes,
     stats,
+    supabaseStatus,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -58,12 +63,16 @@ export default function AdminPage() {
     updatePromoCode,
     deletePromoCode,
     togglePromoCode,
+    checkDatabaseConnection,
+    syncCatalogToSupabase,
     resetToDefaults,
     exportBackupJSON,
     importBackupJSON
   } = useAdminProducts();
 
   const { showToast } = useToast();
+  const [isSyncingDb, setIsSyncingDb] = useState(false);
+  const [isCopiedSql, setIsCopiedSql] = useState(false);
 
   // Active Admin View Tab
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'campaigns' | 'promos' | 'settings'>('dashboard');
@@ -260,6 +269,47 @@ export default function AdminPage() {
             >
               <Sparkles size={14} color="#FF7A1A" /> New Campaign
             </button>
+
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '100px',
+                fontSize: '12px',
+                fontWeight: 700,
+                background: supabaseStatus.connected
+                  ? supabaseStatus.tablesExist
+                    ? 'rgba(30,166,114,0.15)'
+                    : 'rgba(255,122,26,0.15)'
+                  : 'rgba(255,255,255,0.08)',
+                color: supabaseStatus.connected
+                  ? supabaseStatus.tablesExist
+                    ? '#1EA672'
+                    : '#FF7A1A'
+                  : 'var(--gray-400)',
+                border: `1px solid ${
+                  supabaseStatus.connected
+                    ? supabaseStatus.tablesExist
+                      ? 'rgba(30,166,114,0.4)'
+                      : 'rgba(255,122,26,0.4)'
+                    : 'rgba(255,255,255,0.15)'
+                }`
+              }}
+              title={supabaseStatus.message}
+            >
+              <Database size={13} />
+              <span>
+                {supabaseStatus.isChecking
+                  ? 'Connecting...'
+                  : supabaseStatus.connected
+                  ? supabaseStatus.tablesExist
+                    ? 'Supabase DB Live'
+                    : 'Supabase: Schema Pending'
+                  : 'Supabase Offline'}
+              </span>
+            </div>
 
             <Link
               href="/"
@@ -1147,10 +1197,185 @@ export default function AdminPage() {
         {activeTab === 'settings' && (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--navy)', marginBottom: '20px' }}>
-              Catalog Data &amp; Backup Operations
+              Database &amp; Catalog Operations
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Supabase Database Card */}
+              <div
+                style={{
+                  background: '#fff',
+                  padding: '24px',
+                  borderRadius: '20px',
+                  border: '1.5px solid #0B63F6',
+                  boxShadow: '0 8px 30px rgba(11,99,246,0.08)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(11,99,246,0.15) 0%, rgba(63,169,255,0.15) 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--blue)'
+                      }}
+                    >
+                      <Database size={22} />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                          Supabase Cloud Database
+                        </h3>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            padding: '3px 8px',
+                            borderRadius: '100px',
+                            background: supabaseStatus.connected
+                              ? supabaseStatus.tablesExist
+                                ? 'rgba(30,166,114,0.15)'
+                                : 'rgba(255,122,26,0.15)'
+                              : 'rgba(255,61,90,0.15)',
+                            color: supabaseStatus.connected
+                              ? supabaseStatus.tablesExist
+                                ? '#1EA672'
+                                : '#FF7A1A'
+                              : '#FF3D5A'
+                          }}
+                        >
+                          {supabaseStatus.isChecking
+                            ? 'Connecting...'
+                            : supabaseStatus.connected
+                            ? supabaseStatus.tablesExist
+                              ? 'LIVE & SYNCED'
+                              : 'SCHEMA PENDING'
+                            : 'OFFLINE'}
+                        </span>
+                      </div>
+                      <span className="mono" style={{ fontSize: '12px', color: 'var(--gray-600)' }}>
+                        https://argkashxfnbqjoqonyfh.supabase.co
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      const res = await checkDatabaseConnection();
+                      if (res.connected) {
+                        showToast('Database Connected! 🟢', res.message, 'success');
+                      } else {
+                        showToast('Connection Failed 🔴', res.message, 'error');
+                      }
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--gray-300)',
+                      background: '#fff',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                      color: 'var(--navy)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <RefreshCw size={13} /> Test Connection
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    background: 'var(--gray-50)',
+                    padding: '14px 16px',
+                    borderRadius: '12px',
+                    marginBottom: '18px',
+                    fontSize: '13px',
+                    color: 'var(--navy)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                    <Cloud size={16} color="var(--blue)" />
+                    <span>Status: {supabaseStatus.message}</span>
+                  </div>
+                  {supabaseStatus.lastChecked && (
+                    <span style={{ fontSize: '11px', color: 'var(--gray-500)', marginLeft: '24px' }}>
+                      Last checked at: {supabaseStatus.lastChecked}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <button
+                    disabled={isSyncingDb}
+                    onClick={async () => {
+                      setIsSyncingDb(true);
+                      showToast('Syncing...', 'Uploading catalog data to Supabase...', 'info');
+                      try {
+                        const result = await syncCatalogToSupabase();
+                        if (result.success) {
+                          showToast('Sync Completed! 🚀', result.message, 'success');
+                        } else {
+                          showToast('Sync Warning', result.message, 'warning');
+                        }
+                      } catch (err: any) {
+                        showToast('Sync Error', err?.message || 'Failed to sync with Supabase', 'error');
+                      } finally {
+                        setIsSyncingDb(false);
+                      }
+                    }}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '10px',
+                      background: 'linear-gradient(135deg, #0B63F6 0%, #7C3AED 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      fontSize: '13.5px',
+                      fontWeight: 800,
+                      cursor: isSyncingDb ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(11,99,246,0.3)'
+                    }}
+                  >
+                    <Upload size={16} /> {isSyncingDb ? 'Syncing Catalog...' : 'Push All Catalog Data to Supabase'}
+                  </button>
+                </div>
+
+                {!supabaseStatus.tablesExist && (
+                  <div
+                    style={{
+                      marginTop: '16px',
+                      padding: '14px',
+                      background: 'rgba(255,122,26,0.08)',
+                      border: '1px solid rgba(255,122,26,0.3)',
+                      borderRadius: '10px',
+                      fontSize: '12.5px',
+                      color: 'var(--navy)'
+                    }}
+                  >
+                    <p style={{ margin: '0 0 6px', fontWeight: 700, color: '#FF7A1A' }}>
+                      ⚡ Supabase Setup Step (One-Time):
+                    </p>
+                    <p style={{ margin: '0 0 8px', color: 'var(--gray-700)', lineHeight: 1.4 }}>
+                      To allow live database queries and orders, run the SQL schema located at <code style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--gray-300)' }}>supabase/schema.sql</code> in your Supabase SQL Editor.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Backup Card */}
               <div style={{ background: '#fff', padding: '24px', borderRadius: '20px', border: '1px solid var(--gray-200)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>

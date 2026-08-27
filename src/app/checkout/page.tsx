@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CheckCircle2, ShieldCheck, Truck, CreditCard, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { ProductIcon } from '@/components/product/ProductIcon';
+import { createOrderInDb } from '@/lib/supabaseService';
 
 export default function CheckoutPage() {
   const { items, subtotal, discount, shipping, tax, total, clearCart } = useCart();
@@ -33,6 +34,33 @@ export default function CheckoutPage() {
     const generatedOrderNum = `CC-${Math.floor(100000 + Math.random() * 900000)}`;
     setOrderNumber(generatedOrderNum);
     setOrderPlaced(true);
+
+    createOrderInDb({
+      orderNumber: generatedOrderNum,
+      customerEmail: email,
+      customerName: `${firstName} ${lastName}`.trim(),
+      shippingAddress: {
+        address,
+        city,
+        province,
+        postalCode
+      },
+      items: items.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        color: item.selectedColor,
+        model: item.selectedModel
+      })),
+      subtotal,
+      discount,
+      shipping: shippingMethod === 'express' ? 9.99 : shipping,
+      tax,
+      total: grandTotal,
+      paymentMethod
+    }).catch((err) => console.warn('Order Supabase sync skipped:', err));
+
     clearCart();
   };
 
