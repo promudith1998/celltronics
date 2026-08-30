@@ -18,20 +18,20 @@ export const Footer: React.FC = () => {
         >
           {/* Brand Info */}
           <div>
-            <Link href="/" className="logo" style={{ textDecoration: 'none', marginBottom: '16px', display: 'inline-flex' }}>
+            <Link href="/" style={{ textDecoration: 'none', marginBottom: '18px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
               <Image
                 src="/images/logo.png"
                 alt="CellCentral Logo"
-                width={150}
-                height={38}
-                style={{ objectFit: 'contain' }}
+                width={190}
+                height={54}
+                style={{ height: '54px', width: 'auto', objectFit: 'contain' }}
               />
-              <div style={{ marginLeft: '6px' }}>
-                <div style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
+              <div>
+                <div style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
                   <span style={{ color: '#0B63F6' }}>CELL</span>
                   <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
                 </div>
-                <div style={{ fontSize: '8px', fontWeight: 800, letterSpacing: '0.14em', color: '#0B1E3D', marginTop: '2px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.15em', color: '#0B1E3D', marginTop: '3px' }}>
                   MOBILE ACCESSORIES
                 </div>
               </div>
