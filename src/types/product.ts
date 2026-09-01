@@ -58,3 +58,30 @@ export interface Product {
   reviews?: ProductReview[];
 }
 
+export interface DeviceFamily {
+  id: string;
+  name: string;
+  shortName: string;
+  brand: string;
+  tagline: string;
+  description: string;
+  color: string;
+  accentColor: string;
+  models: string[];
+}
+
+export interface WarrantyRegistrationPayload {
+  fullName: string;
+  email: string;
+  phone: string;
+  postalCode: string;
+  purchaseChannel: 'online' | 'retail_partner' | 'amazon' | 'other';
+  retailerName?: string;
+  storeLocation?: string;
+  productCategory: string;
+  productName: string;
+  modelSku?: string;
+  purchaseDate: string;
+  orderOrReceiptNumber: string;
+  serialNumber?: string;
+}

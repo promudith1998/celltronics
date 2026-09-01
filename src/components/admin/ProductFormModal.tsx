@@ -110,7 +110,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setDescription('Engineered for maximum endurance and sleek Canadian everyday styling.');
       setFeatures([
         'Ultra-durable construction designed for high impact defense',
-        'Certified premium finish with non-slip tactile grip',
+        'Pro-grade premium finish with non-slip tactile grip',
         'Backed by our Canadian 1-Year replacement warranty'
       ]);
       setSpecs([

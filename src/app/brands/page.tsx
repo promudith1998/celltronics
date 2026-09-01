@@ -8,25 +8,25 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function BrandsPage() {
   const brandDescriptions: { [key: string]: string } = {
-    Anker: 'Global leader in mobile charging technology and high-grade MagSafe audio and power accessories.',
-    UGREEN: 'Pioneering GaN III fast chargers, multi-port USB hubs, and high-speed data cables.',
-    Baseus: 'Innovative consumer electronics, braided 100W cables, and sleek automotive accessories.',
-    ESR: 'Patented HaloLock kickstand cases, MagSafe ecosystem, and ultra-tough protection.',
-    Spigen: 'World-renowned precision phone cases, screen protectors, and audio solutions.',
+    Anker: 'Global leader in high-performance mobile charging, Power Delivery semiconductors, and durable audio.',
+    UGREEN: 'Pioneering GaN fast wall blocks, multi-port desktop hubs, and high-speed data cables.',
+    Baseus: 'Precision consumer electronics, braided 100W/240W cables, and sleek automotive charging mounts.',
+    ESR: 'HaloLock kickstand cases, MagSafe ecosystem accessories, and military drop-tested armor.',
+    Spigen: 'World-renowned precision phone cases, screen protectors, and rugged everyday accessories.',
     TORRAS: 'UltraGlass aerospace-grade shatterproof screen protection and slim magnetic cases.',
-    Samsung: 'Official and certified Qi wireless car mounts, adaptive fast chargers, and accessories.',
-    Belkin: 'Apple-certified MagSafe charging stands, robust surge protectors, and connectivity gear.'
+    Samsung: 'Fast wireless charging stands, adaptive travel adapters, and Galaxy device accessories.',
+    Belkin: 'Engineered charging stations, surge protectors, and connectivity gear for modern devices.'
   };
 
   return (
     <div className="wrap" style={{ paddingTop: '24px', paddingBottom: '64px' }}>
       <Breadcrumbs items={[{ label: 'Brands' }]} />
 
-      <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>
-        Certified Brand Partners
+      <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--navy)', marginBottom: '8px' }}>
+        Featured Brands &amp; Compatible Ecosystems
       </h1>
       <p style={{ color: 'var(--gray-700)', fontSize: '15px', marginBottom: '36px', maxWidth: '640px' }}>
-        We only source 100% authentic, certified mobile accessories from the industry’s most respected manufacturers.
+        We source top-tier mobile accessories engineered for Apple, Samsung, Google, and universal USB-C devices. Backed by our Canadian 1-Year Warranty.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
@@ -60,8 +60,8 @@ export default function BrandsPage() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <h3 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--navy)' }}>{brand}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#1EA672', fontWeight: 700, background: '#E7F9F0', padding: '3px 8px', borderRadius: '4px' }}>
-                    <ShieldCheck size={13} /> Certified
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#0B63F6', fontWeight: 700, background: '#EFF6FF', padding: '3px 8px', borderRadius: '4px' }}>
+                    <ShieldCheck size={13} /> Genuine Stock
                   </div>
                 </div>
                 <p style={{ color: 'var(--gray-700)', fontSize: '13px', lineHeight: 1.5, marginBottom: '20px' }}>
@@ -74,7 +74,7 @@ export default function BrandsPage() {
                 className="btn btn-ghost btn-sm"
                 style={{ justifyContent: 'space-between', width: '100%' }}
               >
-                <span>Shop {brand}</span>
+                <span>Browse {brand} Products</span>
                 <ArrowRight size={14} />
               </Link>
             </div>

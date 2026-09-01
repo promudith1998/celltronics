@@ -1,4 +1,4 @@
-import { Product } from '@/types/product';
+import { Product, DeviceFamily } from '@/types/product';
 
 export const PRODUCTS: Product[] = [
   // ========================================================
@@ -274,7 +274,7 @@ export const PRODUCTS: Product[] = [
     stockCount: 88,
     iconType: 'case',
     description: 'Frosted matte translucent backplate that resists fingerprints and smudges while showing off your phone logo.',
-    longDescription: 'Crafted with Air Cushion Technology in all corners for certified drop protection. Matte frosted back feels soft to the touch with zero oily smudges.',
+    longDescription: 'Crafted with Air Cushion Technology in all corners for military-grade drop protection. Matte frosted back feels soft to the touch with zero oily smudges.',
     features: [
       'Air Cushion Technology corner air bags',
       'Integrated magnetic ring for seamless MagSafe charging',
@@ -322,7 +322,7 @@ export const PRODUCTS: Product[] = [
     specs: {
       'Material': 'Bayer PC + German TPU',
       'Thickness': '0.04 in / 1.1mm',
-      'Drop Rating': '12ft / 3.6m Certified'
+      'Drop Rating': '12ft / 3.6m Tested'
     },
     compatibleDevices: ['iPhone 17 Pro Max', 'iPhone 17 Pro', 'Galaxy S26 Ultra', 'Pixel 10 Pro'],
     colors: [
@@ -1067,16 +1067,89 @@ export const BRANDS = [
   'Anker', 'UGREEN', 'Baseus', 'ESR', 'Spigen', 'TORRAS', 'Samsung', 'Belkin'
 ];
 
+export const DEVICE_FAMILIES: DeviceFamily[] = [
+  {
+    id: 'iphone',
+    name: 'Apple iPhone',
+    shortName: 'iPhone',
+    brand: 'Apple',
+    tagline: 'MagSafe cases, ultra-tough screen glass & fast charging',
+    description: 'Precision-engineered accessories for Apple iPhone. Featuring ultra-fast MagSafe wireless compatibility, 9H tempered glass, and military drop-tested shock protection.',
+    color: '#0B63F6',
+    accentColor: '#EBF3FF',
+    models: [
+      'iPhone 16 Pro Max',
+      'iPhone 16 Pro',
+      'iPhone 16 Plus',
+      'iPhone 16',
+      'iPhone 15 Pro Max',
+      'iPhone 15 Pro',
+      'iPhone 15',
+      'iPhone 14 Pro Max',
+      'iPhone 14',
+      'iPhone 13'
+    ]
+  },
+  {
+    id: 'samsung-galaxy',
+    name: 'Samsung Galaxy',
+    shortName: 'Galaxy',
+    brand: 'Samsung',
+    tagline: 'Super Fast Charging 2.0, curved glass & rugged armor',
+    description: 'High performance accessories built for Samsung Galaxy flagships. Featuring 45W PPS Super Fast Charging blocks, edge-to-edge screen shields, and S-Pen compatible rugged cases.',
+    color: '#2563EB',
+    accentColor: '#EFF6FF',
+    models: [
+      'Galaxy S25 Ultra',
+      'Galaxy S25+',
+      'Galaxy S25',
+      'Galaxy S24 Ultra',
+      'Galaxy S24+',
+      'Galaxy S24',
+      'Galaxy Z Fold6',
+      'Galaxy Z Flip6',
+      'Galaxy S23 Ultra',
+      'Galaxy S23'
+    ]
+  },
+  {
+    id: 'google-pixel',
+    name: 'Google Pixel',
+    shortName: 'Pixel',
+    brand: 'Google',
+    tagline: 'Camera bar protection, 30W PD fast charge & matte shields',
+    description: 'Designed specifically for Google Pixel devices. Featuring camera visor impact armor, non-yellowing crystal clear cases, and high-speed Power Delivery fast chargers.',
+    color: '#EA4335',
+    accentColor: '#FEF2F2',
+    models: [
+      'Pixel 9 Pro XL',
+      'Pixel 9 Pro',
+      'Pixel 9',
+      'Pixel 8 Pro',
+      'Pixel 8',
+      'Pixel 8a',
+      'Pixel 7 Pro',
+      'Pixel 7'
+    ]
+  }
+];
+
 export const DEVICE_MODELS = [
-  'iPhone 17 Pro Max',
-  'iPhone 17 Pro',
-  'iPhone 17',
   'iPhone 16 Pro Max',
   'iPhone 16 Pro',
-  'Galaxy S26 Ultra',
-  'Galaxy S26',
-  'Pixel 10 Pro',
-  'Pixel 10'
+  'iPhone 16',
+  'iPhone 15 Pro Max',
+  'iPhone 15 Pro',
+  'iPhone 15',
+  'Galaxy S25 Ultra',
+  'Galaxy S25',
+  'Galaxy S24 Ultra',
+  'Galaxy S24',
+  'Galaxy Z Fold6',
+  'Pixel 9 Pro XL',
+  'Pixel 9 Pro',
+  'Pixel 9',
+  'Pixel 8 Pro'
 ];
 
 export const PROMO_CODES = [

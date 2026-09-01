@@ -348,7 +348,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
           <div className="compat-box">
             <h5>
               <CheckCircle2 size={15} color="var(--blue)" />
-              CERTIFIED COMPATIBLE DEVICES
+              COMPATIBLE DEVICES &amp; ECOSYSTEM
             </h5>
             <div className="compat-list">
               {product.compatibleDevices.map((dev) => (
@@ -356,6 +356,39 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                   {dev}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Quick Technical Specs Highlight Box */}
+          <div
+            style={{
+              marginTop: '16px',
+              marginBottom: '20px',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              padding: '14px 16px',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px'
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--blue)', textTransform: 'uppercase' }}>
+                PROTECTION / POWER
+              </div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--navy)', marginTop: '2px' }}>
+                {product.specs['Drop Rating'] || product.specs['Hardness'] || product.specs['Outputs'] || 'High Performance Standard'}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--orange)', textTransform: 'uppercase' }}>
+                CANADIAN WARRANTY
+              </div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--navy)', marginTop: '2px' }}>
+                1-Year Full Coverage
+              </div>
             </div>
           </div>
 
