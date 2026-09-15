@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Product } from '@/types/product';
-import { PromotionCampaign, PromoCode } from '@/types/admin';
+import { PromotionCampaign, PromoCode, AdminOrder, CustomerInquiry, NewsletterSubscriber, OrderStatus } from '@/types/admin';
 import { PRODUCTS, PROMO_CODES as DEFAULT_PROMO_CODES } from '@/data/products';
 
 // Mapping from DB row to Product object
@@ -342,6 +342,66 @@ export async function createOrderInDb(orderData: {
   }
 }
 
+// Orders
+export function mapRowToOrder(row: any): AdminOrder {
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    customerEmail: row.customer_email,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone || undefined,
+    shippingAddress:
+      typeof row.shipping_address === 'object' && row.shipping_address
+        ? row.shipping_address
+        : { address: '', city: '', province: 'ON', postalCode: '' },
+    items: Array.isArray(row.items) ? row.items : [],
+    subtotal: Number(row.subtotal || 0),
+    discount: Number(row.discount || 0),
+    shipping: Number(row.shipping || 0),
+    tax: Number(row.tax || 0),
+    total: Number(row.total || 0),
+    promoCode: row.promo_code || undefined,
+    paymentMethod: row.payment_method || 'credit_card',
+    status: (row.status as OrderStatus) || 'pending',
+    createdAt: row.created_at || new Date().toISOString()
+  };
+}
+
+export async function fetchOrdersFromDb(): Promise<{ success: boolean; data: AdminOrder[]; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) return { success: false, data: [], error: error.message };
+    return { success: true, data: (data || []).map(mapRowToOrder) };
+  } catch (err: any) {
+    return { success: false, data: [], error: err?.message };
+  }
+}
+
+export async function updateOrderStatusInDb(orderId: string, status: OrderStatus): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteOrderFromDb(orderId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('orders').delete().eq('id', orderId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 // Newsletter
 export async function subscribeNewsletterInDb(email: string): Promise<boolean> {
   try {
@@ -351,6 +411,24 @@ export async function subscribeNewsletterInDb(email: string): Promise<boolean> {
     return !error;
   } catch {
     return false;
+  }
+}
+
+export async function fetchNewsletterSubscribersFromDb(): Promise<NewsletterSubscriber[]> {
+  try {
+    const { data, error } = await supabase
+      .from('newsletter_subscribers')
+      .select('*')
+      .order('subscribed_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map((row: any) => ({
+      id: row.id,
+      email: row.email,
+      subscribedAt: row.subscribed_at,
+      isActive: Boolean(row.is_active ?? true)
+    }));
+  } catch {
+    return [];
   }
 }
 
@@ -367,5 +445,26 @@ export async function sendContactMessageInDb(message: {
     return !error;
   } catch {
     return false;
+  }
+}
+
+export async function fetchContactMessagesFromDb(): Promise<CustomerInquiry[]> {
+  try {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone || undefined,
+      subject: row.subject,
+      message: row.message,
+      createdAt: row.created_at
+    }));
+  } catch {
+    return [];
   }
 }

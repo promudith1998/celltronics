@@ -1,9 +1,26 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Truck, Sparkles, Building2, Store, FileCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShieldCheck, Truck, Lock } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const router = useRouter();
+
+  // Keyboard shortcut for staff access (Ctrl + Shift + A or Cmd + Shift + A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        router.push('/admin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
+
   return (
     <footer style={{ background: '#FFFFFF', color: '#47506B', borderTop: '1px solid var(--gray-200)', paddingTop: '56px', paddingBottom: '32px' }}>
       <div className="wrap">
@@ -124,7 +141,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Bar: Privacy & Terms */}
+        {/* Bottom Bar: Privacy, Terms & Discreet Staff Access */}
         <div
           style={{
             display: 'flex',
@@ -138,10 +155,27 @@ export const Footer: React.FC = () => {
           }}
         >
           <div>© 2026 CellCentral Canada. Built for fast performance, high durability &amp; wholesale distribution.</div>
-          <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
             <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link href="/shop" style={{ color: '#8891A5', textDecoration: 'none' }}>Terms of Wholesale &amp; Service</Link>
             <Link href="/warranty-registration" style={{ color: '#8891A5', textDecoration: 'none' }}>Warranty Terms</Link>
+            {/* Discreet Staff Entry */}
+            <Link
+              href="/admin"
+              style={{
+                color: '#94A3B8',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                opacity: 0.65,
+                transition: 'opacity 0.15s'
+              }}
+              title="Restricted Staff Operations Gatekeeper (Shortcut: Ctrl + Shift + A)"
+            >
+              <Lock size={11} />
+              <span>Staff Portal</span>
+            </Link>
           </div>
         </div>
       </div>
