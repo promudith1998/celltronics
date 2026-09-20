@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { Product, ProductCategory } from '@/types/product';
+import { Product, ProductCategory, ProductBadge } from '@/types/product';
 import {
   PromotionCampaign,
   PromoCode,
@@ -523,27 +523,22 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const updateProduct = (id: string, updates: Partial<Product>) => {
-    let updatedProduct: Product | null = null;
+    const existing = products.find((p) => p.id === id);
+    if (!existing) return;
+
+    const updatedProduct: Product = { ...existing, ...updates };
 
     setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === id) {
-          updatedProduct = { ...p, ...updates };
-          return updatedProduct;
-        }
-        return p;
-      })
+      prev.map((p) => (p.id === id ? updatedProduct : p))
     );
 
-    if (updatedProduct) {
-      upsertProductInDb(updatedProduct).catch((e) => console.warn('Supabase sync error:', e));
-      addActivityEvent({
-        type: 'stock',
-        title: `Updated Product: ${updatedProduct.name.slice(0, 30)}...`,
-        description: `Price: $${updatedProduct.price.toFixed(2)} | Stock: ${updatedProduct.stockCount ?? 20}`,
-        badgeColor: '#7C3AED'
-      });
-    }
+    upsertProductInDb(updatedProduct).catch((e) => console.warn('Supabase sync error:', e));
+    addActivityEvent({
+      type: 'stock',
+      title: `Updated Product: ${updatedProduct.name.slice(0, 30)}...`,
+      description: `Price: $${updatedProduct.price.toFixed(2)} | Stock: ${updatedProduct.stockCount ?? 20}`,
+      badgeColor: '#7C3AED'
+    });
   };
 
   const deleteProduct = (id: string) => {
@@ -597,11 +592,11 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const originalPrice = p.wasPrice || p.price;
           const factor = (100 - discountPercent) / 100;
           const newPrice = Math.round(originalPrice * factor * 100) / 100;
-          const updated = {
+          const updated: Product = {
             ...p,
             wasPrice: originalPrice,
             price: newPrice,
-            badge: discountPercent >= 20 ? 'deal' : p.badge,
+            badge: (discountPercent >= 20 ? 'sale' : p.badge) as ProductBadge | undefined,
             badgeText: `${discountPercent}% OFF`
           };
           upsertProductInDb(updated).catch((e) => console.warn('Supabase sync error:', e));

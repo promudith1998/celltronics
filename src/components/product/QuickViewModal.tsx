@@ -53,15 +53,21 @@ export const QuickViewModal: React.FC = () => {
               position: 'relative'
             }}
           >
-            {quickViewProduct.imageUrl ? (
-              <img
-                src={quickViewProduct.imageUrl}
-                alt={quickViewProduct.name}
-                style={{ width: '80%', height: '80%', objectFit: 'contain', borderRadius: '12px' }}
-              />
-            ) : (
-              <ProductIcon type={quickViewProduct.iconType} size="60%" />
-            )}
+            <img
+              src={
+                quickViewProduct.imageUrl ||
+                (quickViewProduct.iconType === 'case' ? '/images/products/case-clear-magsafe.jpg' :
+                 quickViewProduct.iconType === 'screen' ? '/images/products/screen-protector-tray.jpg' :
+                 quickViewProduct.iconType === 'charger' ? '/images/products/charger-gan-65w.jpg' :
+                 quickViewProduct.iconType === 'cable' ? '/images/products/cable-braided-100w.jpg' :
+                 quickViewProduct.iconType === 'power' ? '/images/products/powerbank-magsafe.jpg' :
+                 quickViewProduct.iconType === 'audio' ? '/images/products/earbuds-anc.jpg' :
+                 quickViewProduct.iconType === 'mount' ? '/images/products/car-mount-magsafe.jpg' :
+                 '/images/products/case-clear-magsafe.jpg')
+              }
+              alt={quickViewProduct.name}
+              style={{ width: '85%', height: '85%', objectFit: 'contain', borderRadius: '12px' }}
+            />
             {quickViewProduct.badge && (
               <span
                 className={`badge badge-${quickViewProduct.badge}`}

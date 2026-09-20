@@ -6,6 +6,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'torras-ultraglass-screen-protector',
+    imageUrl: '/images/products/screen-protector-tray.jpg',
     name: 'UltraGlass 9H+ Tempered Glass (2-Pack)',
     brand: 'TORRAS',
     category: 'screen-protectors',
@@ -178,6 +179,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'anker-maggo-clear-case',
+    imageUrl: '/images/products/case-clear-magsafe.jpg',
     name: 'MagGo Clear Case with MagSafe',
     brand: 'Anker',
     category: 'phone-cases',
@@ -221,6 +223,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'esr-halolock-kickstand-case',
+    imageUrl: '/images/products/case-matte-kickstand.jpg',
     name: 'HaloLock Camera Guard Kickstand Case',
     brand: 'ESR',
     category: 'phone-cases',
@@ -340,6 +343,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'ugreen-65w-gan-fast-charger',
+    imageUrl: '/images/products/charger-gan-65w.jpg',
     name: 'Nexode 65W GaN III Fast Charger 3-Port',
     brand: 'UGREEN',
     category: 'chargers',
@@ -457,6 +461,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'belkin-boostcharge-pro-3in1-magsafe',
+    imageUrl: '/images/products/charger-3in1-stand.jpg',
     name: 'BoostCharge Pro 3-in-1 MagSafe Charging Stand',
     brand: 'Belkin',
     category: 'chargers',
@@ -499,6 +504,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'baseus-usb-c-braided-cable-2m',
+    imageUrl: '/images/products/cable-braided-100w.jpg',
     name: 'USB-C to USB-C 100W Braided Cable (2m)',
     brand: 'Baseus',
     category: 'cables',
@@ -657,6 +663,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'esr-10000mah-magsafe-power-bank',
+    imageUrl: '/images/products/powerbank-magsafe.jpg',
     name: '10,000mAh MagSafe Power Bank with Stand',
     brand: 'ESR',
     category: 'power-banks',
@@ -818,6 +825,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'spigen-arcfield-wireless-earbuds-pro',
+    imageUrl: '/images/products/earbuds-anc.jpg',
     name: 'ArcField Wireless ANC Earbuds Pro',
     brand: 'Spigen',
     category: 'audio',
@@ -940,6 +948,7 @@ export const PRODUCTS: Product[] = [
   // ========================================================
   {
     id: 'samsung-wireless-car-mount-charger-15w',
+    imageUrl: '/images/products/car-mount-magsafe.jpg',
     name: 'Wireless Car Mount Charger 15W Auto-Clamp',
     brand: 'Samsung',
     category: 'car-accessories',
@@ -1071,6 +1080,7 @@ export const DEVICE_FAMILIES: DeviceFamily[] = [
   {
     id: 'iphone',
     name: 'Apple iPhone',
+    imageUrl: '/images/device-iphone.jpg',
     shortName: 'iPhone',
     brand: 'Apple',
     tagline: 'MagSafe cases, ultra-tough screen glass & fast charging',
@@ -1093,6 +1103,7 @@ export const DEVICE_FAMILIES: DeviceFamily[] = [
   {
     id: 'samsung-galaxy',
     name: 'Samsung Galaxy',
+    imageUrl: '/images/device-galaxy.jpg',
     shortName: 'Galaxy',
     brand: 'Samsung',
     tagline: 'Super Fast Charging 2.0, curved glass & rugged armor',
@@ -1115,6 +1126,7 @@ export const DEVICE_FAMILIES: DeviceFamily[] = [
   {
     id: 'google-pixel',
     name: 'Google Pixel',
+    imageUrl: '/images/device-pixel.jpg',
     shortName: 'Pixel',
     brand: 'Google',
     tagline: 'Camera bar protection, 30W PD fast charge & matte shields',

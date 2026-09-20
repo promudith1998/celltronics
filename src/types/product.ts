@@ -68,6 +68,7 @@ export interface DeviceFamily {
   color: string;
   accentColor: string;
   models: string[];
+  imageUrl?: string;
 }
 
 export interface WarrantyRegistrationPayload {

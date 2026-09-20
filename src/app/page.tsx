@@ -200,78 +200,55 @@ export default function HomePage() {
 
             {/* Center 3D Hardware Showcase Podium */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 520 440" style={{ width: '100%', height: 'auto', maxHeight: '420px' }}>
-                <defs>
-                  <radialGradient id="podiumGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#1E3A8A" />
-                    <stop offset="60%" stopColor="#0B1E3D" />
-                    <stop offset="100%" stopColor="#07152E" stopOpacity="0" />
-                  </radialGradient>
-                  <linearGradient id="neonRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3FA9FF" />
-                    <stop offset="50%" stopColor="#0B63F6" />
-                    <stop offset="100%" stopColor="#8B5CF6" />
-                  </linearGradient>
-                  <linearGradient id="heroScreenGlass" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3FA9FF" stopOpacity="0.4" />
-                    <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#FF7A1A" stopOpacity="0.5" />
-                  </linearGradient>
-                </defs>
-
-                {/* Podium Base */}
-                <ellipse cx="260" cy="365" rx="220" ry="42" fill="url(#podiumGlow)" />
-                <ellipse cx="260" cy="360" rx="190" ry="32" fill="#0E244C" stroke="url(#neonRing)" strokeWidth="3.5" />
-                <ellipse cx="260" cy="358" rx="160" ry="24" fill="#0A1A36" />
-
-                {/* 1. Clear MagSafe iPhone Case */}
-                <g transform="translate(180, 50)">
-                  <rect x="0" y="0" width="136" height="276" rx="28" fill="none" stroke="#FFFFFF" strokeWidth="4.5" opacity="0.95" />
-                  <rect x="6" y="6" width="124" height="264" rx="22" fill="#07152E" opacity="0.6" />
-                  <rect x="12" y="12" width="50" height="54" rx="14" fill="#0B1E3D" stroke="#FFFFFF" strokeWidth="2.5" />
-                  <circle cx="26" cy="27" r="8" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
-                  <circle cx="48" cy="27" r="8" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
-                  <circle cx="26" cy="49" r="8" fill="#1E293B" stroke="#64748B" strokeWidth="2" />
-                  <circle cx="68" cy="140" r="30" fill="none" stroke="#FFFFFF" strokeWidth="4.5" />
-                  <line x1="68" y1="172" x2="68" y2="188" stroke="#FFFFFF" strokeWidth="4.5" strokeLinecap="round" />
-                </g>
-
-                {/* 2. 65W GaN Fast Charger */}
-                <g transform="translate(250, 140)">
-                  <rect x="0" y="0" width="86" height="106" rx="14" fill="#0B132B" stroke="#475569" strokeWidth="2" />
-                  <text x="32" y="44" fill="#FFFFFF" fontFamily="var(--font-mono)" fontSize="18" fontWeight="800">65W</text>
-                  <text x="32" y="58" fill="#3FA9FF" fontSize="9" fontWeight="700">GaN III</text>
-                  <rect x="56" y="24" width="20" height="8" rx="4" fill="#050914" stroke="#3FA9FF" strokeWidth="1.5" />
-                  <rect x="56" y="42" width="20" height="8" rx="4" fill="#050914" stroke="#3FA9FF" strokeWidth="1.5" />
-                  <rect x="56" y="60" width="20" height="8" rx="4" fill="#050914" stroke="#FF7A1A" strokeWidth="1.5" />
-                  <rect x="56" y="80" width="20" height="14" rx="2" fill="#050914" stroke="#FF7A1A" strokeWidth="1.5" />
-                </g>
-
-                {/* 3. Screen Protector */}
-                <g transform="translate(305, 120)">
-                  <rect x="0" y="0" width="108" height="216" rx="22" fill="url(#heroScreenGlass)" stroke="url(#neonRing)" strokeWidth="3" opacity="0.9" />
-                  <path d="M 0 30 L 80 0 L 108 50 L 0 160 Z" fill="#FFFFFF" opacity="0.3" />
-                  <rect x="36" y="10" width="36" height="6" rx="3" fill="#000000" />
-                </g>
-
-                {/* 4. Braided Cable */}
-                <path
-                  d="M 255 240 C 240 320, 340 360, 310 260"
-                  fill="none"
-                  stroke="#1E293B"
-                  strokeWidth="10"
-                  strokeLinecap="round"
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '460px',
+                  borderRadius: '22px',
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 50px -10px rgba(11, 99, 246, 0.5), 0 0 35px rgba(255, 46, 147, 0.25)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.2)',
+                  background: 'rgba(11, 30, 61, 0.6)',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                <img
+                  src="/images/hero-showcase.jpg"
+                  alt="Celtronics Premium Hardware & Accessories"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    aspectRatio: '4/3',
+                    objectFit: 'cover'
+                  }}
                 />
-                <path
-                  d="M 255 240 C 240 320, 340 360, 310 260"
-                  fill="none"
-                  stroke="#3FA9FF"
-                  strokeWidth="2.5"
-                  strokeDasharray="4,4"
-                  strokeLinecap="round"
-                />
-                <rect x="250" y="232" width="12" height="18" rx="3" fill="#64748B" stroke="#94A3B8" strokeWidth="1" />
-              </svg>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '12px',
+                    left: '12px',
+                    right: '12px',
+                    background: 'rgba(7, 21, 46, 0.75)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    padding: '8px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.04em' }}>
+                    <Zap size={14} color="#FF7A1A" />
+                    NEXT-GEN FLAGSHIP ACCESSORIES
+                  </span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#F1F5F9', background: 'rgba(255, 255, 255, 0.15)', padding: '2px 8px', borderRadius: '100px' }}>
+                    MagSafe + GaN III
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Right Value Badges */}
@@ -329,7 +306,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <div className="device-families-grid">
             {DEVICE_FAMILIES.map((family) => (
               <div
                 key={family.id}
@@ -337,22 +314,36 @@ export default function HomePage() {
                   background: '#F8FAFC',
                   borderRadius: '16px',
                   border: '1.5px solid #E2E8F0',
-                  padding: '24px',
+                  padding: '20px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  transition: 'transform 0.18s, box-shadow 0.18s'
+                  transition: 'transform 0.18s, box-shadow 0.18s',
+                  overflow: 'hidden'
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: family.accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Smartphone size={22} color={family.color} />
+                  {family.imageUrl ? (
+                    <div style={{ position: 'relative', width: '100%', height: '160px', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', background: '#F1F5F9' }}>
+                      <img
+                        src={family.imageUrl}
+                        alt={family.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <span style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '11px', fontWeight: 800, color: family.color, background: 'rgba(255, 255, 255, 0.95)', border: `1px solid ${family.color}`, padding: '3px 10px', borderRadius: '100px', backdropFilter: 'blur(6px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                        {family.shortName} Series
+                      </span>
                     </div>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: family.color, background: '#fff', border: `1px solid ${family.color}`, padding: '2px 8px', borderRadius: '100px' }}>
-                      {family.shortName} Series
-                    </span>
-                  </div>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: family.accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Smartphone size={22} color={family.color} />
+                      </div>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: family.color, background: '#fff', border: `1px solid ${family.color}`, padding: '2px 8px', borderRadius: '100px' }}>
+                        {family.shortName} Series
+                      </span>
+                    </div>
+                  )}
 
                   <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0B1E3D', marginBottom: '6px' }}>
                     {family.name}
@@ -429,7 +420,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+          <div className="products-responsive-grid">
             {bestSellers.map((prod) => (
               <ProductCard key={prod.id} product={prod} />
             ))}
@@ -456,7 +447,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+          <div className="products-responsive-grid">
             {latestDeviceAccessories.map((prod) => (
               <ProductCard key={prod.id} product={prod} />
             ))}
@@ -481,7 +472,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+          <div className="advantage-pillars-grid">
             {/* Pillar 1: Canadian Logistics */}
             <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', padding: '28px 22px', borderRadius: '16px' }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#0B63F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px' }}>
@@ -772,7 +763,7 @@ export default function HomePage() {
             </div>
 
             {/* Center: Email Subscription Form */}
-            <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', gap: '8px', flex: 1, maxWidth: '460px' }}>
+            <form onSubmit={handleNewsletterSubmit} className="nl-form-custom" style={{ display: 'flex', gap: '8px', flex: '1 1 300px', maxWidth: '460px', width: '100%' }}>
               <input
                 type="email"
                 placeholder="Enter your email address"

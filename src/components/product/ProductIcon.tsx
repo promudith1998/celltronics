@@ -1,17 +1,22 @@
 import React from 'react';
 
 interface ProductIconProps {
-  type: 'case' | 'charger' | 'cable' | 'power' | 'audio' | 'screen' | 'mount';
+  type?: 'case' | 'charger' | 'cable' | 'power' | 'audio' | 'screen' | 'mount';
+  iconType?: 'case' | 'charger' | 'cable' | 'power' | 'audio' | 'screen' | 'mount';
   size?: number | string;
   strokeUrl?: string;
+  color?: string;
 }
 
 export const ProductIcon: React.FC<ProductIconProps> = ({
   type,
+  iconType,
   size = '100%',
-  strokeUrl = 'url(#brandGrad)'
+  strokeUrl = 'url(#brandGrad)',
+  color,
 }) => {
-  switch (type) {
+  const finalType = type || iconType || 'case';
+  switch (finalType) {
     case 'screen':
       return (
         <svg

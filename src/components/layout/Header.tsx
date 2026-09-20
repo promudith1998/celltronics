@@ -156,7 +156,7 @@ export const Header: React.FC = () => {
             className="logo-mark"
             priority
           />
-          <div>
+          <div className="logo-text-group">
             <div className="logo-word" style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
               <span style={{ color: '#0B63F6' }}>CELL</span>
               <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
@@ -250,10 +250,10 @@ export const Header: React.FC = () => {
             <Search size={20} />
           </button>
 
-          {/* Account */}
+          {/* Account / Warranty */}
           <Link
             href="/warranty-registration"
-            className="h-action"
+            className="h-action h-action-warranty"
             title="Register Product Warranty"
           >
             <FileCheck2 size={19} color="#0B63F6" />
@@ -263,7 +263,7 @@ export const Header: React.FC = () => {
           {/* Wishlist */}
           <Link
             href="/wishlist"
-            className="h-action"
+            className="h-action h-action-wishlist"
             title="My Wishlist"
           >
             <Heart size={19} />

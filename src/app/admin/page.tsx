@@ -1400,7 +1400,7 @@ export default function AdminPage() {
                                   {p.imageUrl ? (
                                     <Image src={p.imageUrl} alt={p.name} width={46} height={46} style={{ objectFit: 'cover' }} />
                                   ) : (
-                                    <ProductIcon iconType={p.iconType} size={22} color="var(--navy)" />
+                                    <ProductIcon type={p.iconType} size={22} />
                                   )}
                                 </div>
                                 <div>

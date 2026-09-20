@@ -154,8 +154,18 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
 
   const relatedProducts = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
 
+  const fallbackImg =
+    product.iconType === 'case' ? '/images/products/case-clear-magsafe.jpg' :
+    product.iconType === 'screen' ? '/images/products/screen-protector-tray.jpg' :
+    product.iconType === 'charger' ? '/images/products/charger-gan-65w.jpg' :
+    product.iconType === 'cable' ? '/images/products/cable-braided-100w.jpg' :
+    product.iconType === 'power' ? '/images/products/powerbank-magsafe.jpg' :
+    product.iconType === 'audio' ? '/images/products/earbuds-anc.jpg' :
+    product.iconType === 'mount' ? '/images/products/car-mount-magsafe.jpg' :
+    '/images/products/case-clear-magsafe.jpg';
+
   const galleryImages = [
-    product.imageUrl,
+    product.imageUrl || fallbackImg,
     ...(product.galleryImages || [])
   ].filter(Boolean) as string[];
 

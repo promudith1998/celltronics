@@ -45,6 +45,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toggleWishlist(product);
   };
 
+  const getProductImage = (p: Product) => {
+    if (p.imageUrl) return p.imageUrl;
+    switch (p.iconType) {
+      case 'case': return '/images/products/case-clear-magsafe.jpg';
+      case 'screen': return '/images/products/screen-protector-tray.jpg';
+      case 'charger': return '/images/products/charger-gan-65w.jpg';
+      case 'cable': return '/images/products/cable-braided-100w.jpg';
+      case 'power': return '/images/products/powerbank-magsafe.jpg';
+      case 'audio': return '/images/products/earbuds-anc.jpg';
+      case 'mount': return '/images/products/car-mount-magsafe.jpg';
+      default: return '/images/products/case-clear-magsafe.jpg';
+    }
+  };
+
   return (
     <div className="pcard">
       {/* Product Media Area */}
@@ -60,15 +74,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             padding: '16px'
           }}
         >
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              style={{ width: '100%', height: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }}
-            />
-          ) : (
-            <ProductIcon type={product.iconType} size="68%" />
-          )}
+          <img
+            src={getProductImage(product)}
+            alt={product.name}
+            style={{ width: '100%', height: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }}
+          />
         </Link>
 
         {/* Badges */}

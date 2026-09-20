@@ -12,6 +12,7 @@ import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/layout/CartDrawer';
 import { QuickViewModal } from '@/components/product/QuickViewModal';
 import { Toast } from '@/components/layout/Toast';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -76,6 +77,7 @@ export default function RootLayout({
                   <CartDrawer />
                   <QuickViewModal />
                   <Toast />
+                  <MobileBottomNav />
                 </QuickViewProvider>
               </WishlistProvider>
             </CartProvider>
