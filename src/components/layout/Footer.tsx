@@ -57,10 +57,13 @@ export const Footer: React.FC = () => {
             <p style={{ fontSize: '13.5px', color: '#47506B', lineHeight: 1.5, marginTop: '12px', maxWidth: '280px' }}>
               Canada’s premier destination for high-durability mobile accessories, wholesale dealer supply, and retail partner merchandising.
             </p>
+            <div style={{ marginTop: '12px', padding: '8px 12px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '11.5px', color: '#64748B', lineHeight: 1.4, maxWidth: '280px' }}>
+              💡 <strong>Note:</strong> We specialize exclusively in mobile accessories, cases, and fast chargers. We do not sell mobile phones.
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', fontSize: '12px', color: '#0B1E3D', fontWeight: 600 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={14} color="#1EA672" />
-                <span>1-Year Canadian Warranty on all products</span>
+                <span>1-Year Canadian Warranty on all accessories</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Truck size={14} color="#0B63F6" />
@@ -86,20 +89,20 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* SHOP BY DEVICE Column */}
+          {/* ACCESSORIES BY PHONE Column */}
           <div>
             <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
-              SHOP BY DEVICE
+              ACCESSORIES BY PHONE
             </h5>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <Link href="/shop/device/iphone" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600 }}>Apple iPhone Series</Link>
-              <Link href="/shop?q=iPhone+16" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• iPhone 16 Pro / Max</Link>
-              <Link href="/shop?q=iPhone+15" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• iPhone 15 Series</Link>
-              <Link href="/shop/device/samsung-galaxy" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600, marginTop: '4px' }}>Samsung Galaxy</Link>
-              <Link href="/shop?q=Galaxy+S25" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Galaxy S25 / Ultra</Link>
-              <Link href="/shop?q=Galaxy+S24" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Galaxy S24 Series</Link>
-              <Link href="/shop/device/google-pixel" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600, marginTop: '4px' }}>Google Pixel</Link>
-              <Link href="/shop?q=Pixel+9" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Pixel 9 / Pro / XL</Link>
+              <Link href="/shop/device/iphone" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600 }}>Apple iPhone Accessories</Link>
+              <Link href="/shop?q=iPhone+16" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• iPhone 16 Pro / Max Cases</Link>
+              <Link href="/shop?q=iPhone+15" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• iPhone 15 Series Cases</Link>
+              <Link href="/shop/device/samsung-galaxy" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600, marginTop: '4px' }}>Samsung Galaxy Accessories</Link>
+              <Link href="/shop?q=Galaxy+S25" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Galaxy S25 / Ultra Cases</Link>
+              <Link href="/shop?q=Galaxy+S24" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Galaxy S24 Protection</Link>
+              <Link href="/shop/device/google-pixel" style={{ color: '#47506B', textDecoration: 'none', fontWeight: 600, marginTop: '4px' }}>Google Pixel Accessories</Link>
+              <Link href="/shop?q=Pixel+9" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '12.5px' }}>• Pixel 9 / Pro / XL Cases</Link>
             </div>
           </div>
 

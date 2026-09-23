@@ -1079,7 +1079,7 @@ export const BRANDS = [
 export const DEVICE_FAMILIES: DeviceFamily[] = [
   {
     id: 'iphone',
-    name: 'Apple iPhone',
+    name: 'Apple iPhone Accessories',
     imageUrl: '/images/device-iphone.jpg',
     shortName: 'iPhone',
     brand: 'Apple',
@@ -1102,7 +1102,7 @@ export const DEVICE_FAMILIES: DeviceFamily[] = [
   },
   {
     id: 'samsung-galaxy',
-    name: 'Samsung Galaxy',
+    name: 'Samsung Galaxy Accessories',
     imageUrl: '/images/device-galaxy.jpg',
     shortName: 'Galaxy',
     brand: 'Samsung',
@@ -1125,7 +1125,7 @@ export const DEVICE_FAMILIES: DeviceFamily[] = [
   },
   {
     id: 'google-pixel',
-    name: 'Google Pixel',
+    name: 'Google Pixel Accessories',
     imageUrl: '/images/device-pixel.jpg',
     shortName: 'Pixel',
     brand: 'Google',

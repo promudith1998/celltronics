@@ -111,7 +111,7 @@ export default function HomePage() {
                     gap: '6px'
                   }}
                 >
-                  🍁 CANADIAN RETAIL &amp; WHOLESALE DISTRIBUTION
+                  🍁 CANADIAN MOBILE ACCESSORIES SPECIALIST
                 </span>
               </div>
 
@@ -127,6 +127,9 @@ export default function HomePage() {
                 <span style={{ display: 'block', color: '#0B63F6' }}>POWER.</span>
                 <span style={{ display: 'block', color: '#8B5CF6' }}>PROTECT.</span>
                 <span style={{ display: 'block', color: '#FF7A1A' }}>CONNECT.</span>
+                <span style={{ display: 'block', fontSize: 'clamp(18px, 2.2vw, 24px)', color: '#FFFFFF', fontWeight: 800, marginTop: '10px', letterSpacing: '-0.01em' }}>
+                  PREMIUM MOBILE ACCESSORIES
+                </span>
               </h1>
 
               <p
@@ -139,7 +142,7 @@ export default function HomePage() {
                   fontWeight: 500
                 }}
               >
-                Engineered for extreme durability, ultra-fast charging, and seamless daily protection. Available direct to consumer and wholesale to retailers.
+                Canada&apos;s dedicated source for high-performance phone cases, GaN fast chargers, 9H tempered glass screen protectors, and MagSafe gear. Available direct to consumer and wholesale to retailers.
               </p>
 
               {/* Dual Calls to Action */}
@@ -242,7 +245,7 @@ export default function HomePage() {
                 >
                   <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.04em' }}>
                     <Zap size={14} color="#FF7A1A" />
-                    NEXT-GEN FLAGSHIP ACCESSORIES
+                    NEXT-GEN MOBILE ACCESSORIES
                   </span>
                   <span style={{ fontSize: '11px', fontWeight: 700, color: '#F1F5F9', background: 'rgba(255, 255, 255, 0.15)', padding: '2px 8px', borderRadius: '100px' }}>
                     MagSafe + GaN III
@@ -259,7 +262,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <div style={{ color: '#fff', fontSize: '13.5px', fontWeight: 800 }}>1-YEAR WARRANTY</div>
-                  <div style={{ color: '#CBD5E1', fontSize: '12px' }}>Comprehensive on all products</div>
+                  <div style={{ color: '#CBD5E1', fontSize: '12px' }}>Comprehensive on all accessories</div>
                 </div>
               </div>
 
@@ -288,17 +291,17 @@ export default function HomePage() {
       </section>
 
       {/* ======================================================== */}
-      {/* 2. SHOP BY DEVICE (iPhone, Samsung Galaxy, Google Pixel) */}
+      {/* 2. ACCESSORIES BY PHONE MODEL (iPhone, Samsung Galaxy, Pixel) */}
       {/* ======================================================== */}
       <section style={{ padding: '56px 0 48px', background: '#FFFFFF' }}>
         <div className="wrap">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px' }}>
             <div>
               <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#0B63F6', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                COMPATIBILITY HUB
+                DEVICE COMPATIBILITY
               </span>
               <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#0B1E3D', margin: '4px 0 0', letterSpacing: '-0.01em' }}>
-                SHOP BY DEVICE
+                ACCESSORIES BY PHONE MODEL
               </h2>
             </div>
             <Link href="/shop" style={{ fontSize: '13px', fontWeight: 800, color: '#0B63F6', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -331,7 +334,7 @@ export default function HomePage() {
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       <span style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '11px', fontWeight: 800, color: family.color, background: 'rgba(255, 255, 255, 0.95)', border: `1px solid ${family.color}`, padding: '3px 10px', borderRadius: '100px', backdropFilter: 'blur(6px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                        {family.shortName} Series
+                        {family.shortName} Accessories
                       </span>
                     </div>
                   ) : (
@@ -340,7 +343,7 @@ export default function HomePage() {
                         <Smartphone size={22} color={family.color} />
                       </div>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: family.color, background: '#fff', border: `1px solid ${family.color}`, padding: '2px 8px', borderRadius: '100px' }}>
-                        {family.shortName} Series
+                        {family.shortName} Accessories
                       </span>
                     </div>
                   )}
@@ -429,7 +432,7 @@ export default function HomePage() {
       </section>
 
       {/* ======================================================== */}
-      {/* 4. LATEST DEVICE ACCESSORIES SHOWCASE                    */}
+      {/* 4. LATEST FLAGSHIP PHONE ACCESSORIES                    */}
       {/* ======================================================== */}
       <section style={{ padding: '56px 0', background: '#FFFFFF' }}>
         <div className="wrap">
@@ -439,11 +442,11 @@ export default function HomePage() {
                 <Sparkles size={14} color="#0B63F6" /> NEW FLAGSHIPS
               </span>
               <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#0B1E3D', margin: '4px 0 0', letterSpacing: '-0.01em' }}>
-                LATEST DEVICE ACCESSORIES
+                LATEST PHONE ACCESSORIES
               </h2>
             </div>
             <Link href="/shop" style={{ fontSize: '13px', fontWeight: 800, color: '#0B63F6', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Shop New Releases <ArrowRight size={14} />
+              Shop New Accessories <ArrowRight size={14} />
             </Link>
           </div>
 
@@ -468,7 +471,7 @@ export default function HomePage() {
               Why Choose CellCentral?
             </h2>
             <p style={{ fontSize: '15px', color: '#CBD5E1', lineHeight: 1.5 }}>
-              Engineered with pro-grade materials, stored in Canadian warehouses, and backed by comprehensive warranty replacement.
+              Canada&apos;s dedicated mobile accessories specialist. Engineered with pro-grade materials, stored in domestic fulfillment centers, and backed by comprehensive warranty replacement.
             </p>
           </div>
 
@@ -508,7 +511,7 @@ export default function HomePage() {
                 1-Year Canadian Warranty
               </h3>
               <p style={{ fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5, margin: 0 }}>
-                Hassle-free 1-Year warranty on all products. Easy online product registration with instant digital certification.
+                Hassle-free 1-Year warranty on all accessories. Easy online product registration with instant digital certification.
               </p>
             </div>
 
@@ -611,7 +614,7 @@ export default function HomePage() {
                   WARRANTY COVERAGE
                 </h4>
                 <p style={{ fontSize: '12px', color: '#47506B', margin: '3px 0 0', lineHeight: 1.35 }}>
-                  1-year Canadian warranty on all products.
+                  1-year Canadian warranty on all accessories.
                 </p>
               </div>
             </div>

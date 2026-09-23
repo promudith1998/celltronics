@@ -14,11 +14,47 @@ import {
   AlertCircle,
   Tag,
   Shield,
-  Palette
+  Palette,
+  Loader2,
+  CheckCircle2,
+  Star,
+  Maximize2,
+  Eye,
+  RefreshCw,
+  FileImage,
+  ArrowRight
 } from 'lucide-react';
 import { Product, ProductCategory, ProductBadge, ProductVariant } from '@/types/product';
 import { CATEGORIES, BRANDS, DEVICE_MODELS } from '@/data/products';
 import { ProductIcon } from '@/components/product/ProductIcon';
+import { uploadMultipleProductImages } from '@/lib/imageUploadService';
+
+// Category standard realistic product photography presets
+const CATEGORY_PRESET_IMAGES: Record<string, { label: string; url: string }[]> = {
+  'phone-cases': [
+    { label: 'Clear MagSafe Case', url: '/images/products/case-clear-magsafe.jpg' },
+    { label: 'Matte Kickstand Armor', url: '/images/products/case-matte-kickstand.jpg' }
+  ],
+  'screen-protectors': [
+    { label: 'Tempered Glass + Align Tray', url: '/images/products/screen-protector-tray.jpg' }
+  ],
+  'chargers': [
+    { label: '65W GaN Dual Port Block', url: '/images/products/charger-gan-65w.jpg' },
+    { label: '3-in-1 Foldable MagSafe Stand', url: '/images/products/charger-3in1-stand.jpg' }
+  ],
+  'cables': [
+    { label: '100W Braided USB-C Cable', url: '/images/products/cable-braided-100w.jpg' }
+  ],
+  'power-banks': [
+    { label: '10000mAh MagSafe Battery', url: '/images/products/powerbank-magsafe.jpg' }
+  ],
+  'audio': [
+    { label: 'ANC Hi-Res Wireless Earbuds', url: '/images/products/earbuds-anc.jpg' }
+  ],
+  'car-accessories': [
+    { label: 'MagSafe 15W Auto Vent Mount', url: '/images/products/car-mount-magsafe.jpg' }
+  ]
+};
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -63,6 +99,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   ]);
   const [models, setModels] = useState<string[]>(['Standard Edition']);
   const [tags, setTags] = useState<string>('magsafe, case, protection');
+
+  // Photo Upload & Dropzone States
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadStats, setUploadStats] = useState<{ originalKB: number; compressedKB: number; percent: number; count: number } | null>(null);
+  const [previewZoomUrl, setPreviewZoomUrl] = useState<string | null>(null);
 
   // Populate when editing
   useEffect(() => {
@@ -130,25 +173,101 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Image Upload Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  // Process uploaded files with automatic compression & dual-mode storage
+  const processFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const resultStr = event.target.result as string;
-          if (!imageUrl) {
-            setImageUrl(resultStr);
-          } else {
-            setGalleryImages((prev) => [...prev, resultStr]);
-          }
+    setIsUploading(true);
+    setUploadStatus(`Optimizing and uploading ${fileArray.length} photo${fileArray.length > 1 ? 's' : ''}...`);
+
+    try {
+      const results = await uploadMultipleProductImages(fileArray, {
+        category,
+        prefix: sku ? sku.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'prod',
+        onProgress: (done, total) => {
+          setUploadStatus(`Processed ${done}/${total} photos...`);
         }
-      };
-      reader.readAsDataURL(file);
-    });
+      });
+
+      if (results.length > 0) {
+        let totalOrig = 0;
+        let totalComp = 0;
+        results.forEach((r) => {
+          totalOrig += r.originalSize;
+          totalComp += r.compressedSize;
+        });
+
+        const origKB = Math.round(totalOrig / 1024);
+        const compKB = Math.round(totalComp / 1024);
+        const percent = origKB > 0 ? Math.max(0, Math.round(((origKB - compKB) / origKB) * 100)) : 0;
+
+        setUploadStats({
+          originalKB: origKB,
+          compressedKB: compKB,
+          percent,
+          count: results.length
+        });
+
+        // First uploaded image becomes primary cover if none currently set
+        const newUrls = results.map((r) => r.url);
+        if (!imageUrl) {
+          setImageUrl(newUrls[0]);
+          if (newUrls.length > 1) {
+            setGalleryImages((prev) => [...prev, ...newUrls.slice(1)]);
+          }
+        } else {
+          setGalleryImages((prev) => [...prev, ...newUrls]);
+        }
+      }
+    } catch (err) {
+      console.error('Error during photo upload:', err);
+    } finally {
+      setIsUploading(false);
+      setUploadStatus('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
+  };
+
+  const makePrimary = (index: number) => {
+    const chosen = galleryImages[index];
+    const prevPrimary = imageUrl;
+    const remaining = galleryImages.filter((_, i) => i !== index);
+    setImageUrl(chosen);
+    if (prevPrimary) {
+      setGalleryImages([prevPrimary, ...remaining]);
+    } else {
+      setGalleryImages(remaining);
+    }
   };
 
   // Discount Calculation Helper
@@ -710,23 +829,64 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             {/* TAB 3: PHOTOS & ARTWORK */}
             {activeTab === 'media' && (
               <>
+                {/* Category Context Banner */}
+                <div
+                  style={{
+                    background: '#F0F7FF',
+                    border: '1px solid #BFDBFE',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1D4ED8' }}>
+                      <FileImage size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E40AF' }}>
+                        Category: {CATEGORIES.find((c) => c.id === category)?.name || category}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: '#3B82F6' }}>
+                        Photos uploaded will be categorized and optimized automatically with WebP compression.
+                      </div>
+                    </div>
+                  </div>
+
+                  {uploadStats && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#DCFCE7', border: '1px solid #86EFAC', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, color: '#15803D' }}>
+                      <CheckCircle2 size={13} />
+                      <span>{uploadStats.count} photo{uploadStats.count > 1 ? 's' : ''} optimized ({uploadStats.originalKB}KB &rarr; {uploadStats.compressedKB}KB, {uploadStats.percent}% saved)</span>
+                    </div>
+                  )}
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                      Upload Product Photo (Dropzone)
+                      Upload Product Photos (Drag &amp; Drop Supported)
                     </label>
 
                     {/* Drag and Drop Zone */}
                     <div
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => !isUploading && fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
                       style={{
-                        border: '2px dashed var(--blue)',
-                        background: 'rgba(11,99,246,0.03)',
+                        border: isDragging ? '2.5px dashed #0B63F6' : '2px dashed var(--blue)',
+                        background: isDragging ? 'rgba(11,99,246,0.1)' : 'rgba(11,99,246,0.03)',
                         borderRadius: '16px',
-                        padding: '32px 20px',
+                        padding: '30px 20px',
                         textAlign: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        cursor: isUploading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: isDragging ? '0 0 20px rgba(11,99,246,0.25)' : 'none'
                       }}
                     >
                       <input
@@ -735,62 +895,156 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         onChange={handleFileUpload}
                         accept="image/*"
                         multiple
+                        disabled={isUploading}
                         style={{ display: 'none' }}
                       />
+
                       <div
                         style={{
-                          width: '48px',
-                          height: '48px',
+                          width: '52px',
+                          height: '52px',
                           borderRadius: '50%',
-                          background: 'rgba(11,99,246,0.1)',
-                          color: 'var(--blue)',
+                          background: isDragging ? '#0B63F6' : 'rgba(11,99,246,0.1)',
+                          color: isDragging ? '#fff' : 'var(--blue)',
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginBottom: '12px'
+                          marginBottom: '12px',
+                          transition: 'all 0.2s ease'
                         }}
                       >
-                        <Upload size={22} />
+                        {isUploading ? (
+                          <Loader2 size={24} className="animate-spin" />
+                        ) : (
+                          <Upload size={24} />
+                        )}
                       </div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--navy)' }}>
-                        Click to upload photos from computer
+
+                      <div style={{ fontSize: '14.5px', fontWeight: 800, color: isDragging ? '#0B63F6' : 'var(--navy)' }}>
+                        {isUploading ? uploadStatus : isDragging ? 'Drop Photos Here to Upload' : 'Click to Upload or Drag & Drop Photos'}
                       </div>
+                      
                       <div style={{ fontSize: '12px', color: 'var(--gray-700)', marginTop: '4px' }}>
-                        Supports PNG, JPG, WebP, SVG (Multiple files supported)
+                        Automatic WebP compression &bull; Dual-mode Supabase Storage &bull; Multiple files allowed
                       </div>
+
+                      {isUploading && (
+                        <div style={{ marginTop: '14px', width: '100%', maxWidth: '240px', margin: '14px auto 0' }}>
+                          <div style={{ width: '100%', height: '6px', background: '#E2E8F0', borderRadius: '100px', overflow: 'hidden' }}>
+                            <div style={{ width: '80%', height: '100%', background: 'var(--grad-brand)', borderRadius: '100px', animation: 'pulse 1.2s infinite' }} />
+                          </div>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Category Presets Quick-Add */}
+                    {CATEGORY_PRESET_IMAGES[category] && (
+                      <div style={{ marginTop: '16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Sparkles size={12} color="#0B63F6" />
+                          <span>Standard {CATEGORIES.find((c) => c.id === category)?.name} Presets:</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {CATEGORY_PRESET_IMAGES[category].map((preset) => (
+                            <button
+                              key={preset.url}
+                              type="button"
+                              onClick={() => {
+                                if (!imageUrl) {
+                                  setImageUrl(preset.url);
+                                } else if (!galleryImages.includes(preset.url) && imageUrl !== preset.url) {
+                                  setGalleryImages((prev) => [...prev, preset.url]);
+                                }
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: '#F8FAFC',
+                                border: '1px solid #CBD5E1',
+                                padding: '5px 10px',
+                                borderRadius: '8px',
+                                fontSize: '11.5px',
+                                fontWeight: 600,
+                                color: '#1E293B',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <img src={preset.url} alt="" style={{ width: '18px', height: '18px', objectFit: 'contain', borderRadius: '4px' }} />
+                              <span>{preset.label}</span>
+                              <Plus size={11} color="#0B63F6" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Direct Image URL Input */}
                     <div style={{ marginTop: '16px' }}>
                       <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                         Or Paste Web Image URL
                       </label>
-                      <input
-                        type="url"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://example.com/image.png"
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1.5px solid var(--gray-200)',
-                          fontSize: '13px'
-                        }}
-                      />
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="url"
+                          value={imageUrl}
+                          onChange={(e) => setImageUrl(e.target.value)}
+                          placeholder="https://example.com/product-photo.webp"
+                          style={{
+                            flex: 1,
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            border: '1.5px solid var(--gray-200)',
+                            fontSize: '13px'
+                          }}
+                        />
+                        {imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!galleryImages.includes(imageUrl)) {
+                                setGalleryImages((prev) => [...prev, imageUrl]);
+                                setImageUrl('');
+                              }
+                            }}
+                            title="Move current URL to gallery angles"
+                            style={{
+                              background: '#F1F5F9',
+                              border: '1px solid #CBD5E1',
+                              padding: '0 12px',
+                              borderRadius: '10px',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              color: '#334155',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            + Add to Gallery
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   {/* Live Media Preview Box */}
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                      Primary Preview
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase' }}>
+                        Primary Cover Preview
+                      </label>
+                      {imageUrl && (
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#0B63F6', background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '2px 8px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          <Star size={10} fill="#0B63F6" /> Main Card Image
+                        </span>
+                      )}
+                    </div>
+
                     <div
                       style={{
                         background: 'radial-gradient(circle at 50% 35%, #F8FAFC 0%, #EEF2F6 100%)',
                         borderRadius: '16px',
-                        border: '1px solid var(--gray-200)',
+                        border: '1.5px solid var(--gray-200)',
                         aspectRatio: '1/1',
                         display: 'flex',
                         alignItems: 'center',
@@ -809,80 +1063,176 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       ) : (
                         <div style={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                           <ProductIcon type={iconType} size="60%" />
-                          <span style={{ fontSize: '11px', color: 'var(--gray-700)', marginTop: '8px', fontWeight: 600 }}>
-                            (Using default 3D vector SVG artwork)
+                          <span style={{ fontSize: '12px', color: 'var(--gray-700)', marginTop: '8px', fontWeight: 700 }}>
+                            No Cover Photo Uploaded
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--gray-400)', marginTop: '2px' }}>
+                            Upload or select an image above to replace default icon
                           </span>
                         </div>
                       )}
 
+                      {/* Top Action Overlay */}
                       {imageUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setImageUrl('')}
-                          style={{
-                            position: 'absolute',
-                            top: '10px',
-                            right: '10px',
-                            background: 'rgba(255,61,90,0.9)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '28px',
-                            height: '28px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewZoomUrl(imageUrl)}
+                            title="Zoom High-Res View"
+                            style={{
+                              background: 'rgba(255,255,255,0.92)',
+                              color: '#0B1E3D',
+                              border: '1px solid #CBD5E1',
+                              borderRadius: '50%',
+                              width: '30px',
+                              height: '30px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            <Maximize2 size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setImageUrl('')}
+                            title="Remove Cover Photo"
+                            style={{
+                              background: 'rgba(255,61,90,0.95)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '30px',
+                              height: '30px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Multi-photo Gallery list */}
+                {/* Multi-photo Gallery Manager */}
                 {galleryImages.length > 0 && (
-                  <div style={{ marginTop: '16px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                      Additional Gallery Angles ({galleryImages.length})
-                    </label>
-                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '4px 0' }}>
+                  <div style={{ marginTop: '20px', background: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid var(--gray-200)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--navy)', textTransform: 'uppercase', display: 'block' }}>
+                          Multi-Angle Gallery Angles ({galleryImages.length})
+                        </label>
+                        <span style={{ fontSize: '11px', color: 'var(--gray-500)' }}>
+                          Click &quot;Make Cover&quot; to swap any angle to the primary card picture.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setGalleryImages([])}
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#DC2626',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Trash2 size={12} /> Clear Gallery
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '6px 2px' }}>
                       {galleryImages.map((img, i) => (
                         <div
                           key={i}
                           style={{
-                            width: '70px',
-                            height: '70px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--gray-200)',
-                            position: 'relative',
+                            width: '100px',
+                            borderRadius: '12px',
+                            border: '1.5px solid #CBD5E1',
                             overflow: 'hidden',
                             flex: 'none',
-                            background: '#F8FAFC'
+                            background: '#FFFFFF',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
                           }}
                         >
-                          <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          <div style={{ width: '100%', height: '80px', position: 'relative', background: '#F8FAFC', padding: '6px' }}>
+                            <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', gap: '3px' }}>
+                              <button
+                                type="button"
+                                onClick={() => setPreviewZoomUrl(img)}
+                                title="Enlarge preview"
+                                style={{
+                                  background: 'rgba(0,0,0,0.6)',
+                                  color: '#fff',
+                                  borderRadius: '50%',
+                                  width: '18px',
+                                  height: '18px',
+                                  border: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Eye size={10} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setGalleryImages((prev) => prev.filter((_, idx) => idx !== i))}
+                                title="Delete"
+                                style={{
+                                  background: 'rgba(239,68,68,0.85)',
+                                  color: '#fff',
+                                  borderRadius: '50%',
+                                  width: '18px',
+                                  height: '18px',
+                                  border: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <X size={10} />
+                              </button>
+                            </div>
+                          </div>
+
                           <button
                             type="button"
-                            onClick={() => setGalleryImages((prev) => prev.filter((_, idx) => idx !== i))}
+                            onClick={() => makePrimary(i)}
                             style={{
-                              position: 'absolute',
-                              top: '2px',
-                              right: '2px',
-                              background: 'rgba(0,0,0,0.6)',
-                              color: '#fff',
-                              borderRadius: '50%',
-                              width: '18px',
-                              height: '18px',
+                              background: '#F1F5F9',
+                              border: 'none',
+                              borderTop: '1px solid #E2E8F0',
+                              padding: '6px 4px',
+                              fontSize: '10.5px',
+                              fontWeight: 700,
+                              color: '#0B63F6',
+                              cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              cursor: 'pointer'
+                              gap: '3px',
+                              transition: 'background 0.15s ease'
                             }}
                           >
-                            <X size={10} />
+                            <Star size={10} /> Make Cover
                           </button>
                         </div>
                       ))}
@@ -1213,6 +1563,77 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Full-Screen High-Resolution Image Preview Modal */}
+      {previewZoomUrl && (
+        <div
+          onClick={() => setPreviewZoomUrl(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+            animation: 'fadeIn 0.15s ease'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '85vh',
+              background: '#fff',
+              borderRadius: '18px',
+              padding: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setPreviewZoomUrl(null)}
+              style={{
+                position: 'absolute',
+                top: '-12px',
+                right: '-12px',
+                background: '#FF3D5A',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
+              }}
+            >
+              <X size={16} />
+            </button>
+            <img
+              src={previewZoomUrl}
+              alt="High resolution preview"
+              style={{
+                maxWidth: '80vw',
+                maxHeight: '75vh',
+                objectFit: 'contain',
+                borderRadius: '12px'
+              }}
+            />
+            <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 600, color: 'var(--navy)' }}>
+              High-Resolution Preview
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

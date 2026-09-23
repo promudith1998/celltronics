@@ -17,7 +17,7 @@ export const TopBar: React.FC = () => {
         <div className="item">
           <Shield size={14} color="#FF7A1A" />
           <span>
-            <strong style={{ color: '#FF7A1A', fontWeight: 800 }}>1-YEAR WARRANTY</strong> on all products
+            <strong style={{ color: '#FF7A1A', fontWeight: 800 }}>1-YEAR WARRANTY</strong> on all accessories
           </span>
         </div>
 
@@ -25,7 +25,7 @@ export const TopBar: React.FC = () => {
         <div className="item">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
             <span style={{ color: '#FF3D5A', fontSize: '13px' }}>🍁</span>
-            <span>Proudly Canadian 🇨🇦</span>
+            <span>Canadian Mobile Accessories Specialist 🇨🇦</span>
           </span>
         </div>
       </div>

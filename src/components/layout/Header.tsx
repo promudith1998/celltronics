@@ -172,7 +172,7 @@ export const Header: React.FC = () => {
           <form onSubmit={handleSearchSubmit} style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
             <input
               type="text"
-              placeholder="Search for products, brands or devices (e.g. iPhone 16, 65W GaN)..."
+              placeholder="Search mobile accessories, cases, chargers (e.g. iPhone 16 Case, 65W GaN)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery.trim().length > 1 && setIsSearchOpen(true)}
@@ -445,7 +445,7 @@ export const Header: React.FC = () => {
                 }}
               >
                 <Smartphone size={15} color="#0B63F6" />
-                <span>SHOP BY DEVICE</span>
+                <span>ACCESSORIES BY DEVICE</span>
                 <ChevronDown size={14} style={{ transform: isDeviceMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </button>
 
@@ -464,12 +464,35 @@ export const Header: React.FC = () => {
                     border: '1px solid var(--gray-200)',
                     padding: '20px',
                     zIndex: 100,
-                    marginTop: '4px',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '16px'
+                    marginTop: '4px'
                   }}
                 >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      background: 'var(--gray-50)',
+                      borderRadius: '8px',
+                      marginBottom: '16px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: 'var(--gray-700)',
+                      border: '1px solid var(--gray-200)'
+                    }}
+                  >
+                    <span>📱</span>
+                    <span>Select your smartphone model to view compatible cases, screen glass, and fast chargers:</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '16px'
+                    }}
+                  >
                   {DEVICE_FAMILIES.map((family) => (
                     <div key={family.id} style={{ background: 'var(--gray-50)', padding: '14px', borderRadius: '10px' }}>
                       <Link
@@ -521,11 +544,12 @@ export const Header: React.FC = () => {
                             textDecoration: 'none'
                           }}
                         >
-                          View all {family.shortName} &rarr;
+                          View all {family.shortName} accessories &rarr;
                         </Link>
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -749,7 +773,7 @@ export const Header: React.FC = () => {
                   marginBottom: '10px'
                 }}
               >
-                SHOP BY DEVICE
+                ACCESSORIES BY DEVICE
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '6px', marginBottom: '20px' }}>
@@ -773,7 +797,7 @@ export const Header: React.FC = () => {
                   >
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Smartphone size={16} color={family.color} />
-                      <span>{family.name} Accessories</span>
+                      <span>{family.name}</span>
                     </span>
                     <ChevronRight size={14} color="var(--gray-400)" />
                   </Link>

@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: DevicePageProps): Promise<Met
   const family = DEVICE_FAMILIES.find((f) => f.id === params.device);
   if (!family) {
     return {
-      title: 'Device Accessories — CellCentral Canada',
+      title: 'Mobile Accessories — CellCentral Canada',
     };
   }
   return {
-    title: `${family.name} Accessories & Protection — CellCentral Canada`,
+    title: `${family.name} & Protection — CellCentral Canada`,
     description: family.description,
   };
 }
@@ -39,13 +39,13 @@ export default function ShopDevicePage({ params }: DevicePageProps) {
     <Suspense
       fallback={
         <div className="wrap" style={{ padding: '64px 0', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#0B1E3D' }}>{family.name} Accessories</h1>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#0B1E3D' }}>{family.name}</h1>
           <p style={{ color: '#64748B' }}>{family.description}</p>
         </div>
       }
     >
       <ShopCatalog
-        categoryTitle={`${family.name} Accessories`}
+        categoryTitle={family.name}
         categoryDescription={family.description}
       />
     </Suspense>

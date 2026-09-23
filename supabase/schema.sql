@@ -147,3 +147,18 @@ CREATE POLICY "Public Read Newsletter" ON public.newsletter_subscribers FOR SELE
 
 CREATE POLICY "Public Insert Contact" ON public.contact_messages FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public Read Contact" ON public.contact_messages FOR SELECT USING (true);
+
+-- ==============================================================================
+-- 7. SUPABASE STORAGE BUCKET FOR PRODUCT & CATEGORY PHOTOS
+-- ==============================================================================
+
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage RLS policies for public uploads, updates, reads, and deletes
+CREATE POLICY "Public Storage Read" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');
+CREATE POLICY "Public Storage Insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'product-images');
+CREATE POLICY "Public Storage Update" ON storage.objects FOR UPDATE USING (bucket_id = 'product-images');
+CREATE POLICY "Public Storage Delete" ON storage.objects FOR DELETE USING (bucket_id = 'product-images');
+

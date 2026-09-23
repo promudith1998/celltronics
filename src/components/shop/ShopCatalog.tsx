@@ -679,7 +679,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 
           {/* Device Model Compatibility Filter */}
           <div className="filter-group">
-            <h5>Device Compatibility</h5>
+            <h5>Compatible Phone Model</h5>
             {DEVICE_MODELS.map((model) => (
               <label key={model} className="filter-row">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -804,7 +804,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
                   </div>
                   <div>
                     <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 2px' }}>1-Year Peace of Mind</h4>
-                    <p style={{ fontSize: '12.5px', color: 'var(--gray-700)', margin: 0 }}>Hassle-free Canadian warranty on every product.</p>
+                    <p style={{ fontSize: '12.5px', color: 'var(--gray-700)', margin: 0 }}>Hassle-free Canadian warranty on all accessories.</p>
                   </div>
                 </div>
 
@@ -813,8 +813,8 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
                     <Flame size={20} color="var(--orange)" />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 2px' }}>Authentic Brand Partner</h4>
-                    <p style={{ fontSize: '12.5px', color: 'var(--gray-700)', margin: 0 }}>100% genuine Anker, Spigen, TORRAS, ESR &amp; Belkin.</p>
+                    <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 2px' }}>100% Genuine Accessories</h4>
+                    <p style={{ fontSize: '12.5px', color: 'var(--gray-700)', margin: 0 }}>Official accessories from Anker, Spigen, TORRAS, ESR &amp; Belkin.</p>
                   </div>
                 </div>
               </div>

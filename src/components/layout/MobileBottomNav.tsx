@@ -107,7 +107,7 @@ export const MobileBottomNav: React.FC = () => {
                 Popular Searches
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {['iPhone 16 Pro', '65W GaN Charger', 'MagSafe Bank', 'Privacy Glass', 'S25 Ultra'].map((tag) => (
+                {['iPhone 16 Pro Case', '65W GaN Charger', 'MagSafe Bank', 'Privacy Glass', 'S25 Ultra Case'].map((tag) => (
                   <Link
                     key={tag}
                     href={`/shop?q=${encodeURIComponent(tag)}`}

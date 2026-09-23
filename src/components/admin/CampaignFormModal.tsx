@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Check, Flame, Calendar, Tag, Layers, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Sparkles, Check, Flame, Calendar, Tag, Layers, ArrowRight, Upload, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { PromotionCampaign, GradientTheme } from '@/types/admin';
 import { CATEGORIES } from '@/data/products';
+import { uploadProductImage } from '@/lib/imageUploadService';
 
 interface CampaignFormModalProps {
   isOpen: boolean;
@@ -40,6 +41,9 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
   const [isActive, setIsActive] = useState(true);
   const [targetCategory, setTargetCategory] = useState<string>('all');
   const [linkUrl, setLinkUrl] = useState('/shop');
+  const [bannerImageUrl, setBannerImageUrl] = useState('');
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (campaignToEdit) {
@@ -54,6 +58,7 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
       setIsActive(campaignToEdit.isActive ?? true);
       setTargetCategory(campaignToEdit.targetCategory || 'all');
       setLinkUrl(campaignToEdit.linkUrl || '/shop');
+      setBannerImageUrl(campaignToEdit.bannerImageUrl || '');
     } else {
       setName('Spring Fast Charging Promo');
       setTitle('SUPERCHARGE YOUR EVERYDAY TECH');
@@ -66,12 +71,31 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
       setIsActive(true);
       setTargetCategory('chargers');
       setLinkUrl('/shop/chargers');
+      setBannerImageUrl('');
     }
   }, [campaignToEdit, isOpen]);
 
   if (!isOpen) return null;
 
   const currentTheme = GRADIENT_PREVIEWS.find((g) => g.id === gradientTheme) || GRADIENT_PREVIEWS[0];
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingBanner(true);
+    try {
+      const res = await uploadProductImage(file, { category: targetCategory || 'campaigns', prefix: 'banner' });
+      setBannerImageUrl(res.url);
+    } catch (err) {
+      console.error('Failed to upload banner:', err);
+    } finally {
+      setIsUploadingBanner(false);
+      if (bannerFileInputRef.current) {
+        bannerFileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +112,8 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
       endDate,
       isActive,
       targetCategory: targetCategory === 'all' ? undefined : targetCategory,
-      linkUrl: linkUrl.trim() || '/shop'
+      linkUrl: linkUrl.trim() || '/shop',
+      bannerImageUrl: bannerImageUrl.trim() || undefined
     };
 
     onSave(data, campaignToEdit?.id);
@@ -175,7 +200,11 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
               </label>
               <div
                 style={{
-                  background: currentTheme.gradient,
+                  background: bannerImageUrl
+                    ? `linear-gradient(rgba(11,30,61,0.6), rgba(11,30,61,0.85)), url(${bannerImageUrl})`
+                    : currentTheme.gradient,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                   borderRadius: '18px',
                   padding: '28px 24px',
                   color: '#fff',
@@ -352,6 +381,78 @@ export const CampaignFormModal: React.FC<CampaignFormModalProps> = ({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Custom Banner Artwork / Photo Upload */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase' }}>
+                  Custom Campaign Photo / Banner Artwork (Optional)
+                </label>
+                {bannerImageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setBannerImageUrl('')}
+                    style={{ fontSize: '11px', fontWeight: 700, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                  >
+                    <Trash2 size={12} /> Remove Image
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px', alignItems: 'center' }}>
+                <div
+                  onClick={() => !isUploadingBanner && bannerFileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed var(--blue)',
+                    background: 'rgba(11,99,246,0.03)',
+                    borderRadius: '14px',
+                    padding: '18px',
+                    textAlign: 'center',
+                    cursor: isUploadingBanner ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px'
+                  }}
+                >
+                  <input
+                    type="file"
+                    ref={bannerFileInputRef}
+                    onChange={handleBannerUpload}
+                    accept="image/*"
+                    disabled={isUploadingBanner}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(11,99,246,0.1)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isUploadingBanner ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
+                      {isUploadingBanner ? 'Compressing & Uploading Banner...' : 'Upload Banner Photo from Device'}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--gray-500)' }}>
+                      WebP, JPG, PNG &bull; Auto-optimized to &lt;120KB
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <input
+                    type="url"
+                    value={bannerImageUrl}
+                    onChange={(e) => setBannerImageUrl(e.target.value)}
+                    placeholder="Or paste web image URL..."
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: '1.5px solid var(--gray-200)',
+                      fontSize: '13px'
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
