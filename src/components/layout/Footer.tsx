@@ -36,23 +36,15 @@ export const Footer: React.FC = () => {
         >
           {/* Brand Info */}
           <div>
-            <Link href="/" style={{ textDecoration: 'none', marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+            <Link href="/" style={{ textDecoration: 'none', marginBottom: '16px', display: 'inline-block' }}>
               <Image
                 src="/images/logo.png"
                 alt="CellCentral Logo"
-                width={190}
-                height={54}
-                style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
+                width={260}
+                height={88}
+                style={{ height: '76px', width: 'auto', objectFit: 'contain', marginLeft: '-24px' }}
+                priority
               />
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                  <span style={{ color: '#0B63F6' }}>CELL</span>
-                  <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
-                </div>
-                <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.15em', color: '#0B1E3D', marginTop: '3px' }}>
-                  MOBILE ACCESSORIES &amp; DISTRIBUTION
-                </div>
-              </div>
             </Link>
             <p style={{ fontSize: '13.5px', color: '#47506B', lineHeight: 1.5, marginTop: '12px', maxWidth: '280px' }}>
               Canada’s premier destination for high-durability mobile accessories, wholesale dealer supply, and retail partner merchandising.
