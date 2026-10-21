@@ -45,6 +45,7 @@ export default function ShopDevicePage({ params }: DevicePageProps) {
       }
     >
       <ShopCatalog
+        initialDeviceFamily={params.device}
         categoryTitle={family.name}
         categoryDescription={family.description}
       />

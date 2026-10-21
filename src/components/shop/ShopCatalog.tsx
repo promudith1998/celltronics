@@ -18,7 +18,7 @@ import {
   LayoutGrid,
   Filter
 } from 'lucide-react';
-import { PRODUCTS, CATEGORIES, BRANDS, DEVICE_MODELS } from '@/data/products';
+import { PRODUCTS, CATEGORIES, BRANDS, DEVICE_MODELS, DEVICE_FAMILIES } from '@/data/products';
 import { useAdminProducts } from '@/context/AdminProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -26,12 +26,14 @@ import { ProductCategory, Product } from '@/types/product';
 
 interface ShopCatalogProps {
   initialCategory?: ProductCategory;
+  initialDeviceFamily?: string;
   categoryTitle?: string;
   categoryDescription?: string;
 }
 
 export const ShopCatalog: React.FC<ShopCatalogProps> = ({
   initialCategory,
+  initialDeviceFamily,
   categoryTitle = 'All Mobile Accessories',
   categoryDescription = 'Discover our full range of premium phone cases, GaN fast chargers, ultra-durable cables, and MagSafe accessories designed for Canadian daily life.'
 }) => {
@@ -43,13 +45,18 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
   // Search Param Initializers
   const queryParam = searchParams.get('q') || '';
   const brandParam = searchParams.get('brand') || '';
+  const modelParam = searchParams.get('model') || '';
+  const deviceParam = searchParams.get('device') || '';
 
   // Filter States
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [selectedBrands, setSelectedBrands] = useState<string[]>(brandParam ? [brandParam] : []);
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(200);
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<string[]>(modelParam ? [modelParam] : []);
+  const [selectedDeviceFamily, setSelectedDeviceFamily] = useState<string>(
+    initialDeviceFamily || deviceParam || ''
+  );
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>('featured');
@@ -65,6 +72,14 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
   }, [initialCategory]);
 
   useEffect(() => {
+    if (initialDeviceFamily) {
+      setSelectedDeviceFamily(initialDeviceFamily);
+    } else if (deviceParam) {
+      setSelectedDeviceFamily(deviceParam);
+    }
+  }, [initialDeviceFamily, deviceParam]);
+
+  useEffect(() => {
     if (queryParam) {
       setSearchQuery(queryParam);
     }
@@ -75,6 +90,12 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       setSelectedBrands([brandParam]);
     }
   }, [brandParam]);
+
+  useEffect(() => {
+    if (modelParam && !selectedModels.includes(modelParam)) {
+      setSelectedModels([modelParam]);
+    }
+  }, [modelParam]);
 
   // Handle Brand Toggle
   const toggleBrand = (brand: string) => {
@@ -100,6 +121,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
     setSelectedColor('');
     setInStockOnly(false);
     setSearchQuery('');
+    setSelectedDeviceFamily(initialDeviceFamily || '');
   };
 
   // Set Price preset
@@ -116,7 +138,8 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
     (selectedColor ? 1 : 0) +
     (inStockOnly ? 1 : 0) +
     (minPrice > 0 || maxPrice < 200 ? 1 : 0) +
-    (searchQuery ? 1 : 0);
+    (searchQuery ? 1 : 0) +
+    (selectedDeviceFamily && !initialDeviceFamily ? 1 : 0);
 
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
@@ -133,25 +156,86 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       if (product.price < minPrice || product.price > maxPrice) {
         return false;
       }
+      // Device Family Filter
+      if (selectedDeviceFamily) {
+        const fam = DEVICE_FAMILIES.find((f) => f.id === selectedDeviceFamily);
+        if (fam) {
+          const famNameLower = fam.shortName.toLowerCase();
+          const famBrandLower = fam.brand.toLowerCase();
+          const isFamMatch =
+            product.compatibleDevices?.some((d) => {
+              const dl = d.toLowerCase();
+              return (
+                dl.includes(famNameLower) ||
+                dl.includes(famBrandLower) ||
+                fam.models.some((m) => dl.includes(m.toLowerCase()) || m.toLowerCase().includes(dl))
+              );
+            }) ||
+            product.models?.some((m) => {
+              const ml = m.toLowerCase();
+              return (
+                ml.includes(famNameLower) ||
+                fam.models.some((fm) => ml.includes(fm.toLowerCase()) || fm.toLowerCase().includes(ml))
+              );
+            }) ||
+            (fam.id === 'iphone' && (product.tags.includes('magsafe') || product.tags.includes('apple-watch')));
+          if (!isFamMatch) return false;
+        }
+      }
       // Model compatibility filter
-      if (
-        selectedModels.length > 0 &&
-        !selectedModels.some((m) => product.compatibleDevices.includes(m) || product.models.includes(m))
-      ) {
-        return false;
+      if (selectedModels.length > 0) {
+        const matchesAnyModel = selectedModels.some((selModel) => {
+          const selLower = selModel.toLowerCase();
+          return (
+            product.compatibleDevices?.some(
+              (d) => d.toLowerCase().includes(selLower) || selLower.includes(d.toLowerCase())
+            ) ||
+            product.models?.some(
+              (m) => m.toLowerCase().includes(selLower) || selLower.includes(m.toLowerCase())
+            )
+          );
+        });
+        if (!matchesAnyModel) {
+          return false;
+        }
       }
       // In-stock filter
       if (inStockOnly && (!product.inStock || product.badge === 'out')) {
         return false;
       }
-      // Search query filter
+      // Search query filter (matches name, brand, category, tags, compatible devices, and models)
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase().trim();
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesBrand = product.brand.toLowerCase().includes(q);
         const matchesCategory = product.categoryName.toLowerCase().includes(q);
         const matchesTag = product.tags.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesBrand && !matchesCategory && !matchesTag) {
+        const matchesCompatible = product.compatibleDevices?.some((d) => d.toLowerCase().includes(q));
+        const matchesModel = product.models?.some((m) => m.toLowerCase().includes(q));
+
+        // Multi-token match e.g. "iPhone 16 Pro"
+        const tokens = q.split(/\s+/).filter(Boolean);
+        const matchesAllTokens =
+          tokens.length > 1 &&
+          tokens.every(
+            (token) =>
+              product.name.toLowerCase().includes(token) ||
+              product.brand.toLowerCase().includes(token) ||
+              product.categoryName.toLowerCase().includes(token) ||
+              product.tags.some((t) => t.toLowerCase().includes(token)) ||
+              product.compatibleDevices?.some((d) => d.toLowerCase().includes(token)) ||
+              product.models?.some((m) => m.toLowerCase().includes(token))
+          );
+
+        if (
+          !matchesName &&
+          !matchesBrand &&
+          !matchesCategory &&
+          !matchesTag &&
+          !matchesCompatible &&
+          !matchesModel &&
+          !matchesAllTokens
+        ) {
           return false;
         }
       }
@@ -163,7 +247,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       if (sortBy === 'newest') return (b.badge === 'new' ? 1 : 0) - (a.badge === 'new' ? 1 : 0);
       return 0; // Default: featured
     });
-  }, [PRODUCTS_DATA, selectedCategory, selectedBrands, minPrice, maxPrice, selectedModels, inStockOnly, searchQuery, sortBy]);
+  }, [PRODUCTS_DATA, selectedCategory, selectedBrands, minPrice, maxPrice, selectedDeviceFamily, selectedModels, inStockOnly, searchQuery, sortBy]);
 
   // Brand product counts
   const getBrandCount = (brand: string) => {
@@ -396,6 +480,25 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           </span>
 
           {/* Active Filter Chips */}
+          {selectedDeviceFamily && (
+            <span
+              onClick={() => setSelectedDeviceFamily('')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: 'rgba(11,99,246,0.12)',
+                color: 'var(--blue)',
+                fontSize: '12px',
+                fontWeight: 700,
+                padding: '4px 10px',
+                borderRadius: '100px',
+                cursor: 'pointer'
+              }}
+            >
+              Device: {DEVICE_FAMILIES.find((f) => f.id === selectedDeviceFamily)?.name || selectedDeviceFamily} <X size={12} />
+            </span>
+          )}
           {selectedBrands.map((brand) => (
             <span
               key={brand}

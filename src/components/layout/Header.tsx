@@ -29,12 +29,13 @@ import {
   Briefcase,
   Store,
   FileCheck2,
-  Check
+  Check,
+  Tag
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAdminProducts } from '@/context/AdminProductContext';
-import { PRODUCTS, DEVICE_FAMILIES } from '@/data/products';
+import { PRODUCTS, DEVICE_FAMILIES, CATEGORIES, BRANDS, PROMO_CODES } from '@/data/products';
 import { Product } from '@/types/product';
 
 export const Header: React.FC = () => {
@@ -50,18 +51,50 @@ export const Header: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDeviceMenuOpen, setIsDeviceMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
-  const deviceMenuRef = useRef<HTMLDivElement>(null);
+  const navContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Close mobile drawer on route change
+  const handleMenuEnter = (menuKey: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    setActiveDropdown(menuKey);
+  };
+
+  const handleMenuLeave = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 180);
+  };
+
+  const handleMenuToggle = (menuKey: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setActiveDropdown((prev) => (prev === menuKey ? null : menuKey));
+  };
+
+  const closeAllMenus = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setActiveDropdown(null);
+  };
+
+  // Close menus and drawer on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsMobileSearchOpen(false);
     setIsSearchOpen(false);
-    setIsDeviceMenuOpen(false);
+    closeAllMenus();
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open
@@ -85,7 +118,9 @@ export const Header: React.FC = () => {
           p.name.toLowerCase().includes(q) ||
           p.brand.toLowerCase().includes(q) ||
           p.categoryName.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q))
+          p.tags.some((t) => t.toLowerCase().includes(q)) ||
+          p.compatibleDevices?.some((d) => d.toLowerCase().includes(q)) ||
+          p.models?.some((m) => m.toLowerCase().includes(q))
       ).slice(0, 5);
       setSearchResults(matched);
       setIsSearchOpen(true);
@@ -95,7 +130,7 @@ export const Header: React.FC = () => {
     }
   }, [searchQuery]);
 
-  // Close search dropdown on click outside
+  // Close search and menus on click outside or Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -106,12 +141,25 @@ export const Header: React.FC = () => {
       ) {
         setIsSearchOpen(false);
       }
-      if (deviceMenuRef.current && !deviceMenuRef.current.contains(event.target as Node)) {
-        setIsDeviceMenuOpen(false);
+      if (
+        navContainerRef.current &&
+        !navContainerRef.current.contains(event.target as Node)
+      ) {
+        closeAllMenus();
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeAllMenus();
+        setIsSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -121,6 +169,7 @@ export const Header: React.FC = () => {
       setIsSearchOpen(false);
       setIsMobileSearchOpen(false);
       setIsMobileMenuOpen(false);
+      closeAllMenus();
     }
   };
 
@@ -133,6 +182,142 @@ export const Header: React.FC = () => {
     { name: 'Audio', href: '/shop/audio', icon: Headphones },
     { name: 'Deals', href: '/deals', isDeals: true, icon: Flame }
   ];
+
+  const categorySubmenus: Record<string, {
+    title: string;
+    description: string;
+    allHref: string;
+    allLabel: string;
+    subItems: { label: string; href: string; badge?: string }[];
+    popularBrands: string[];
+    featuredCallout: { title: string; desc: string; icon: any };
+  }> = {
+    'Phone Cases': {
+      title: 'Phone Cases & Covers',
+      description: 'Military drop-tested cases with ultra-strong MagSafe magnets.',
+      allHref: '/shop/phone-cases',
+      allLabel: 'View All Phone Cases',
+      subItems: [
+        { label: 'MagGo Clear MagSafe Cases', href: '/shop?q=magsafe%20clear', badge: 'POPULAR' },
+        { label: 'Camera Guard Kickstand Cases', href: '/shop?q=kickstand', badge: 'TOP RATED' },
+        { label: 'Ultra Hybrid Frosted Matte Armor', href: '/shop?q=matte' },
+        { label: 'Guardian Slim Drop-Proof Cases', href: '/shop?q=slim', badge: 'SALE' }
+      ],
+      popularBrands: ['Anker', 'ESR', 'Spigen', 'TORRAS'],
+      featuredCallout: {
+        title: 'MagSafe Compatible',
+        desc: 'Up to 15N magnetic hold calibrated for Apple & Qi2 wireless chargers.',
+        icon: Smartphone
+      }
+    },
+    'Screen Protectors': {
+      title: 'Screen & Lens Protection',
+      description: 'Aerospace 9H+ tempered glass and 28° micro-louver privacy shields.',
+      allHref: '/shop/screen-protectors',
+      allLabel: 'View All Screen Protectors',
+      subItems: [
+        { label: 'UltraGlass 9H+ Dual-Ion Glass (2-Pk)', href: '/shop?q=ultraglass', badge: 'BEST SELLER' },
+        { label: 'GlasTR EZ FIT 28° Privacy Glass', href: '/shop?q=privacy', badge: '-17%' },
+        { label: 'Armorite Shatterproof Glass', href: '/shop?q=armorite', badge: 'NEW' },
+        { label: 'UltraGlass 2 Anti-Microbial Shield', href: '/shop?q=antimicrobial' }
+      ],
+      popularBrands: ['TORRAS', 'Spigen', 'ESR', 'Belkin'],
+      featuredCallout: {
+        title: 'Zero-Bubble Alignment Tray',
+        desc: 'Every protector includes a precision auto-alignment frame for foolproof installation.',
+        icon: Layers
+      }
+    },
+    'Chargers': {
+      title: 'Fast Chargers & Power Docks',
+      description: 'Next-gen GaN III wall chargers, multi-port blocks & 3-in-1 stands.',
+      allHref: '/shop/chargers',
+      allLabel: 'View All Chargers',
+      subItems: [
+        { label: 'Nexode 65W GaN III Fast Charger (3-Port)', href: '/shop?q=65w', badge: 'BEST SELLER' },
+        { label: 'Prime 100W GaN Wall Charger', href: '/shop?q=100w', badge: '-18%' },
+        { label: '140W PD 3.1 Multi-Port Station', href: '/shop?q=140w', badge: 'NEW PD 3.1' },
+        { label: 'BoostCharge Pro 3-in-1 MagSafe Dock', href: '/shop?q=3-in-1', badge: 'PREMIUM' }
+      ],
+      popularBrands: ['UGREEN', 'Anker', 'Baseus', 'Belkin'],
+      featuredCallout: {
+        title: 'GaNFast III Cool Tech',
+        desc: 'Delivers maximum power in a 50% smaller block running 30% cooler.',
+        icon: Zap
+      }
+    },
+    'Cables': {
+      title: 'Ultra-Durable Charging Cables',
+      description: '100W & 240W braided cables engineered to withstand 30,000+ bends.',
+      allHref: '/shop/cables',
+      allLabel: 'View All Cables',
+      subItems: [
+        { label: '100W PD Braided USB-C Cable (2m)', href: '/shop?q=100w%20cable', badge: 'BEST SELLER' },
+        { label: 'Bio-Braided 240W Silicone USB-C (1.8m)', href: '/shop?q=240w', badge: 'NEW' },
+        { label: '90° Right Angle Fast Charge Gaming Cable', href: '/shop?q=90-degree' },
+        { label: 'MagSafe 2-in-1 Foldable Travel Cord', href: '/shop?q=2-in-1', badge: '-18%' }
+      ],
+      popularBrands: ['Baseus', 'Anker', 'UGREEN', 'ESR'],
+      featuredCallout: {
+        title: 'Reinforced E-Marker Chips',
+        desc: 'Dynamic power handshake safeguards your phone and laptop batteries against voltage spikes.',
+        icon: Cable
+      }
+    },
+    'Power Banks': {
+      title: 'Portable Batteries & MagSafe Packs',
+      description: 'High-density lithium battery packs for mobile travel & daily backups.',
+      allHref: '/shop/power-banks',
+      allLabel: 'View All Power Banks',
+      subItems: [
+        { label: '10,000mAh MagSafe Bank with Stand', href: '/shop?q=10000mah', badge: 'LIMITED' },
+        { label: 'Prime 20,000mAh 200W Smart Display Bank', href: '/shop?q=200w', badge: 'FLAGSHIP' },
+        { label: 'Blade 100W Ultra-Thin Laptop Power Bank', href: '/shop?q=blade', badge: '-18%' },
+        { label: 'MiniMag 5,000mAh Snap-On Battery', href: '/shop?q=minimag', badge: 'NEW SLIM' }
+      ],
+      popularBrands: ['ESR', 'Anker', 'Baseus', 'TORRAS'],
+      featuredCallout: {
+        title: 'Flight Approved Power',
+        desc: 'All models strictly adhere to Transport Canada and TSA carry-on airline safety regulations.',
+        icon: BatteryCharging
+      }
+    },
+    'Audio': {
+      title: 'Headphones & ANC Earbuds',
+      description: 'Active Noise Cancelling audio with deep bass and crystal-clear calls.',
+      allHref: '/shop/audio',
+      allLabel: 'View All Audio',
+      subItems: [
+        { label: 'ArcField Wireless ANC Earbuds Pro', href: '/shop?q=arcfield', badge: '-25%' },
+        { label: 'Soundcore Space Q45 Wireless ANC Headphones', href: '/shop?q=space%20q45', badge: 'BEST SELLER' },
+        { label: 'SoundForm Flow True Wireless ANC Earbuds', href: '/shop?q=soundform', badge: '-28%' }
+      ],
+      popularBrands: ['Spigen', 'Anker Soundcore', 'Belkin'],
+      featuredCallout: {
+        title: 'Hybrid -38dB Noise Cancellation',
+        desc: 'Block city transit rumble or switch seamlessly to ambient awareness mode with a tap.',
+        icon: Headphones
+      }
+    },
+    'Deals': {
+      title: 'Clearance & Promotional Deals',
+      description: 'Exclusive Canadian savings on premium phone accessories.',
+      allHref: '/deals',
+      allLabel: 'Browse All Deal Products',
+      subItems: [
+        { label: 'Promo Code: SAVE10 — $10 OFF over $40', href: '/deals', badge: 'CODE' },
+        { label: 'Promo Code: WELCOME15 — 15% OFF VIP', href: '/deals', badge: 'CODE' },
+        { label: 'Promo Code: FREESHIP — Free Express Shipping', href: '/deals', badge: 'CODE' },
+        { label: 'Up to 28% OFF MagSafe Power Banks & Docks', href: '/deals', badge: 'SALE' }
+      ],
+      popularBrands: ['Anker', 'ESR', 'Belkin', 'Spigen'],
+      featuredCallout: {
+        title: 'Limited-Time Discounts',
+        desc: 'Stack promo codes with automated checkout discounts for maximum savings.',
+        icon: Flame
+      }
+    }
+  };
 
   return (
     <header className="site">
@@ -393,48 +578,523 @@ export const Header: React.FC = () => {
       )}
 
       {/* Main Desktop Navigation Bar */}
-      <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff' }}>
+      <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff', position: 'relative' }}>
         <div className="navrow wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* SHOP BY CATEGORY BUTTON */}
-            <Link
-              href="/shop"
-              className="navcat"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                background: '#0B1E3D',
-                color: '#fff',
-                padding: '10px 16px',
-                borderRadius: '6px',
-                fontWeight: 700,
-                fontSize: '12.5px',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                textDecoration: 'none'
-              }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} ref={navContainerRef}>
+            {/* SHOP BY CATEGORY BUTTON & MEGA DROPDOWN */}
+            <div
+              className="nav-item-wrapper"
+              onMouseEnter={() => handleMenuEnter('categories')}
+              onMouseLeave={handleMenuLeave}
+              style={{ position: 'relative' }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <Menu size={14} />
-                <span>CATEGORIES</span>
-              </span>
-              <ChevronRight size={13} />
-            </Link>
-
-            {/* SHOP BY DEVICE DROPDOWN */}
-            <div style={{ position: 'relative' }} ref={deviceMenuRef}>
               <button
                 type="button"
-                onClick={() => setIsDeviceMenuOpen(!isDeviceMenuOpen)}
-                onMouseEnter={() => setIsDeviceMenuOpen(true)}
+                onClick={() => handleMenuToggle('categories')}
+                className="navcat"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  background: activeDropdown === 'categories' ? '#0B63F6' : '#0B1E3D',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '12.5px',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Menu size={14} />
+                  <span>CATEGORIES</span>
+                </span>
+                <ChevronDown
+                  size={13}
+                  style={{
+                    transform: activeDropdown === 'categories' ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.2s ease'
+                  }}
+                />
+              </button>
+
+              {/* Mega Dropdown for All Categories */}
+              {activeDropdown === 'categories' && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    paddingTop: '6px',
+                    zIndex: 100,
+                    width: '920px'
+                  }}
+                >
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 50px rgba(11,30,61,0.22)',
+                      border: '1px solid var(--gray-200)',
+                      padding: '24px'
+                    }}
+                  >
+                    {/* Header bar */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingBottom: '14px',
+                        marginBottom: '18px',
+                        borderBottom: '1px solid var(--gray-100)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '6px',
+                            background: '#EFF6FF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#0B63F6'
+                          }}
+                        >
+                          <Layers size={15} />
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)', letterSpacing: '0.02em' }}>
+                            ALL PRODUCT CATEGORIES
+                          </span>
+                          <span style={{ fontSize: '11.5px', color: 'var(--gray-400)', marginLeft: '8px' }}>
+                            Canadian certified phone protection, GaN charging &amp; audio
+                          </span>
+                        </div>
+                      </div>
+                      <Link
+                        href="/shop"
+                        onClick={closeAllMenus}
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          color: 'var(--blue)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        Browse Full Catalog (26+) <ArrowRight size={13} />
+                      </Link>
+                    </div>
+
+                    {/* Category Columns */}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gap: '20px'
+                      }}
+                    >
+                      {/* Column 1: Protection */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div>
+                          <Link
+                            href="/shop/phone-cases"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Smartphone size={15} color="#8B3FE0" />
+                            <span>Phone Cases</span>
+                            <span style={{ fontSize: '10px', background: '#F3E8FF', color: '#8B3FE0', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              4+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=magsafe%20clear" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Clear MagSafe Cases
+                            </Link>
+                            <Link href="/shop?q=kickstand" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Camera Guard Kickstand
+                            </Link>
+                            <Link href="/shop?q=matte" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Ultra Hybrid Matte Armor
+                            </Link>
+                            <Link href="/shop?q=slim" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Military Slim Drop-Tested
+                            </Link>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Link
+                            href="/shop/screen-protectors"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Layers size={15} color="#FF3D9A" />
+                            <span>Screen Protectors</span>
+                            <span style={{ fontSize: '10px', background: '#FCE7F3', color: '#DB2777', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              4+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=ultraglass" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              9H+ UltraGlass (2-Pack)
+                            </Link>
+                            <Link href="/shop?q=privacy" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              28° Anti-Spy Privacy Glass
+                            </Link>
+                            <Link href="/shop?q=armorite" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Armorite Shatterproof
+                            </Link>
+                            <Link href="/shop?q=antimicrobial" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              UltraGlass 2 Anti-Microbial
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 2: Power & Cables */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div>
+                          <Link
+                            href="/shop/chargers"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Zap size={15} color="#16A34A" />
+                            <span>Fast Chargers</span>
+                            <span style={{ fontSize: '10px', background: '#DCFCE7', color: '#16A34A', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              4+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=65w" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Nexode 65W GaN III (3-Port)
+                            </Link>
+                            <Link href="/shop?q=100w" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Prime 100W GaN Wall Block
+                            </Link>
+                            <Link href="/shop?q=140w" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              140W PD 3.1 Workstation
+                            </Link>
+                            <Link href="/shop?q=3-in-1" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              BoostCharge Pro 3-in-1 Dock
+                            </Link>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Link
+                            href="/shop/cables"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Cable size={15} color="#0B63F6" />
+                            <span>Durable Cables</span>
+                            <span style={{ fontSize: '10px', background: '#DBEAFE', color: '#1E40AF', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              4+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=100w%20cable" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              100W PD Braided (2m)
+                            </Link>
+                            <Link href="/shop?q=240w" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Bio-Braided 240W Silicone
+                            </Link>
+                            <Link href="/shop?q=90-degree" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              90° Right Angle Gaming
+                            </Link>
+                            <Link href="/shop?q=2-in-1" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              MagSafe 2-in-1 Travel Cord
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 3: Batteries, Audio & Car */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div>
+                          <Link
+                            href="/shop/power-banks"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <BatteryCharging size={15} color="#0B1E3D" />
+                            <span>Power Banks</span>
+                            <span style={{ fontSize: '10px', background: '#E2E8F0', color: '#0B1E3D', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              4+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=10000mah" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              10,000mAh MagSafe Kickstand
+                            </Link>
+                            <Link href="/shop?q=200w" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Prime 200W Smart Display
+                            </Link>
+                            <Link href="/shop?q=blade" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Blade 100W Ultra-Thin Bank
+                            </Link>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Link
+                            href="/shop/audio"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Headphones size={15} color="#FF7A1A" />
+                            <span>Audio &amp; ANC</span>
+                            <span style={{ fontSize: '10px', background: '#FFEDD5', color: '#C2410C', padding: '1px 6px', borderRadius: '100px', fontWeight: 800 }}>
+                              3+
+                            </span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=arcfield" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              ArcField ANC Earbuds Pro
+                            </Link>
+                            <Link href="/shop?q=space%20q45" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              Soundcore Space Q45 ANC
+                            </Link>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Link
+                            href="/shop/car-accessories"
+                            onClick={closeAllMenus}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              color: 'var(--navy)',
+                              marginBottom: '8px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <Car size={15} color="#0D9488" />
+                            <span>Car Mounts &amp; Power</span>
+                          </Link>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Link href="/shop?q=mount" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              15W Auto-Clamp Mount
+                            </Link>
+                            <Link href="/shop?q=cryoboost" onClick={closeAllMenus} style={{ fontSize: '12px', color: 'var(--gray-700)', padding: '2px 0' }}>
+                              CryoBoost MagSafe Mount
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 4: Value Callout Card */}
+                      <div
+                        style={{
+                          background: 'linear-gradient(145deg, #0B1E3D 0%, #132A52 65%, #1A3660 100%)',
+                          borderRadius: '12px',
+                          padding: '18px',
+                          color: '#fff',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <div>
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: 'rgba(255,255,255,0.12)',
+                              padding: '3px 8px',
+                              borderRadius: '100px',
+                              fontSize: '10.5px',
+                              fontWeight: 700,
+                              marginBottom: '10px'
+                            }}
+                          >
+                            <span>🍁 CANADIAN STANDARD</span>
+                          </div>
+                          <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginBottom: '8px', lineHeight: 1.3 }}>
+                            Premium Mobile Accessories
+                          </h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11.5px', color: '#CBD5E1' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Truck size={13} color="#3FA9FF" /> Free Express Shipping over $49
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Shield size={13} color="#FF7A1A" /> 1-Year Comprehensive Warranty
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Check size={13} color="#10B981" /> 100% Genuine Certified Brands
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px' }}>
+                          <Link
+                            href="/shop"
+                            onClick={closeAllMenus}
+                            style={{
+                              background: '#0B63F6',
+                              color: '#fff',
+                              textAlign: 'center',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            View All Products (26+)
+                          </Link>
+                          <Link
+                            href="/deals"
+                            onClick={closeAllMenus}
+                            style={{
+                              background: 'rgba(255,61,90,0.2)',
+                              border: '1px solid rgba(255,61,90,0.4)',
+                              color: '#FFA1AD',
+                              textAlign: 'center',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            Hot Clearance Deals 🔥
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Strip: Popular Brands */}
+                    <div
+                      style={{
+                        marginTop: '20px',
+                        paddingTop: '14px',
+                        borderTop: '1px solid var(--gray-100)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '8px'
+                      }}
+                    >
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--gray-400)', textTransform: 'uppercase' }}>
+                        Shop by Brand:
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        {BRANDS.map((brand) => (
+                          <Link
+                            key={brand}
+                            href={`/shop?brand=${encodeURIComponent(brand)}`}
+                            onClick={closeAllMenus}
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: 'var(--navy)',
+                              background: 'var(--gray-100)',
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            {brand}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SHOP BY DEVICE DROPDOWN */}
+            <div
+              className="nav-item-wrapper"
+              onMouseEnter={() => handleMenuEnter('devices')}
+              onMouseLeave={handleMenuLeave}
+              style={{ position: 'relative' }}
+            >
+              <button
+                type="button"
+                onClick={() => handleMenuToggle('devices')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: isDeviceMenuOpen ? 'var(--blue-light)' : 'transparent',
-                  color: isDeviceMenuOpen ? 'var(--blue)' : '#0B1E3D',
+                  background: activeDropdown === 'devices' ? 'var(--blue-light)' : 'transparent',
+                  color: activeDropdown === 'devices' ? 'var(--blue)' : '#0B1E3D',
                   padding: '10px 14px',
                   borderRadius: '6px',
                   fontWeight: 700,
@@ -446,133 +1106,345 @@ export const Header: React.FC = () => {
               >
                 <Smartphone size={15} color="#0B63F6" />
                 <span>ACCESSORIES BY DEVICE</span>
-                <ChevronDown size={14} style={{ transform: isDeviceMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                <ChevronDown
+                  size={14}
+                  style={{
+                    transform: activeDropdown === 'devices' ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.2s ease'
+                  }}
+                />
               </button>
 
               {/* Mega Dropdown for Device Families */}
-              {isDeviceMenuOpen && (
+              {activeDropdown === 'devices' && (
                 <div
-                  onMouseLeave={() => setIsDeviceMenuOpen(false)}
                   style={{
                     position: 'absolute',
                     top: '100%',
                     left: 0,
-                    width: '680px',
-                    background: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 16px 40px rgba(11,30,61,0.18)',
-                    border: '1px solid var(--gray-200)',
-                    padding: '20px',
+                    paddingTop: '6px',
                     zIndex: 100,
-                    marginTop: '4px'
+                    width: '740px'
                   }}
                 >
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 12px',
-                      background: 'var(--gray-50)',
-                      borderRadius: '8px',
-                      marginBottom: '16px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: 'var(--gray-700)',
-                      border: '1px solid var(--gray-200)'
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 50px rgba(11,30,61,0.22)',
+                      border: '1px solid var(--gray-200)',
+                      padding: '22px 24px'
                     }}
                   >
-                    <span>📱</span>
-                    <span>Select your smartphone model to view compatible cases, screen glass, and fast chargers:</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '16px'
-                    }}
-                  >
-                  {DEVICE_FAMILIES.map((family) => (
-                    <div key={family.id} style={{ background: 'var(--gray-50)', padding: '14px', borderRadius: '10px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        background: 'var(--gray-50)',
+                        borderRadius: '8px',
+                        marginBottom: '16px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: 'var(--gray-700)',
+                        border: '1px solid var(--gray-200)'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>📱</span>
+                        <span>Select your phone model to instantly view compatible cases, screen protectors &amp; fast chargers:</span>
+                      </span>
                       <Link
-                        href={`/shop/device/${family.id}`}
-                        onClick={() => setIsDeviceMenuOpen(false)}
-                        style={{
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '10px',
-                          borderBottom: '1px solid var(--gray-200)',
-                          paddingBottom: '8px'
-                        }}
+                        href="/shop"
+                        onClick={closeAllMenus}
+                        style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--blue)', whiteSpace: 'nowrap' }}
                       >
-                        <span style={{ fontWeight: 800, fontSize: '13.5px', color: family.color }}>
-                          {family.name}
-                        </span>
-                        <ArrowRight size={14} color={family.color} />
+                        All Universal &rarr;
                       </Link>
+                    </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        {family.models.slice(0, 5).map((model) => (
-                          <Link
-                            key={model}
-                            href={`/shop?q=${encodeURIComponent(model)}`}
-                            onClick={() => setIsDeviceMenuOpen(false)}
-                            style={{
-                              fontSize: '12px',
-                              color: 'var(--navy)',
-                              textDecoration: 'none',
-                              padding: '3px 0',
-                              fontWeight: 500
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = family.color)}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--navy)')}
-                          >
-                            {model}
-                          </Link>
-                        ))}
-                        <Link
-                          href={`/shop/device/${family.id}`}
-                          onClick={() => setIsDeviceMenuOpen(false)}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '16px'
+                      }}
+                    >
+                      {DEVICE_FAMILIES.map((family) => (
+                        <div
+                          key={family.id}
                           style={{
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            color: 'var(--blue)',
-                            marginTop: '6px',
-                            textDecoration: 'none'
+                            background: 'var(--gray-50)',
+                            padding: '14px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--gray-200)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between'
                           }}
                         >
-                          View all {family.shortName} accessories &rarr;
-                        </Link>
-                      </div>
+                          <div>
+                            <Link
+                              href={`/shop/device/${family.id}`}
+                              onClick={closeAllMenus}
+                              style={{
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: '10px',
+                                borderBottom: '1.5px solid var(--gray-200)',
+                                paddingBottom: '8px'
+                              }}
+                            >
+                              <span style={{ fontWeight: 800, fontSize: '13px', color: family.color }}>
+                                {family.name}
+                              </span>
+                              <ArrowRight size={13} color={family.color} />
+                            </Link>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              {family.models.slice(0, 5).map((model) => (
+                                <Link
+                                  key={model}
+                                  href={`/shop?model=${encodeURIComponent(model)}&q=${encodeURIComponent(model)}`}
+                                  onClick={closeAllMenus}
+                                  style={{
+                                    fontSize: '12px',
+                                    color: 'var(--navy)',
+                                    textDecoration: 'none',
+                                    padding: '4px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 500,
+                                    transition: 'all 0.1s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = '#fff';
+                                    e.currentTarget.style.color = family.color;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--navy)';
+                                  }}
+                                >
+                                  <span>{model}</span>
+                                  <ChevronRight size={11} style={{ opacity: 0.3 }} />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          <Link
+                            href={`/shop/device/${family.id}`}
+                            onClick={closeAllMenus}
+                            style={{
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              color: 'var(--blue)',
+                              marginTop: '10px',
+                              paddingTop: '8px',
+                              borderTop: '1px solid var(--gray-200)',
+                              textDecoration: 'none',
+                              display: 'block'
+                            }}
+                          >
+                            View all {family.shortName} accessories &rarr;
+                          </Link>
+                        </div>
+                      ))}
                     </div>
-                  ))}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Standard Category Navigation Links */}
+            {/* Standard Category Navigation Links with Interactive Hover Submenus */}
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
+              const isMenuOpen = activeDropdown === link.name;
+              const submenu = categorySubmenus[link.name];
+
               return (
-                <Link
+                <div
                   key={link.name}
-                  href={link.href}
-                  className={`navlink ${link.isDeals ? 'deals' : ''} ${isActive ? 'active' : ''}`}
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: link.isDeals ? '#FF3D5A' : '#0B1E3D',
-                    padding: '10px 10px',
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap'
-                  }}
+                  className="nav-item-wrapper"
+                  onMouseEnter={() => handleMenuEnter(link.name)}
+                  onMouseLeave={handleMenuLeave}
+                  style={{ position: 'relative' }}
                 >
-                  {link.name}
-                </Link>
+                  <Link
+                    href={link.href}
+                    onClick={closeAllMenus}
+                    className={`navlink ${link.isDeals ? 'deals' : ''} ${isActive ? 'active' : ''}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      color: link.isDeals ? '#FF3D5A' : isMenuOpen ? 'var(--blue)' : '#0B1E3D',
+                      padding: '10px 10px',
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap',
+                      borderBottom: isMenuOpen ? '2.5px solid var(--blue)' : undefined
+                    }}
+                  >
+                    <span>{link.name}</span>
+                    {link.isDeals ? (
+                      <span
+                        style={{
+                          background: '#FF3D5A',
+                          color: '#fff',
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          padding: '1px 5px',
+                          borderRadius: '100px',
+                          marginLeft: '2px'
+                        }}
+                      >
+                        HOT
+                      </span>
+                    ) : (
+                      <span
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleMenuToggle(link.name);
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '2px',
+                          cursor: 'pointer'
+                        }}
+                        title={`Browse ${link.name} subcategories`}
+                      >
+                        <ChevronDown
+                          size={12}
+                          style={{
+                            opacity: 0.55,
+                            transform: isMenuOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.18s ease'
+                          }}
+                        />
+                      </span>
+                    )}
+                  </Link>
+
+                  {/* Flyout Submenu for this Category */}
+                  {isMenuOpen && submenu && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: link.isDeals ? 'auto' : '0',
+                        right: link.isDeals ? 0 : 'auto',
+                        paddingTop: '6px',
+                        zIndex: 100,
+                        width: '380px'
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: '#ffffff',
+                          borderRadius: '14px',
+                          boxShadow: '0 18px 45px rgba(11,30,61,0.20)',
+                          border: '1px solid var(--gray-200)',
+                          padding: '18px 20px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--navy)' }}>
+                            {submenu.title}
+                          </span>
+                          <Link
+                            href={submenu.allHref}
+                            onClick={closeAllMenus}
+                            style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--blue)' }}
+                          >
+                            {submenu.allLabel} &rarr;
+                          </Link>
+                        </div>
+                        <p style={{ fontSize: '11.5px', color: 'var(--gray-400)', margin: '0 0 12px', lineHeight: 1.4 }}>
+                          {submenu.description}
+                        </p>
+
+                        {/* Sub items */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '14px' }}>
+                          {submenu.subItems.map((item) => (
+                            <Link
+                              key={item.label}
+                              href={item.href}
+                              onClick={closeAllMenus}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '6px 8px',
+                                borderRadius: '6px',
+                                textDecoration: 'none',
+                                fontSize: '12.5px',
+                                fontWeight: 600,
+                                color: 'var(--navy)',
+                                transition: 'background 0.12s'
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                            >
+                              <span>{item.label}</span>
+                              {item.badge && (
+                                <span
+                                  style={{
+                                    fontSize: '9.5px',
+                                    fontWeight: 800,
+                                    background: item.badge === 'HOT' || item.badge === 'SALE' || item.badge.startsWith('-') ? 'rgba(255,61,90,0.12)' : 'rgba(11,99,246,0.10)',
+                                    color: item.badge === 'HOT' || item.badge === 'SALE' || item.badge.startsWith('-') ? '#FF3D5A' : '#0B63F6',
+                                    padding: '2px 6px',
+                                    borderRadius: '100px'
+                                  }}
+                                >
+                                  {item.badge}
+                                </span>
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* Top Brands Pill Strip */}
+                        <div style={{ borderTop: '1px solid var(--gray-100)', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--gray-400)', textTransform: 'uppercase' }}>
+                            Top Brands:
+                          </span>
+                          <div style={{ display: 'flex', gap: '5px' }}>
+                            {submenu.popularBrands.map((b) => (
+                              <Link
+                                key={b}
+                                href={`/shop?brand=${encodeURIComponent(b)}`}
+                                onClick={closeAllMenus}
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  color: 'var(--navy)',
+                                  background: 'var(--gray-100)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                {b}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
