@@ -6,7 +6,6 @@ import { AdminProductProvider } from '@/context/AdminProductContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { QuickViewProvider } from '@/context/QuickViewContext';
-import { TopBar } from '@/components/layout/TopBar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/layout/CartDrawer';
@@ -70,7 +69,6 @@ export default function RootLayout({
             <CartProvider>
               <WishlistProvider>
                 <QuickViewProvider>
-                  <TopBar />
                   <Header />
                   <main>{children}</main>
                   <Footer />
