@@ -6,9 +6,9 @@ import { CATEGORIES, PRODUCTS } from '@/data/products';
 import { ProductCategory } from '@/types/product';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const cat = CATEGORIES.find((c) => c.id === params.category);
+  const { category: categoryId } = await params;
+  const cat = CATEGORIES.find((c) => c.id === categoryId);
   if (!cat) {
     return {
       title: 'Category Not Found — CellCentral Canada',
@@ -33,8 +34,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const category = CATEGORIES.find((c) => c.id === params.category);
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { category: categoryId } = await params;
+  const category = CATEGORIES.find((c) => c.id === categoryId);
   if (!category) {
     notFound();
   }
@@ -90,7 +92,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         }
       >
         <ShopCatalog
-          initialCategory={params.category as ProductCategory}
+          initialCategory={categoryId as ProductCategory}
           categoryTitle={category.name}
           categoryDescription={category.description}
         />

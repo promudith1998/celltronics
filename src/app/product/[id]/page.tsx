@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import {
   Heart,
   ShoppingBag,
@@ -30,14 +30,16 @@ import { useAdminProducts } from '@/context/AdminProductContext';
 import { ProductVariant, ProductReview } from '@/types/product';
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ProductDetailPage({ params }: ProductPageProps) {
+export default function ProductDetailPage(props: ProductPageProps) {
+  const routeParams = useParams();
+  const productId = (routeParams?.id as string) || '';
   const { products } = useAdminProducts();
-  const product = products.find((p) => p.id === params.id) || PRODUCTS.find((p) => p.id === params.id);
+  const product = products.find((p) => p.id === productId) || PRODUCTS.find((p) => p.id === productId);
   if (!product) {
     notFound();
   }
