@@ -17,8 +17,13 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: DevicePageProps): Promise<Metadata> {
+<<<<<<< HEAD
   const { device: deviceParam } = await params;
   const family = DEVICE_FAMILIES.find((f) => f.id === deviceParam);
+=======
+  const { device } = await params;
+  const family = DEVICE_FAMILIES.find((f) => f.id === device);
+>>>>>>> 64339cb54578808d83b3d24655974e0101314567
   if (!family) {
     return {
       title: 'Mobile Accessories — CellCentral Canada',
@@ -31,8 +36,13 @@ export async function generateMetadata({ params }: DevicePageProps): Promise<Met
 }
 
 export default async function ShopDevicePage({ params }: DevicePageProps) {
+<<<<<<< HEAD
   const { device: deviceParam } = await params;
   const family = DEVICE_FAMILIES.find((f) => f.id === deviceParam);
+=======
+  const { device } = await params;
+  const family = DEVICE_FAMILIES.find((f) => f.id === device);
+>>>>>>> 64339cb54578808d83b3d24655974e0101314567
   if (!family) {
     notFound();
   }
@@ -47,7 +57,11 @@ export default async function ShopDevicePage({ params }: DevicePageProps) {
       }
     >
       <ShopCatalog
+<<<<<<< HEAD
         initialDeviceFamily={deviceParam}
+=======
+        initialDeviceFamily={device}
+>>>>>>> 64339cb54578808d83b3d24655974e0101314567
         categoryTitle={family.name}
         categoryDescription={family.description}
       />

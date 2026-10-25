@@ -35,11 +35,19 @@ interface ProductPageProps {
   }>;
 }
 
+<<<<<<< HEAD
 export default function ProductDetailPage() {
   const routeParams = useParams<{ id: string }>();
   const id = Array.isArray(routeParams?.id) ? routeParams.id[0] : (routeParams?.id as string);
   const { products } = useAdminProducts();
   const product = products.find((p) => p.id === id) || PRODUCTS.find((p) => p.id === id);
+=======
+export default function ProductDetailPage(props: ProductPageProps) {
+  const routeParams = useParams();
+  const productId = (routeParams?.id as string) || '';
+  const { products } = useAdminProducts();
+  const product = products.find((p) => p.id === productId) || PRODUCTS.find((p) => p.id === productId);
+>>>>>>> 64339cb54578808d83b3d24655974e0101314567
   if (!product) {
     notFound();
   }
