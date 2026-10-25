@@ -5,9 +5,9 @@ import { ShopCatalog } from '@/components/shop/ShopCatalog';
 import { DEVICE_FAMILIES } from '@/data/products';
 
 interface DevicePageProps {
-  params: {
+  params: Promise<{
     device: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -17,7 +17,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: DevicePageProps): Promise<Metadata> {
-  const family = DEVICE_FAMILIES.find((f) => f.id === params.device);
+  const { device: deviceParam } = await params;
+  const family = DEVICE_FAMILIES.find((f) => f.id === deviceParam);
   if (!family) {
     return {
       title: 'Mobile Accessories — CellCentral Canada',
@@ -29,8 +30,9 @@ export async function generateMetadata({ params }: DevicePageProps): Promise<Met
   };
 }
 
-export default function ShopDevicePage({ params }: DevicePageProps) {
-  const family = DEVICE_FAMILIES.find((f) => f.id === params.device);
+export default async function ShopDevicePage({ params }: DevicePageProps) {
+  const { device: deviceParam } = await params;
+  const family = DEVICE_FAMILIES.find((f) => f.id === deviceParam);
   if (!family) {
     notFound();
   }
@@ -45,7 +47,7 @@ export default function ShopDevicePage({ params }: DevicePageProps) {
       }
     >
       <ShopCatalog
-        initialDeviceFamily={params.device}
+        initialDeviceFamily={deviceParam}
         categoryTitle={family.name}
         categoryDescription={family.description}
       />
