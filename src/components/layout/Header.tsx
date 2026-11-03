@@ -1469,7 +1469,7 @@ export const Header: React.FC = () => {
               }}
             >
               <Briefcase size={14} />
-              <span>WHOLESALE / B2B</span>
+              <span>RETAIL PROGRAM</span>
             </Link>
 
             <Link
@@ -1490,7 +1490,7 @@ export const Header: React.FC = () => {
               }}
             >
               <Store size={14} />
-              <span>RETAIL PARTNERS</span>
+              <span>FRANCHISE</span>
             </Link>
           </div>
         </div>
@@ -1571,7 +1571,7 @@ export const Header: React.FC = () => {
                   gap: '6px'
                 }}
               >
-                <Briefcase size={14} /> Wholesale
+                <Briefcase size={14} /> Retail Program
               </Link>
               <Link
                 href="/retail-partners"
@@ -1591,7 +1591,7 @@ export const Header: React.FC = () => {
                   gap: '6px'
                 }}
               >
-                <Store size={14} /> Retail Partners
+                <Store size={14} /> Franchise
               </Link>
             </div>
 
