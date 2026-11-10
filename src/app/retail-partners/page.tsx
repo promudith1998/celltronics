@@ -681,16 +681,18 @@ export default function RetailPartnersPage() {
       </section>
 
       {/* SECTION 02: OUR RETAIL STORE CONCEPT & CONCEPT RENDERINGS */}
-      <section id="store-concept" style={{ padding: '80px 20px', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+      <section id="store-concept" style={{ padding: '72px 20px 80px', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto 48px' }}>
+          <div style={{ textAlign: 'center', maxWidth: '820px', margin: '0 auto 48px' }}>
             <span
               style={{
                 color: '#FF7A1A',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 800,
                 textTransform: 'uppercase',
-                letterSpacing: '0.08em'
+                letterSpacing: '0.08em',
+                display: 'inline-block',
+                marginBottom: '10px'
               }}
             >
               02. OUR RETAIL STORE CONCEPT
@@ -700,13 +702,15 @@ export default function RetailPartnersPage() {
                 fontSize: 'clamp(26px, 3.5vw, 38px)',
                 fontWeight: 900,
                 color: '#0B1E3D',
-                margin: '10px 0 16px',
-                letterSpacing: '-0.02em'
+                margin: '0 0 16px',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.22,
+                textWrap: 'balance'
               }}
             >
               A Premium Shopping Experience Designed for Modern Consumers
             </h2>
-            <p style={{ fontSize: '16px', lineHeight: 1.6, color: '#475569' }}>
+            <p style={{ fontSize: '15.5px', lineHeight: 1.65, color: '#475569', maxWidth: '760px', margin: '0 auto' }}>
               The CellCentral retail concept combines clean, contemporary store design with organized product displays and an
               easy-to-navigate shopping environment. Our goal is to create retail spaces that are visually appealing,
               commercially practical and designed to showcase mobile accessories effectively.

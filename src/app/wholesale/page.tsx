@@ -603,16 +603,18 @@ export default function WholesaleRetailProgramPage() {
       )}
 
       {/* 01. WHY JOIN THE CELLCENTRAL RETAIL PROGRAM? */}
-      <section style={{ padding: '80px 0', background: '#fff', borderBottom: '1px solid #E2E8F0' }}>
+      <section style={{ padding: '72px 0 80px', background: '#fff', borderBottom: '1px solid #E2E8F0' }}>
         <div className="wrap">
-          <div style={{ textAlign: 'center', maxWidth: '820px', margin: '0 auto 52px' }}>
+          <div style={{ textAlign: 'center', maxWidth: '860px', margin: '0 auto 48px' }}>
             <span
               style={{
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 800,
                 color: '#0B63F6',
                 letterSpacing: '0.08em',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                display: 'inline-block',
+                marginBottom: '10px'
               }}
             >
               01. WHY BECOME A CELLCENTRAL RETAIL PARTNER?
@@ -622,17 +624,19 @@ export default function WholesaleRetailProgramPage() {
                 fontSize: 'clamp(26px, 3.2vw, 38px)',
                 fontWeight: 900,
                 color: '#0B1E3D',
-                marginTop: '8px',
+                marginTop: '0',
                 marginBottom: '16px',
-                letterSpacing: '-0.02em'
+                letterSpacing: '-0.02em',
+                lineHeight: 1.22,
+                textWrap: 'balance'
               }}
             >
               A Reliable Supply Partner for Your Retail Business
             </h2>
-            <p style={{ fontSize: '16px', color: '#475569', lineHeight: 1.6, marginBottom: '12px' }}>
+            <p style={{ fontSize: '15.5px', color: '#475569', lineHeight: 1.65, maxWidth: '780px', margin: '0 auto 12px' }}>
               Your retail success depends on having the right products, dependable suppliers, and competitive purchasing costs. The CellCentral Retail Program is designed to help independent businesses source quality mobile accessories without the complications of managing international suppliers, overseas purchasing, and large import commitments.
             </p>
-            <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.65, maxWidth: '720px', margin: '0 auto' }}>
               Our objective is to develop long-term retail partnerships based on product quality, transparent commercial terms, reliable communication, and convenient ordering.
             </p>
           </div>
@@ -641,8 +645,8 @@ export default function WholesaleRetailProgramPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '24px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '20px',
               marginBottom: '48px'
             }}
           >
