@@ -248,7 +248,7 @@ export default function WholesaleRetailProgramPage() {
           <Breadcrumbs
             items={[
               { label: 'Home', href: '/' },
-              { label: 'Retail Program (Wholesale)' }
+              { label: 'Become a Retail Partner' }
             ]}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#64748B' }}>
@@ -258,7 +258,7 @@ export default function WholesaleRetailProgramPage() {
               href="/retail-partners"
               style={{ color: '#FF7A1A', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >
-              Looking for Turnkey Franchise Stores? <ArrowRight size={12} />
+              Looking to Own a CellCentral Store? <ArrowRight size={12} />
             </Link>
           </div>
         </div>
@@ -289,7 +289,7 @@ export default function WholesaleRetailProgramPage() {
               PROGRAM GUIDE
             </span>
             <span style={{ fontSize: '13px', color: '#1E293B' }}>
-              <strong style={{ color: '#0B63F6' }}>CellCentral Retail Program:</strong> For independent store owners selling premium accessories under your own business name. Zero franchise fees.
+              <strong style={{ color: '#0B63F6' }}>Become a Retail Partner:</strong> For independent store owners selling premium accessories under your own business name. Zero franchise fees.
             </span>
           </div>
           <Link
@@ -309,7 +309,7 @@ export default function WholesaleRetailProgramPage() {
               transition: 'all 0.15s ease'
             }}
           >
-            Want to open a CellCentral-branded Franchise store? View Franchise Program <ArrowRight size={13} />
+            Want to open a CellCentral-branded store? Own a CellCentral Store <ArrowRight size={13} />
           </Link>
         </div>
       </div>
@@ -346,7 +346,7 @@ export default function WholesaleRetailProgramPage() {
               }}
             >
               <Store size={14} color="#0B63F6" />
-              CellCentral Retail Program | Wholesale Canada
+              Become a Retail Partner | Wholesale Canada
             </div>
 
             <h1
@@ -355,129 +355,12 @@ export default function WholesaleRetailProgramPage() {
                 fontWeight: 900,
                 lineHeight: 1.15,
                 letterSpacing: '-0.025em',
-                marginBottom: '14px',
+                marginBottom: '0',
                 color: '#0F172A'
               }}
             >
               Grow Your Retail Business with <span style={{ color: '#0B63F6' }}>Cell</span><span style={{ color: '#FF7A1A' }}>Central</span>
             </h1>
-
-            <div
-              style={{
-                fontSize: 'clamp(18px, 2.2vw, 22px)',
-                fontWeight: 800,
-                color: '#EA580C',
-                marginBottom: '14px'
-              }}
-            >
-              Your Store. Your Business. Our Premium Products.
-            </div>
-
-            <p
-              style={{
-                fontSize: '16px',
-                lineHeight: 1.6,
-                color: '#1E293B',
-                marginBottom: '16px',
-                fontWeight: 700
-              }}
-            >
-              Premium Mobile Accessories. Competitive Wholesale Pricing. Nationwide Opportunities.
-            </p>
-
-            <div style={{ maxWidth: '820px', margin: '0 auto 28px', fontSize: '15px', color: '#475569', lineHeight: 1.65 }}>
-              <p style={{ marginBottom: '10px' }}>
-                CellCentral is building a nationwide network of independent retail partners, providing Canadian businesses with access to premium-quality mobile accessories at competitive wholesale prices.
-              </p>
-              <p style={{ marginBottom: '10px' }}>
-                The CellCentral Retail Program is designed for cellphone retailers, repair shops, electronics stores, convenience stores, online retailers, and regional distributors looking to expand their product offerings and create additional sales opportunities.
-              </p>
-              <p>
-                As an authorized CellCentral retail partner, you continue operating under your own business name, maintaining complete ownership and independence while purchasing CellCentral products at approved wholesale prices.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '14px', marginBottom: '28px' }}>
-              <button
-                onClick={() => scrollToApply()}
-                style={{
-                  background: 'linear-gradient(135deg, #0B63F6 0%, #004ecc 100%)',
-                  color: '#fff',
-                  padding: '14px 30px',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: 800,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 8px 20px rgba(11,99,246,0.3)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Briefcase size={17} /> BECOME A RETAIL PARTNER
-              </button>
-
-              <button
-                onClick={scrollToProducts}
-                style={{
-                  background: '#FFFFFF',
-                  color: '#0F172A',
-                  padding: '14px 26px',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  border: '1.5px solid #CBD5E1',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Package size={17} color="#0B63F6" /> EXPLORE OUR PRODUCTS
-              </button>
-            </div>
-
-            {/* Program Highlights Row */}
-            <div
-              style={{
-                display: 'inline-flex',
-                flexWrap: 'wrap',
-                gap: '12px 18px',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '12px 24px',
-                background: '#FFFFFF',
-                border: '1px solid #E2E8F0',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                fontSize: '13px',
-                color: '#334155'
-              }}
-            >
-              <span style={{ fontWeight: 800, color: '#0B63F6' }}>Program Highlights:</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                <CheckCircle2 size={15} color="#16A34A" /> Independent Ownership
-              </span>
-              <span style={{ color: '#CBD5E1' }}>•</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                <CheckCircle2 size={15} color="#16A34A" /> Competitive Wholesale Pricing
-              </span>
-              <span style={{ color: '#CBD5E1' }}>•</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                <CheckCircle2 size={15} color="#16A34A" /> Premium Products
-              </span>
-              <span style={{ color: '#CBD5E1' }}>•</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                <CheckCircle2 size={15} color="#16A34A" /> Canada-Wide Opportunities
-              </span>
-            </div>
           </div>
         </div>
 
@@ -732,7 +615,7 @@ export default function WholesaleRetailProgramPage() {
                 textTransform: 'uppercase'
               }}
             >
-              01. WHY JOIN THE CELLCENTRAL RETAIL PROGRAM?
+              01. WHY BECOME A CELLCENTRAL RETAIL PARTNER?
             </span>
             <h2
               style={{
@@ -2151,10 +2034,10 @@ export default function WholesaleRetailProgramPage() {
               Your Store. Your Brand. Your Customers.
             </h2>
             <p style={{ fontSize: '16px', color: '#475569', lineHeight: 1.6, marginBottom: '12px' }}>
-              The CellCentral Retail Program is designed specifically for businesses that want to sell CellCentral products while maintaining their independent business identity.
+              The Become a Retail Partner program is designed specifically for businesses that want to sell CellCentral products while maintaining their independent business identity.
             </p>
             <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.6 }}>
-              Unlike the CellCentral Franchise Program, retail partners do not operate as CellCentral-branded franchise locations.
+              Unlike the Own a CellCentral Store program, retail partners do not operate as CellCentral-branded franchise locations.
             </p>
           </div>
 
@@ -2425,7 +2308,7 @@ export default function WholesaleRetailProgramPage() {
                 letterSpacing: '-0.02em'
               }}
             >
-              Apply to Join the CellCentral Retail Program
+              Apply to Become a CellCentral Retail Partner
             </h2>
             <p style={{ fontSize: '16px', color: '#475569', lineHeight: 1.6, marginBottom: '8px' }}>
               Interested in stocking CellCentral products in your store? Complete the following application to request access to our wholesale purchasing program.
@@ -2467,7 +2350,7 @@ export default function WholesaleRetailProgramPage() {
                   <CheckCircle2 size={40} />
                 </div>
                 <h3 style={{ fontSize: '26px', fontWeight: 900, color: '#0B1E3D', marginBottom: '12px' }}>
-                  Thank you for applying to join the CellCentral Retail Program!
+                  Thank you for applying to Become a CellCentral Retail Partner!
                 </h3>
                 <p style={{ fontSize: '16px', color: '#475569', maxWidth: '600px', margin: '0 auto 16px', lineHeight: 1.6 }}>
                   Your application has been received and will be reviewed by our wholesale account team. We will contact you regarding account verification and the next steps in the approval process.
@@ -3133,7 +3016,7 @@ export default function WholesaleRetailProgramPage() {
                 letterSpacing: '-0.02em'
               }}
             >
-              Everything You Need to Know About the CellCentral Retail Program
+              Everything You Need to Know About Becoming a Retail Partner
             </h2>
             <p style={{ fontSize: '16px', color: '#64748B' }}>
               Clear answers to the most common questions from Canadian store owners and wholesalers.
@@ -3294,13 +3177,13 @@ export default function WholesaleRetailProgramPage() {
         </div>
       </section>
 
-      {/* FOOTER CROSS-LINK BANNER TO FRANCHISE */}
+      {/* FOOTER CROSS-LINK BANNER TO STORE OWNERSHIP */}
       <section style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', padding: '24px 0' }}>
         <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Looking for Turnkey Franchise Opportunities instead?</span>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Looking to Own a CellCentral Store instead?</span>
             <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0' }}>
-              Explore our turnkey CellCentral Express Kiosk and Full Store franchise models with comprehensive branding, operations, and territory support.
+              Explore our turnkey CellCentral Express Kiosk and Full Store models with comprehensive branding, operations, and territory support.
             </p>
           </div>
           <Link
@@ -3319,7 +3202,7 @@ export default function WholesaleRetailProgramPage() {
               gap: '6px'
             }}
           >
-            View Franchise Program <ArrowRight size={14} />
+            Own a CellCentral Store <ArrowRight size={14} />
           </Link>
         </div>
       </section>

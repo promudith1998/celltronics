@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -28,7 +28,9 @@ import {
   Package,
   Boxes,
   Compass,
-  FileText
+  FileText,
+  Maximize2,
+  X
 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -60,6 +62,27 @@ export default function RetailPartnersPage() {
   const [submitted, setSubmitted] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<number>(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string>('/images/storefront-dusk.png');
+  const [lightboxCaption, setLightboxCaption] = useState<string>('CellCentral Flagship Storefront Concept at Dusk');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      }
+    };
+    if (isLightboxOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isLightboxOpen]);
 
   const galleryImages = [
     {
@@ -163,174 +186,311 @@ export default function RetailPartnersPage() {
   return (
     <div style={{ background: '#FAFBFD', color: '#1E293B' }}>
       {/* Breadcrumbs */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px 20px 0' }}>
-        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Franchise Opportunities' }]} />
+      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '12px 20px' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
+          <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Own a CellCentral Store' }]} />
+        </div>
       </div>
 
       {/* HERO SECTION */}
       <section
         style={{
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
+          color: '#0F172A',
+          padding: '52px 20px 64px',
           position: 'relative',
-          padding: '80px 20px 100px',
-          background: 'linear-gradient(135deg, #061226 0%, #0B1E3D 55%, #0B336B 100%)',
-          color: '#fff',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderBottom: '1px solid #E2E8F0'
         }}
       >
-        {/* Subtle background glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-20%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(11, 99, 246, 0.25) 0%, transparent 70%)',
-            pointerEvents: 'none'
-          }}
-        />
+        <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          {/* Top Intro & Content */}
+          <div style={{ maxWidth: '960px', margin: '0 auto', textAlign: 'center', marginBottom: '36px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#FFF7ED',
+                border: '1px solid #FED7AA',
+                color: '#EA580C',
+                padding: '6px 16px',
+                borderRadius: '100px',
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '18px'
+              }}
+            >
+              <Sparkles size={14} color="#EA580C" />
+              <span>OWN A CELLCENTRAL STORE • CANADA-WIDE EXPANSION</span>
+            </div>
 
-        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', alignItems: 'center' }}>
-            <div style={{ maxWidth: '780px' }}>
+            <h1
+              style={{
+                fontSize: 'clamp(32px, 4.8vw, 54px)',
+                fontWeight: 900,
+                lineHeight: 1.15,
+                letterSpacing: '-0.025em',
+                color: '#0F172A',
+                marginBottom: '0'
+              }}
+            >
+              Own Your Business.{' '}
+              <span style={{ color: '#0B63F6' }}>
+                Build Your Future
+              </span>{' '}
+              <span style={{ color: '#FF7A1A' }}>
+                With CellCentral
+              </span>.
+            </h1>
+          </div>
+
+          {/* FULL SCREEN STORE CONCEPT VISUAL */}
+          <div style={{ position: 'relative', marginTop: '24px' }}>
+            <div
+              style={{
+                position: 'relative',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                border: '1px solid #CBD5E1',
+                boxShadow: '0 25px 60px rgba(15, 23, 42, 0.14)',
+                background: '#0F172A',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                setLightboxImage('/images/storefront-dusk.png');
+                setLightboxCaption('CellCentral Flagship Storefront Concept at Dusk');
+                setIsLightboxOpen(true);
+              }}
+              title="Click to view full screen"
+            >
+              <Image
+                src="/images/storefront-dusk.png"
+                alt="CellCentral Flagship Storefront Concept at Dusk"
+                width={1774}
+                height={887}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '700px',
+                  display: 'block',
+                  objectFit: 'cover'
+                }}
+                priority
+              />
+
+              {/* Bottom Caption Bar */}
               <div
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'rgba(255, 122, 26, 0.15)',
-                  border: '1px solid rgba(255, 122, 26, 0.35)',
-                  color: '#FF9E4A',
-                  padding: '6px 14px',
-                  borderRadius: '100px',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  marginBottom: '20px'
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: '24px 28px',
+                  background: 'linear-gradient(to top, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.4) 70%, transparent 100%)',
+                  color: '#fff'
                 }}
               >
-                <Sparkles size={14} />
-                <span>CELLCENTRAL FRANCHISE OPPORTUNITIES • CANADA-WIDE EXPANSION</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+                      CellCentral Flagship Storefront Concept at Dusk
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#CBD5E1', maxWidth: '820px' }}>
+                      Modern storefront presentation featuring 3D illuminated CellCentral branding, full-height glass architecture, and category-organized window merchandising displays.
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span
+                      style={{
+                        background: '#FF7A1A',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        padding: '5px 12px',
+                        borderRadius: '100px'
+                      }}
+                    >
+                      Flagship Concept
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxImage('/images/storefront-dusk.png');
+                        setLightboxCaption('CellCentral Flagship Storefront Concept at Dusk');
+                        setIsLightboxOpen(true);
+                      }}
+                      style={{
+                        background: 'rgba(255,255,255,0.2)',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        color: '#fff',
+                        padding: '5px 12px',
+                        borderRadius: '100px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Maximize2 size={13} /> Full Screen
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <h1
-                style={{
-                  fontSize: 'clamp(32px, 5vw, 54px)',
-                  fontWeight: 900,
-                  lineHeight: 1.12,
-                  letterSpacing: '-0.025em',
-                  color: '#fff',
-                  marginBottom: '20px'
-                }}
-              >
-                Own Your Business.{' '}
-                <span
-                  style={{
-                    background: 'linear-gradient(90deg, #38BDF8 0%, #FF7A1A 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}
-                >
-                  Build Your Future
-                </span>{' '}
-                With CellCentral.
-              </h1>
-
-              <p
-                style={{
-                  fontSize: 'clamp(16px, 2vw, 19px)',
-                  lineHeight: 1.6,
-                  color: '#CBD5E1',
-                  marginBottom: '32px'
-                }}
-              >
-                Join the next generation of mobile accessories retail in Canada. CellCentral is developing a modern retail
-                franchise network focused on premium mobile accessories, innovative store design, quality products and
-                exceptional customer experiences.
-              </p>
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '36px' }}>
-                <a
-                  href="#franchise-application"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: '#FF7A1A',
-                    color: '#fff',
-                    padding: '14px 28px',
-                    borderRadius: '10px',
-                    fontWeight: 800,
-                    fontSize: '15px',
-                    textDecoration: 'none',
-                    boxShadow: '0 8px 24px rgba(255, 122, 26, 0.4)',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <span>Apply for Franchise Opportunity</span>
-                  <ArrowRight size={18} />
-                </a>
-
-                <a
-                  href="#store-concept"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    color: '#fff',
-                    padding: '14px 26px',
-                    borderRadius: '10px',
-                    fontWeight: 700,
-                    fontSize: '15px',
-                    textDecoration: 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Store size={18} />
-                  <span>Explore Our Franchise Concept</span>
-                </a>
-              </div>
-
-              {/* Program Highlights Strip */}
+              {/* Floating Benefit Card 1 (Clean White Theme) */}
               <div
                 style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '20px',
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '12px',
+                  padding: '12px 18px',
                   display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '24px',
-                  paddingTop: '24px',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-                  fontSize: '13px',
-                  color: '#94A3B8'
+                  alignItems: 'center',
+                  gap: '12px',
+                  boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
+                  zIndex: 3
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={16} color="#38BDF8" />
-                  <span style={{ color: '#E2E8F0', fontWeight: 600 }}>Structured Business Support</span>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#FF7A1A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Store size={20} color="#fff" />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={16} color="#38BDF8" />
-                  <span style={{ color: '#E2E8F0', fontWeight: 600 }}>Centralized Product Sourcing</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={16} color="#38BDF8" />
-                  <span style={{ color: '#E2E8F0', fontWeight: 600 }}>Turnkey Store Design</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={16} color="#38BDF8" />
-                  <span style={{ color: '#E2E8F0', fontWeight: 600 }}>Canada-Wide Opportunities</span>
+                <div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0F172A' }}>Flagship Architecture</div>
+                  <div style={{ fontSize: '11.5px', color: '#64748B' }}>3D illuminated branding &amp; glass front</div>
                 </div>
               </div>
 
-              <p style={{ fontSize: '11.5px', color: '#64748B', marginTop: '16px', fontStyle: 'italic' }}>
-                * Franchise opportunities are subject to availability, qualification and completion of applicable legal requirements.
-              </p>
+              {/* Floating Benefit Card 2 (Clean White Theme) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '12px',
+                  padding: '12px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
+                  zIndex: 3
+                }}
+              >
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#0B63F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Building2 size={20} color="#fff" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0F172A' }}>Turnkey Store Design</div>
+                  <div style={{ fontSize: '11.5px', color: '#64748B' }}>Approved fixtures, layouts &amp; displays</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* FULL-SCREEN LIGHTBOX MODAL */}
+      {isLightboxOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 999999,
+            background: 'rgba(0, 0, 0, 0.92)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar with Close Button */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              zIndex: 10
+            }}
+          >
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: '#fff',
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              title="Close Full Screen (Esc)"
+            >
+              <X size={22} />
+            </button>
+          </div>
+
+          <div
+            style={{
+              position: 'relative',
+              maxWidth: '94vw',
+              maxHeight: '88vh',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={lightboxImage}
+              alt={lightboxCaption}
+              width={1774}
+              height={887}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '88vh',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.5)'
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '13px',
+              textAlign: 'center'
+            }}
+          >
+            {lightboxCaption} (Press Esc or click anywhere to exit)
+          </div>
+        </div>
+      )}
 
       {/* IMPORTANT PROGRAM DISTINCTION CALLOUT BANNER */}
       <section style={{ background: '#FFFBEB', borderBottom: '1px solid #FDE68A', padding: '16px 20px' }}>
@@ -340,9 +500,9 @@ export default function RetailPartnersPage() {
               PROGRAM NOTICE
             </span>
             <div style={{ fontSize: '13px', color: '#92400E' }}>
-              <strong>Looking for Independent Wholesale Reselling?</strong> If you already operate an independent store and want to purchase CellCentral products under your own business name without franchise obligations, see the{' '}
+              <strong>Looking for Independent Wholesale Reselling?</strong> If you already operate an independent store and want to purchase CellCentral products under your own business name without franchise obligations, see{' '}
               <Link href="/wholesale" style={{ color: '#B45309', fontWeight: 800, textDecoration: 'underline' }}>
-                CellCentral Retail Program (/wholesale)
+                Become a Retail Partner (/wholesale)
               </Link>.
             </div>
           </div>
@@ -358,7 +518,7 @@ export default function RetailPartnersPage() {
               textDecoration: 'none'
             }}
           >
-            <span>View Wholesale Program</span>
+            <span>Become a Retail Partner</span>
             <ArrowRight size={14} />
           </Link>
         </div>
@@ -641,9 +801,16 @@ export default function RetailPartnersPage() {
                 height: 'clamp(280px, 45vw, 540px)',
                 borderRadius: '16px',
                 overflow: 'hidden',
-                background: '#0B1E3D',
-                marginBottom: '18px'
+                background: '#0F172A',
+                marginBottom: '18px',
+                cursor: 'pointer'
               }}
+              onClick={() => {
+                setLightboxImage(galleryImages[selectedGalleryImage].src);
+                setLightboxCaption(galleryImages[selectedGalleryImage].caption);
+                setIsLightboxOpen(true);
+              }}
+              title="Click to view full screen"
             >
               <Image
                 src={galleryImages[selectedGalleryImage].src}
@@ -659,15 +826,42 @@ export default function RetailPartnersPage() {
                   left: 0,
                   right: 0,
                   padding: '24px 28px',
-                  background: 'linear-gradient(to top, rgba(6,18,38,0.92) 0%, rgba(6,18,38,0.5) 70%, transparent 100%)',
+                  background: 'linear-gradient(to top, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.5) 70%, transparent 100%)',
                   color: '#fff'
                 }}
               >
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
-                  {galleryImages[selectedGalleryImage].caption}
-                </div>
-                <div style={{ fontSize: '13.5px', color: '#CBD5E1', maxWidth: '850px', lineHeight: 1.5 }}>
-                  {galleryImages[selectedGalleryImage].description}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+                      {galleryImages[selectedGalleryImage].caption}
+                    </div>
+                    <div style={{ fontSize: '13.5px', color: '#CBD5E1', maxWidth: '850px', lineHeight: 1.5 }}>
+                      {galleryImages[selectedGalleryImage].description}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxImage(galleryImages[selectedGalleryImage].src);
+                      setLightboxCaption(galleryImages[selectedGalleryImage].caption);
+                      setIsLightboxOpen(true);
+                    }}
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                      color: '#fff',
+                      padding: '6px 14px',
+                      borderRadius: '100px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Maximize2 size={13} /> Full Screen
+                  </button>
                 </div>
               </div>
             </div>
@@ -1254,42 +1448,43 @@ export default function RetailPartnersPage() {
         </div>
       </section>
 
-      {/* SECTION 08: FRANCHISE APPLICATION FORM */}
+      {/* SECTION 08: STORE APPLICATION FORM */}
       <section
         id="franchise-application"
         style={{
           padding: '80px 20px',
-          background: 'linear-gradient(135deg, #061226 0%, #0B1E3D 100%)',
-          color: '#fff'
+          background: '#F8FAFC',
+          borderTop: '1px solid #E2E8F0',
+          color: '#0F172A'
         }}
       >
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <span
               style={{
-                color: '#FF7A1A',
+                color: '#EA580C',
                 fontSize: '12.5px',
                 fontWeight: 800,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em'
               }}
             >
-              08. FRANCHISE APPLICATION
+              08. STORE APPLICATION
             </span>
             <h2
               style={{
                 fontSize: 'clamp(28px, 4vw, 42px)',
                 fontWeight: 900,
-                color: '#fff',
+                color: '#0F172A',
                 margin: '10px 0 16px',
                 letterSpacing: '-0.02em'
               }}
             >
               Take the First Step Toward Owning a CellCentral Store
             </h2>
-            <p style={{ fontSize: '16px', lineHeight: 1.6, color: '#94A3B8', maxWidth: '720px', margin: '0 auto' }}>
+            <p style={{ fontSize: '16px', lineHeight: 1.6, color: '#475569', maxWidth: '720px', margin: '0 auto' }}>
               Interested in becoming part of the CellCentral retail network? Complete the form below to introduce yourself
-              and express your interest in a CellCentral franchise opportunity. Our team will review your inquiry and contact
+              and express your interest in a CellCentral store opportunity. Our team will review your inquiry and contact
               you if an appropriate opportunity is available.
             </p>
           </div>
@@ -1765,7 +1960,7 @@ export default function RetailPartnersPage() {
       <section
         style={{
           padding: '80px 20px',
-          background: 'linear-gradient(135deg, #0B1E3D 0%, #061226 100%)',
+          background: 'linear-gradient(135deg, #0B63F6 0%, #004ECC 100%)',
           color: '#fff',
           textAlign: 'center'
         }}
@@ -1776,9 +1971,10 @@ export default function RetailPartnersPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              background: 'rgba(255, 122, 26, 0.15)',
-              color: '#FF9E4A',
-              padding: '6px 14px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(255, 255, 255, 0.35)',
+              color: '#fff',
+              padding: '6px 16px',
               borderRadius: '100px',
               fontSize: '12px',
               fontWeight: 800,
@@ -1801,9 +1997,9 @@ export default function RetailPartnersPage() {
             Your Business Journey Starts Here.
           </h2>
 
-          <p style={{ fontSize: '16.5px', lineHeight: 1.6, color: '#CBD5E1', marginBottom: '32px' }}>
+          <p style={{ fontSize: '16.5px', lineHeight: 1.6, color: '#DBEAFE', marginBottom: '32px' }}>
             CellCentral is working toward a modern Canadian retail network built around premium mobile accessories, consistent
-            branding, professional store presentation and strong franchise partnerships. If you are passionate about
+            branding, professional store presentation and strong retail partnerships. If you are passionate about
             entrepreneurship, customer service and retail business ownership, we invite you to explore our concept.
           </p>
 
@@ -1818,16 +2014,16 @@ export default function RetailPartnersPage() {
                 fontWeight: 800,
                 fontSize: '15px',
                 textDecoration: 'none',
-                boxShadow: '0 8px 24px rgba(255, 122, 26, 0.4)'
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)'
               }}
             >
-              APPLY FOR FRANCHISE OPPORTUNITY
+              APPLY TO OWN A CELLCENTRAL STORE
             </a>
             <Link
               href="/wholesale"
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 color: '#fff',
                 padding: '14px 28px',
                 borderRadius: '10px',
@@ -1836,12 +2032,12 @@ export default function RetailPartnersPage() {
                 textDecoration: 'none'
               }}
             >
-              Wholesale / Independent Retailers
+              Become a Retail Partner
             </Link>
           </div>
 
-          <p style={{ fontSize: '11.5px', color: '#64748B', margin: 0, fontStyle: 'italic' }}>
-            Franchise opportunities are subject to availability, approval, applicable laws and execution of appropriate agreements.
+          <p style={{ fontSize: '11.5px', color: '#BFDBFE', margin: 0, fontStyle: 'italic' }}>
+            Store opportunities are subject to availability, approval, applicable laws and execution of appropriate agreements.
           </p>
         </div>
       </section>
