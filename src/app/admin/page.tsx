@@ -423,6 +423,25 @@ export default function AdminPage() {
                 <ExternalLink size={14} />
               </Link>
 
+              {/* 2FA Verified Admin Badge */}
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: '#10B981',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  padding: '7px 12px',
+                  borderRadius: '8px'
+                }}
+              >
+                <ShieldCheck size={14} />
+                <span>2FA Verified</span>
+              </div>
+
               {/* Lock / Sign Out Button */}
               <button
                 onClick={handleLockSession}
