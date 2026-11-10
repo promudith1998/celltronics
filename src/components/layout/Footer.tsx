@@ -101,16 +101,16 @@ export const Footer: React.FC = () => {
           {/* WHOLESALE & PARTNERS Column */}
           <div>
             <h5 style={{ fontSize: '12.5px', fontWeight: 800, color: '#0B1E3D', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '16px' }}>
-              B2B &amp; FRANCHISE
+              B2B &amp; STORE OPPORTUNITIES
             </h5>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
               <Link href="/wholesale" style={{ color: '#0B63F6', fontWeight: 700, textDecoration: 'none' }}>
-                Retail Program (Wholesale)
+                Become a Retail Partner
               </Link>
               <Link href="/wholesale" style={{ color: '#47506B', textDecoration: 'none' }}>Dealer Registration</Link>
               <Link href="/wholesale" style={{ color: '#47506B', textDecoration: 'none' }}>Volume Pricing &amp; Net-30</Link>
               <Link href="/retail-partners" style={{ color: '#FF7A1A', fontWeight: 700, textDecoration: 'none', marginTop: '4px' }}>
-                Franchise Opportunities
+                Own a CellCentral Store
               </Link>
               <Link href="/retail-partners" style={{ color: '#47506B', textDecoration: 'none' }}>In-Store POP Displays</Link>
               <Link href="/retail-partners" style={{ color: '#47506B', textDecoration: 'none' }}>Find a Retailer (Coming Soon)</Link>
