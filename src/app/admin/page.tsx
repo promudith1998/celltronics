@@ -42,7 +42,8 @@ import {
   Shield,
   Truck,
   FileText,
-  RotateCcw
+  RotateCcw,
+  CreditCard
 } from 'lucide-react';
 import { useAdminProducts } from '@/context/AdminProductContext';
 import { useToast } from '@/context/ToastContext';
@@ -56,6 +57,7 @@ import { PromoCodeModal } from '@/components/admin/PromoCodeModal';
 import { AdminAuthGate } from '@/components/admin/AdminAuthGate';
 import { AdminAnalyticsChart } from '@/components/admin/AdminAnalyticsChart';
 import { OrderDetailsModal } from '@/components/admin/OrderDetailsModal';
+import { testPayPalConnection } from '@/app/actions/paypal';
 
 export default function AdminPage() {
   const {
@@ -96,6 +98,10 @@ export default function AdminPage() {
   const { showToast } = useToast();
   const [isSyncingDb, setIsSyncingDb] = useState(false);
   const [isCopiedSql, setIsCopiedSql] = useState(false);
+
+  // PayPal Connectivity State
+  const [paypalTestResult, setPaypalTestResult] = useState<any>(null);
+  const [isCheckingPaypal, setIsCheckingPaypal] = useState(false);
 
   // Active Admin View Tab
   const [activeTab, setActiveTab] = useState<
@@ -2197,6 +2203,145 @@ export default function AdminPage() {
                       <span>{isSyncingDb ? 'Syncing...' : 'Sync Catalog to Supabase Cloud'}</span>
                     </button>
                   </div>
+                </div>
+
+                {/* PayPal & Apple Pay Payment Gateway Connectivity Card */}
+                <div
+                  style={{
+                    background: '#fff',
+                    padding: '24px',
+                    borderRadius: '20px',
+                    border: '1px solid var(--gray-200)',
+                    boxShadow: '0 2px 10px rgba(11,30,61,0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div
+                        style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '12px',
+                          background: 'rgba(0, 121, 193, 0.12)',
+                          color: '#0079C1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <CreditCard size={22} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                            PayPal &amp; Apple Pay Payment Gateway
+                          </h3>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 800,
+                              padding: '3px 8px',
+                              borderRadius: '100px',
+                              background: paypalTestResult?.authenticated
+                                ? 'rgba(30,166,114,0.15)'
+                                : paypalTestResult?.credentialsConfigured
+                                ? 'rgba(255,61,90,0.15)'
+                                : 'rgba(255,122,26,0.15)',
+                              color: paypalTestResult?.authenticated
+                                ? '#1EA672'
+                                : paypalTestResult?.credentialsConfigured
+                                ? '#FF3D5A'
+                                : '#FF7A1A'
+                            }}
+                          >
+                            {isCheckingPaypal
+                              ? 'Checking...'
+                              : paypalTestResult?.authenticated
+                              ? 'CONNECTED & ACTIVE'
+                              : paypalTestResult?.credentialsConfigured
+                              ? 'AUTH FAILED'
+                              : 'KEYS NEEDED'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '12.5px', color: 'var(--gray-600)' }}>
+                          Referencing <code>getting-started-guide-buy-button-nextjs</code> · Canadian Dollar (CAD) Payments
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setIsCheckingPaypal(true);
+                        try {
+                          const res = await testPayPalConnection();
+                          setPaypalTestResult(res);
+                          if (res.authenticated) {
+                            showToast('PayPal API Connected! 🟢', res.message, 'success');
+                          } else if (res.credentialsConfigured) {
+                            showToast('PayPal Auth Failed 🔴', res.message, 'error');
+                          } else {
+                            showToast('PayPal Keys Missing ⚠️', res.message, 'warning');
+                          }
+                        } catch (err: any) {
+                          showToast('Connectivity Check Failed', err.message, 'error');
+                        } finally {
+                          setIsCheckingPaypal(false);
+                        }
+                      }}
+                      disabled={isCheckingPaypal}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--gray-300)',
+                        background: '#fff',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        color: 'var(--navy)',
+                        cursor: isCheckingPaypal ? 'not-allowed' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <RefreshCw size={13} className={isCheckingPaypal ? 'spin' : ''} />
+                      <span>{isCheckingPaypal ? 'Testing API...' : 'Test PayPal Connectivity'}</span>
+                    </button>
+                  </div>
+
+                  {paypalTestResult ? (
+                    <div
+                      style={{
+                        padding: '14px 16px',
+                        borderRadius: '12px',
+                        background: paypalTestResult.authenticated ? '#F0FDF4' : '#FEF2F2',
+                        border: `1px solid ${paypalTestResult.authenticated ? '#BBF7D0' : '#FECACA'}`,
+                        fontSize: '13px',
+                        color: paypalTestResult.authenticated ? '#166534' : '#991B1B',
+                        lineHeight: 1.5
+                      }}
+                    >
+                      <strong>Diagnostic Result:</strong> {paypalTestResult.message}
+                      {paypalTestResult.clientIdMasked && (
+                        <div style={{ marginTop: '6px', fontSize: '12px' }}>
+                          Client ID: <code>{paypalTestResult.clientIdMasked}</code> · Environment: <strong>{paypalTestResult.environment}</strong>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        background: 'var(--gray-50)',
+                        border: '1px solid var(--gray-200)',
+                        fontSize: '12.5px',
+                        color: 'var(--gray-700)',
+                        lineHeight: 1.5
+                      }}
+                    >
+                      Click <strong>&quot;Test PayPal Connectivity&quot;</strong> to verify live connection to PayPal servers and validate your API credentials from <code>.env.local</code>.
+                    </div>
+                  )}
                 </div>
 
                 {/* Local JSON Backup & Recovery */}

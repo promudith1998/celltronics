@@ -1,6 +1,14 @@
 'use server';
 
-import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal';
+import { createPayPalOrder, capturePayPalOrder, checkPayPalConnectivity } from '@/lib/paypal';
+
+/**
+ * Server action to check PayPal API connectivity, credentials & token validity.
+ */
+export async function testPayPalConnection() {
+  return checkPayPalConnectivity();
+}
+
 
 /**
  * Server action to create a PayPal checkout order.
@@ -32,3 +40,4 @@ export async function captureOrder(orderId: string): Promise<any> {
     throw new Error(error.message || 'Failed to capture PayPal order');
   }
 }
+
