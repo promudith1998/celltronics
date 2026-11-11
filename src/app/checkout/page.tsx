@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ShieldCheck, Truck, CreditCard, ArrowRight, ShoppingBag } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Truck, CreditCard, ArrowRight, ShoppingBag, Zap } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { ProductIcon } from '@/components/product/ProductIcon';
 import { createOrderInDb } from '@/lib/supabaseService';
+import { PayPalCheckoutButton } from '@/components/checkout/PayPalCheckoutButton';
 
 export default function CheckoutPage() {
   const { items, subtotal, discount, shipping, tax, total, clearCart } = useCart();
@@ -18,7 +19,7 @@ export default function CheckoutPage() {
   const [province, setProvince] = useState('ON');
   const [postalCode, setPostalCode] = useState('');
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple' | 'interac'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'apple' | 'card' | 'interac'>('paypal');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -28,6 +29,42 @@ export default function CheckoutPage() {
 
   const expressFee = shippingMethod === 'express' ? 9.99 : 0;
   const grandTotal = total + expressFee;
+
+  const handlePayPalSuccess = (capturedOrderId: string, details?: any) => {
+    const finalOrderNumber = capturedOrderId.startsWith('DEMO-')
+      ? `CC-${Math.floor(100000 + Math.random() * 900000)}`
+      : capturedOrderId;
+    setOrderNumber(finalOrderNumber);
+    setOrderPlaced(true);
+
+    createOrderInDb({
+      orderNumber: finalOrderNumber,
+      customerEmail: email || details?.payer?.email_address || 'customer@cellcentral.ca',
+      customerName: `${firstName} ${lastName}`.trim() || details?.payer?.name?.given_name || 'CellCentral Customer',
+      shippingAddress: {
+        address: address || 'Canadian Shipping Address',
+        city: city || 'Toronto',
+        province: province || 'ON',
+        postalCode: postalCode || 'M5V 2T6'
+      },
+      items: items.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        color: item.selectedColor,
+        model: item.selectedModel
+      })),
+      subtotal,
+      discount,
+      shipping: shippingMethod === 'express' ? 9.99 : shipping,
+      tax,
+      total: grandTotal,
+      paymentMethod
+    }).catch((err) => console.warn('Order Supabase sync skipped:', err));
+
+    clearCart();
+  };
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,10 +350,27 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* 4. Payment Simulation */}
+          {/* 4. Payment Methods & PayPal / Apple Pay Integration */}
           <div style={{ background: '#fff', border: '1px solid var(--gray-100)', borderRadius: 'var(--radius)', padding: '24px', marginBottom: '24px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px' }}>4. Payment Details</h3>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${paymentMethod === 'paypal' ? 'btn-navy' : 'btn-ghost'}`}
+                onClick={() => setPaymentMethod('paypal')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span style={{ fontWeight: 800, color: '#0079C1' }}>P</span>
+                <span>PayPal Account</span>
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${paymentMethod === 'apple' ? 'btn-navy' : 'btn-ghost'}`}
+                onClick={() => setPaymentMethod('apple')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span>Apple Pay / Digital Wallet</span>
+              </button>
               <button
                 type="button"
                 className={`btn btn-sm ${paymentMethod === 'card' ? 'btn-navy' : 'btn-ghost'}`}
@@ -326,19 +380,37 @@ export default function CheckoutPage() {
               </button>
               <button
                 type="button"
-                className={`btn btn-sm ${paymentMethod === 'apple' ? 'btn-navy' : 'btn-ghost'}`}
-                onClick={() => setPaymentMethod('apple')}
-              >
-                Apple Pay / Google Pay
-              </button>
-              <button
-                type="button"
                 className={`btn btn-sm ${paymentMethod === 'interac' ? 'btn-navy' : 'btn-ghost'}`}
                 onClick={() => setPaymentMethod('interac')}
               >
                 Interac e-Transfer
               </button>
             </div>
+
+            {/* PayPal / Apple Pay Section */}
+            {(paymentMethod === 'paypal' || paymentMethod === 'apple') && (
+              <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
+                    {paymentMethod === 'paypal' ? 'Fast & Secure PayPal Checkout' : 'Apple Pay / Digital Wallet'}
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#16A34A', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <ShieldCheck size={14} /> Instant Authorization
+                  </span>
+                </div>
+
+                <p style={{ fontSize: '12.5px', color: '#64748B', margin: '0 0 16px', lineHeight: 1.5 }}>
+                  Click below to authorize your {paymentMethod === 'paypal' ? 'PayPal' : 'Apple Pay'} payment of{' '}
+                  <strong style={{ color: '#0F172A' }}>${grandTotal.toFixed(2)} CAD</strong>.
+                </p>
+
+                <PayPalCheckoutButton
+                  amount={grandTotal}
+                  currency="CAD"
+                  onSuccess={handlePayPalSuccess}
+                />
+              </div>
+            )}
 
             {paymentMethod === 'card' && (
               <div>
@@ -380,11 +452,19 @@ export default function CheckoutPage() {
                 </div>
               </div>
             )}
+
+            {paymentMethod === 'interac' && (
+              <div style={{ padding: '16px', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FDE68A', fontSize: '13px', color: '#92400E' }}>
+                <strong>Interac e-Transfer Instructions:</strong> Send payment to <strong>payments@cellcentral.ca</strong> with your order reference after submitting.
+              </div>
+            )}
           </div>
 
-          <button type="submit" className="btn btn-grad btn-block" style={{ padding: '16px', fontSize: '16px' }}>
-            PLACE ORDER (${grandTotal.toFixed(2)} CAD)
-          </button>
+          {paymentMethod !== 'paypal' && paymentMethod !== 'apple' && (
+            <button type="submit" className="btn btn-grad btn-block" style={{ padding: '16px', fontSize: '16px' }}>
+              PLACE ORDER (${grandTotal.toFixed(2)} CAD)
+            </button>
+          )}
         </form>
 
         {/* Right Summary Sidebar */}
