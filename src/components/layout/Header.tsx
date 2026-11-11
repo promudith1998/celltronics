@@ -177,9 +177,9 @@ export const Header: React.FC = () => {
     { name: 'Phone Cases', href: '/shop/phone-cases', icon: Smartphone },
     { name: 'Screen Protectors', href: '/shop/screen-protectors', icon: Layers },
     { name: 'Chargers', href: '/shop/chargers', icon: Zap },
-    { name: 'Cables', href: '/shop/cables', icon: Cable },
-    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging },
-    { name: 'Audio', href: '/shop/audio', icon: Headphones },
+    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1200' },
+    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1360' },
+    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1480' },
     { name: 'Deals', href: '/deals', isDeals: true, icon: Flame }
   ];
 
@@ -579,8 +579,8 @@ export const Header: React.FC = () => {
 
       {/* Main Desktop Navigation Bar */}
       <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff', position: 'relative' }}>
-        <div className="navrow wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minHeight: '48px', flexWrap: 'nowrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap', minWidth: 0 }} ref={navContainerRef}>
+        <div className="navrow wrap">
+          <div className="nav-links-track" ref={navContainerRef}>
             {/* SHOP BY CATEGORY BUTTON & MEGA DROPDOWN */}
             <div
               className="nav-item-wrapper"
@@ -1114,7 +1114,10 @@ export const Header: React.FC = () => {
                 }}
               >
                 <Smartphone size={14} color="#0B63F6" style={{ flexShrink: 0 }} />
-                <span style={{ whiteSpace: 'nowrap' }}>ACCESSORIES BY DEVICE</span>
+                <span style={{ whiteSpace: 'nowrap' }}>
+                  <span className="nav-long-word">ACCESSORIES </span>
+                  <span>BY DEVICE</span>
+                </span>
                 <ChevronDown
                   size={13}
                   style={{
@@ -1281,7 +1284,7 @@ export const Header: React.FC = () => {
               return (
                 <div
                   key={link.name}
-                  className="nav-item-wrapper"
+                  className={`nav-item-wrapper ${link.hideClass || ''}`}
                   onMouseEnter={() => handleMenuEnter(link.name)}
                   onMouseLeave={handleMenuLeave}
                   style={{ position: 'relative', flexShrink: 0 }}
@@ -1486,7 +1489,9 @@ export const Header: React.FC = () => {
               }}
             >
               <Briefcase size={13} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>BECOME A RETAIL PARTNER</span>
+              <span style={{ whiteSpace: 'nowrap' }}>
+                <span className="nav-long-btn">BECOME A </span>RETAIL PARTNER
+              </span>
             </Link>
 
             <Link
@@ -1511,7 +1516,9 @@ export const Header: React.FC = () => {
               }}
             >
               <Store size={13} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>OWN A CELLCENTRAL STORE</span>
+              <span style={{ whiteSpace: 'nowrap' }}>
+                <span className="nav-long-btn">OWN A </span>CELLCENTRAL STORE
+              </span>
             </Link>
           </div>
         </div>

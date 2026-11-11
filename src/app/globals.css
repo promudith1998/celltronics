@@ -604,8 +604,51 @@ nav.mainnav {
 .navrow {
   display: flex;
   align-items: center;
-  gap: 2px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 0;
+  width: 100%;
+  min-height: 48px;
+  flex-wrap: nowrap;
+}
+
+.nav-links-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1480px) {
+  .nav-hide-1480 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1360px) {
+  .nav-hide-1360 {
+    display: none !important;
+  }
+  .nav-long-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .nav-hide-1200 {
+    display: none !important;
+  }
+  .nav-long-word {
+    display: none !important;
+  }
 }
 
 .navcat {
