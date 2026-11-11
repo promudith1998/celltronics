@@ -7,8 +7,9 @@ export async function POST(request: Request) {
     const amount = body.amount || '0.00';
     const currency = body.currency || 'CAD';
     const referenceId = body.referenceId;
+    const customer = body.customer;
 
-    const orderId = await createPayPalOrder(amount, currency, referenceId);
+    const orderId = await createPayPalOrder(amount, currency, referenceId, customer);
     return NextResponse.json({ id: orderId });
   } catch (error: any) {
     console.error('API Error creating PayPal order:', error);
@@ -18,3 +19,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

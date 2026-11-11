@@ -430,6 +430,15 @@ export default function CheckoutPage() {
                 <PayPalCheckoutButton
                   amount={grandTotal}
                   currency="CAD"
+                  customer={{
+                    firstName,
+                    lastName,
+                    email,
+                    address,
+                    city,
+                    province,
+                    postalCode,
+                  }}
                   onSuccess={handlePayPalSuccess}
                 />
               </div>

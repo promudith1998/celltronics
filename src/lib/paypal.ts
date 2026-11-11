@@ -29,15 +29,29 @@ function getPayPalClient(): Client | null {
   });
 }
 
+export interface CustomerShippingInfo {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  countryCode?: string;
+}
+
 /**
  * Creates a PayPal order using the OrdersController
  * @param amount Total amount formatted as string (e.g. "49.99")
  * @param currency Currency code (default: CAD for Canadian CellCentral store)
+ * @param referenceId Optional merchant reference identifier
+ * @param customer Optional customer shipping address for automated pre-filling
  */
 export async function createPayPalOrder(
   amount: string,
   currency: string = 'CAD',
-  referenceId?: string
+  referenceId?: string,
+  customer?: CustomerShippingInfo
 ): Promise<string> {
   const client = getPayPalClient();
 
@@ -51,6 +65,20 @@ export async function createPayPalOrder(
 
   const ordersController = new OrdersController(client);
 
+  const fullName = [customer?.firstName, customer?.lastName].filter(Boolean).join(' ');
+  const shipping = customer?.address
+    ? {
+        name: fullName ? { fullName } : undefined,
+        address: {
+          addressLine1: customer.address,
+          adminArea2: customer.city || 'Toronto',
+          adminArea1: customer.province || 'ON',
+          postalCode: (customer.postalCode || 'M5A 4E5').replace(/\s+/g, ' ').trim(),
+          countryCode: customer.countryCode || 'CA',
+        },
+      }
+    : undefined;
+
   const { result } = await ordersController.createOrder({
     body: {
       intent: CheckoutPaymentIntent.Capture,
@@ -61,6 +89,7 @@ export async function createPayPalOrder(
             currencyCode: currency,
             value: Number(amount).toFixed(2),
           },
+          shipping,
         },
       ],
     },

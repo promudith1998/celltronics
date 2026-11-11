@@ -4,19 +4,34 @@ import React, { useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
+export interface PayPalCustomerInfo {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+}
+
 interface PayPalCheckoutButtonProps {
   amount: number;
   currency?: string;
+  customer?: PayPalCustomerInfo;
   onSuccess: (orderId: string, details?: any) => void;
   onError?: (err: any) => void;
   disabled?: boolean;
 }
 
-async function apiCreateOrder(amountVal: string, currencyVal: string): Promise<string> {
+async function apiCreateOrder(
+  amountVal: string,
+  currencyVal: string,
+  customer?: PayPalCustomerInfo
+): Promise<string> {
   const res = await fetch('/api/paypal/create-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount: amountVal, currency: currencyVal }),
+    body: JSON.stringify({ amount: amountVal, currency: currencyVal, customer }),
   });
   const data = await res.json();
   if (!res.ok || !data.id) {
@@ -41,6 +56,7 @@ async function apiCaptureOrder(orderId: string): Promise<any> {
 export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
   amount,
   currency = 'CAD',
+  customer,
   onSuccess,
   onError,
   disabled = false,
@@ -56,7 +72,7 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
     setIsProcessing(true);
     setErrorMessage('');
     try {
-      const id = await apiCreateOrder(amount.toFixed(2), currency);
+      const id = await apiCreateOrder(amount.toFixed(2), currency, customer);
       const captureResult = await apiCaptureOrder(id);
       setIsProcessing(false);
       onSuccess(id, captureResult);
@@ -97,6 +113,7 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
             intent: 'capture',
             components: 'buttons',
             enableFunding: 'applepay,paylater,card',
+            locale: 'en_CA',
           }}
         >
           <PayPalButtons
@@ -111,7 +128,7 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
             createOrder={async () => {
               try {
                 setIsProcessing(true);
-                const id = await apiCreateOrder(amount.toFixed(2), currency);
+                const id = await apiCreateOrder(amount.toFixed(2), currency, customer);
                 return id;
               } catch (err: any) {
                 setIsProcessing(false);
