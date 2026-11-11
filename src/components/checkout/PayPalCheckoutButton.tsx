@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -67,6 +67,39 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const isConfigured = Boolean(clientId && clientId !== 'your_sandbox_client_id_here');
 
+  // Memoize options to prevent PayPalScriptProvider from tearing down and reloading the script
+  const scriptOptions = useMemo(
+    () => ({
+      clientId: (clientId as string) || '',
+      currency: currency,
+      intent: 'capture',
+      components: 'buttons',
+      enableFunding: 'applepay,paylater,card',
+      locale: 'en_CA',
+    }),
+    [clientId, currency]
+  );
+
+  // Suppress harmless PayPal internal zoid component-close unhandled rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      const msg = String(reason?.message || reason || '');
+      if (
+        msg.includes('Component closed') ||
+        msg.includes('paypal_js_sdk_v5_unhandled_exception') ||
+        msg.includes('zoid')
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   // Handle direct demo checkout when PayPal API keys are not yet configured in .env.local
   const handleSimulatedPayment = async () => {
     setIsProcessing(true);
@@ -106,16 +139,7 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
       )}
 
       {isConfigured ? (
-        <PayPalScriptProvider
-          options={{
-            clientId: clientId as string,
-            currency: currency,
-            intent: 'capture',
-            components: 'buttons',
-            enableFunding: 'applepay,paylater,card',
-            locale: 'en_CA',
-          }}
-        >
+        <PayPalScriptProvider options={scriptOptions}>
           <PayPalButtons
             disabled={disabled || isProcessing}
             style={{
@@ -148,8 +172,21 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
                 if (onError) onError(err);
               }
             }}
-            onError={(err) => {
+            onCancel={(data) => {
               setIsProcessing(false);
+              setErrorMessage('');
+              console.info('PayPal modal/card form closed by user:', data);
+            }}
+            onError={(err: any) => {
+              setIsProcessing(false);
+              const errStr = String(err?.message || err || '');
+              if (
+                errStr.includes('closed') ||
+                errStr.includes('detected') ||
+                errStr.includes('cancel')
+              ) {
+                return;
+              }
               setErrorMessage('PayPal reported an error during checkout.');
               if (onError) onError(err);
             }}
