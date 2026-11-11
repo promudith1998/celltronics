@@ -6,7 +6,30 @@ import { CheckCircle2, ShieldCheck, Truck, CreditCard, ArrowRight, ShoppingBag, 
 import { useCart } from '@/context/CartContext';
 import { ProductIcon } from '@/components/product/ProductIcon';
 import { createOrderInDb } from '@/lib/supabaseService';
-import { PayPalCheckoutButton } from '@/components/checkout/PayPalCheckoutButton';
+import dynamic from 'next/dynamic';
+
+const PayPalCheckoutButton = dynamic(
+  () => import('@/components/checkout/PayPalCheckoutButton').then((mod) => mod.PayPalCheckoutButton),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        style={{
+          padding: '16px',
+          borderRadius: '10px',
+          background: '#F8FAFC',
+          border: '1px dashed #CBD5E1',
+          textAlign: 'center',
+          color: '#64748B',
+          fontSize: '13px',
+          fontWeight: 500,
+        }}
+      >
+        Loading secure PayPal & Apple Pay options...
+      </div>
+    ),
+  }
+);
 
 export default function CheckoutPage() {
   const { items, subtotal, discount, shipping, tax, total, clearCart } = useCart();

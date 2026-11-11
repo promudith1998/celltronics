@@ -57,7 +57,6 @@ import { PromoCodeModal } from '@/components/admin/PromoCodeModal';
 import { AdminAuthGate } from '@/components/admin/AdminAuthGate';
 import { AdminAnalyticsChart } from '@/components/admin/AdminAnalyticsChart';
 import { OrderDetailsModal } from '@/components/admin/OrderDetailsModal';
-import { testPayPalConnection } from '@/app/actions/paypal';
 
 export default function AdminPage() {
   const {
@@ -2273,7 +2272,8 @@ export default function AdminPage() {
                       onClick={async () => {
                         setIsCheckingPaypal(true);
                         try {
-                          const res = await testPayPalConnection();
+                          const response = await fetch('/api/paypal/test-connection');
+                          const res = await response.json();
                           setPaypalTestResult(res);
                           if (res.authenticated) {
                             showToast('PayPal API Connected! 🟢', res.message, 'success');
