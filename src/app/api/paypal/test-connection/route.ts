@@ -5,3 +5,4 @@ export async function GET() {
   const result = await checkPayPalConnectivity();
   return NextResponse.json(result);
 }
+
