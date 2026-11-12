@@ -141,7 +141,7 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
       {isConfigured ? (
         <PayPalScriptProvider options={scriptOptions}>
           <PayPalButtons
-            disabled={disabled || isProcessing}
+            disabled={disabled}
             style={{
               layout: 'vertical',
               color: 'gold',
@@ -151,17 +151,17 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
             }}
             createOrder={async () => {
               try {
-                setIsProcessing(true);
+                setErrorMessage('');
                 const id = await apiCreateOrder(amount.toFixed(2), currency, customer);
                 return id;
               } catch (err: any) {
-                setIsProcessing(false);
                 setErrorMessage(err.message || 'Could not initiate PayPal order.');
                 throw err;
               }
             }}
             onApprove={async (data) => {
               try {
+                setIsProcessing(true);
                 const orderId = data.orderID;
                 const details = await apiCaptureOrder(orderId);
                 setIsProcessing(false);

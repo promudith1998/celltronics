@@ -412,7 +412,7 @@ export default function CheckoutPage() {
 
             {/* PayPal / Apple Pay Section */}
             {(paymentMethod === 'paypal' || paymentMethod === 'apple') && (
-              <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '12px' }}>
+              <div style={{ padding: '20px', background: '#FFFFFF', borderRadius: '12px', border: '1.5px solid #E2E8F0', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)' }}>
                     {paymentMethod === 'paypal' ? 'Fast & Secure PayPal Checkout' : 'Apple Pay / Digital Wallet'}
