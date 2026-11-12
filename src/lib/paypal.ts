@@ -3,6 +3,8 @@ import {
   Environment,
   OrdersController,
   CheckoutPaymentIntent,
+  PaypalWalletContextShippingPreference,
+  PaypalExperienceUserAction,
 } from '@paypal/paypal-server-sdk';
 
 /**
@@ -92,6 +94,15 @@ export async function createPayPalOrder(
           shipping,
         },
       ],
+      paymentSource: {
+        paypal: {
+          experienceContext: {
+            brandName: 'CellCentral Mobile Accessories',
+            shippingPreference: PaypalWalletContextShippingPreference.NoShipping,
+            userAction: PaypalExperienceUserAction.PayNow,
+          },
+        },
+      },
     },
   });
 

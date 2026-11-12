@@ -74,7 +74,8 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
       currency: currency,
       intent: 'capture',
       components: 'buttons',
-      enableFunding: 'applepay,paylater,card',
+      enableFunding: 'applepay,paylater',
+      disableFunding: 'card',
       locale: 'en_CA',
     }),
     [clientId, currency]
