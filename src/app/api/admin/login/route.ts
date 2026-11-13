@@ -71,8 +71,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error: `Invalid username or password (${failed.remainingAttempts} attempts remaining).`,
-        remainingAttempts: failed.remainingAttempts
+        error: 'Invalid username or password.'
       },
       { status: 401 }
     );

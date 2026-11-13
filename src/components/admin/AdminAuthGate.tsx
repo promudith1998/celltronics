@@ -110,13 +110,13 @@ export const AdminAuthGate: React.FC<AdminAuthGateProps> = ({ children }) => {
     const trimmedUser = username.trim();
 
     if (!trimmedUser) {
-      setErrorMessage('Please enter your admin username or email.');
+      setErrorMessage('Please enter your username.');
       triggerShake();
       return;
     }
 
     if (!password) {
-      setErrorMessage('Please enter your admin password.');
+      setErrorMessage('Please enter your password.');
       triggerShake();
       return;
     }
@@ -301,11 +301,10 @@ export const AdminAuthGate: React.FC<AdminAuthGateProps> = ({ children }) => {
                 id="admin-username"
                 name="username"
                 type="text"
-                autoComplete="username"
+                autoComplete="off"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLockedOut || isSubmitting}
-                placeholder="Enter admin username"
                 style={{
                   width: '100%',
                   padding: '12px 14px 12px 42px',
@@ -345,11 +344,10 @@ export const AdminAuthGate: React.FC<AdminAuthGateProps> = ({ children }) => {
                 id="admin-password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLockedOut || isSubmitting}
-                placeholder="Enter admin password"
                 style={{
                   width: '100%',
                   padding: '12px 44px 12px 42px',

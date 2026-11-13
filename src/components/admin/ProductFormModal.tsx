@@ -84,6 +84,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [badgeText, setBadgeText] = useState('');
   const [inStock, setInStock] = useState(true);
   const [stockCount, setStockCount] = useState<number>(50);
+  const [lowStockThreshold, setLowStockThreshold] = useState<string>('');
   const [iconType, setIconType] = useState<Product['iconType']>('case');
   const [imageUrl, setImageUrl] = useState('');
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -120,6 +121,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setBadgeText(productToEdit.badgeText || '');
       setInStock(productToEdit.inStock ?? true);
       setStockCount(productToEdit.stockCount ?? 50);
+      setLowStockThreshold(
+        typeof productToEdit.lowStockThreshold === 'number'
+          ? String(productToEdit.lowStockThreshold)
+          : ''
+      );
       setIconType(productToEdit.iconType || 'case');
       setImageUrl(productToEdit.imageUrl || '');
       setGalleryImages(productToEdit.galleryImages || []);
@@ -308,6 +314,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       sku: sku.trim() || `SKU-${Date.now()}`,
       inStock,
       stockCount: Number(stockCount),
+      lowStockThreshold:
+        lowStockThreshold.trim() !== '' && !Number.isNaN(Number(lowStockThreshold))
+          ? Math.max(0, Math.floor(Number(lowStockThreshold)))
+          : undefined,
       iconType,
       imageUrl: imageUrl.trim() || undefined,
       galleryImages: galleryImages.filter(Boolean),
@@ -811,6 +821,28 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       min="0"
                       value={stockCount}
                       onChange={(e) => setStockCount(parseInt(e.target.value) || 0)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid var(--gray-200)',
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: 'var(--navy)'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                      Custom Low-Stock Alert Threshold (Optional)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Leave blank to use global store threshold"
+                      value={lowStockThreshold}
+                      onChange={(e) => setLowStockThreshold(e.target.value)}
                       style={{
                         width: '100%',
                         padding: '10px 14px',

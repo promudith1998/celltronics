@@ -43,6 +43,7 @@ export interface Product {
   sku: string;
   inStock: boolean;
   stockCount?: number;
+  lowStockThreshold?: number;
   iconType: 'case' | 'charger' | 'cable' | 'power' | 'audio' | 'screen' | 'mount';
   imageUrl?: string;
   galleryImages?: string[];

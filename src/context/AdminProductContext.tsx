@@ -264,6 +264,20 @@ export interface SupabaseStatus {
   lastChecked?: string;
 }
 
+export interface InventoryAlertConfig {
+  lowStockThreshold: number;
+  criticalStockThreshold: number;
+  notifyOnDashboard: boolean;
+  notifyToastOnLowStock: boolean;
+}
+
+export const DEFAULT_INVENTORY_ALERT_CONFIG: InventoryAlertConfig = {
+  lowStockThreshold: 25,
+  criticalStockThreshold: 10,
+  notifyOnDashboard: true,
+  notifyToastOnLowStock: true
+};
+
 interface AdminProductContextType {
   products: Product[];
   campaigns: PromotionCampaign[];
@@ -275,6 +289,9 @@ interface AdminProductContextType {
   stats: AdminStats;
   isLoaded: boolean;
   supabaseStatus: SupabaseStatus;
+  inventoryAlertConfig: InventoryAlertConfig;
+  updateInventoryAlertConfig: (updates: Partial<InventoryAlertConfig>) => void;
+  getProductLowStockThreshold: (product: Product) => number;
 
   // Product Operations
   addProduct: (product: Omit<Product, 'id'>) => Product;
@@ -322,7 +339,8 @@ const STORAGE_KEYS = {
   CAMPAIGNS: 'cellcentral_campaigns_v2',
   PROMOS: 'cellcentral_promocodes_v2',
   ORDERS: 'cellcentral_orders_v2',
-  ACTIVITIES: 'cellcentral_admin_activities_v1'
+  ACTIVITIES: 'cellcentral_admin_activities_v1',
+  INVENTORY_ALERT_CONFIG: 'cellcentral_inventory_alert_config_v1'
 };
 
 export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -333,6 +351,9 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>([]);
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [activityEvents, setActivityEvents] = useState<StoreActivityEvent[]>(INITIAL_ACTIVITIES);
+  const [inventoryAlertConfig, setInventoryAlertConfig] = useState<InventoryAlertConfig>(
+    DEFAULT_INVENTORY_ALERT_CONFIG
+  );
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [supabaseStatus, setSupabaseStatus] = useState<SupabaseStatus>({
     connected: false,
@@ -405,6 +426,14 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const storedActivities = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
       if (storedActivities) setActivityEvents(JSON.parse(storedActivities));
+
+      const storedAlertConfig = localStorage.getItem(STORAGE_KEYS.INVENTORY_ALERT_CONFIG);
+      if (storedAlertConfig) {
+        setInventoryAlertConfig({
+          ...DEFAULT_INVENTORY_ALERT_CONFIG,
+          ...JSON.parse(storedAlertConfig)
+        });
+      }
     } catch (e) {
       console.error('Failed to load admin stored data:', e);
     } finally {
@@ -444,11 +473,58 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [activityEvents, isLoaded]);
 
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(
+        STORAGE_KEYS.INVENTORY_ALERT_CONFIG,
+        JSON.stringify(inventoryAlertConfig)
+      );
+    }
+  }, [inventoryAlertConfig, isLoaded]);
+
+  const getProductLowStockThreshold = useCallback(
+    (product: Product): number => {
+      return typeof product.lowStockThreshold === 'number' && product.lowStockThreshold >= 0
+        ? product.lowStockThreshold
+        : inventoryAlertConfig.lowStockThreshold;
+    },
+    [inventoryAlertConfig.lowStockThreshold]
+  );
+
+  const updateInventoryAlertConfig = (updates: Partial<InventoryAlertConfig>) => {
+    setInventoryAlertConfig((prev) => {
+      const nextLow =
+        typeof updates.lowStockThreshold === 'number'
+          ? Math.max(1, Math.floor(updates.lowStockThreshold))
+          : prev.lowStockThreshold;
+      const nextCritical =
+        typeof updates.criticalStockThreshold === 'number'
+          ? Math.max(0, Math.min(nextLow, Math.floor(updates.criticalStockThreshold)))
+          : Math.min(prev.criticalStockThreshold, nextLow);
+
+      return {
+        ...prev,
+        ...updates,
+        lowStockThreshold: nextLow,
+        criticalStockThreshold: nextCritical
+      };
+    });
+
+    addActivityEvent({
+      type: 'system',
+      title: 'Inventory Alert Settings Updated',
+      description: 'Updated low-stock notification thresholds',
+      badgeColor: '#FF7A1A'
+    });
+  };
+
   // Compute live admin statistics
   const stats: AdminStats = useMemo(() => {
     const totalProducts = products.length;
     const totalInventoryValue = products.reduce((acc, p) => acc + (p.price * (p.stockCount || 20)), 0);
-    const lowStockCount = products.filter((p) => p.inStock && (p.stockCount ?? 20) <= 25).length;
+    const lowStockCount = products.filter(
+      (p) => p.inStock && (p.stockCount ?? 20) <= getProductLowStockThreshold(p)
+    ).length;
     const outOfStockCount = products.filter((p) => !p.inStock || p.badge === 'out').length;
     const activeCampaignsCount = campaigns.filter((c) => c.isActive).length;
     const activePromoCodesCount = promoCodes.filter((p) => p.isActive).length;
@@ -477,7 +553,7 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
       totalOrdersCount,
       pendingOrdersCount
     };
-  }, [products, campaigns, promoCodes, orders]);
+  }, [products, campaigns, promoCodes, orders, getProductLowStockThreshold]);
 
   // Activity logger helper
   const addActivityEvent = (event: Omit<StoreActivityEvent, 'id' | 'timestamp'>) => {
@@ -532,6 +608,17 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
       description: `Price: $${updatedProduct.price.toFixed(2)} | Stock: ${updatedProduct.stockCount ?? 20}`,
       badgeColor: '#7C3AED'
     });
+
+    const threshold = getProductLowStockThreshold(updatedProduct);
+    const updatedQty = updatedProduct.stockCount ?? 20;
+    if (updatedQty <= threshold) {
+      addActivityEvent({
+        type: 'system',
+        title: `Low Stock Alert: ${updatedProduct.name.slice(0, 28)}...`,
+        description: `Only ${updatedQty} units left (Alert threshold: ${threshold})`,
+        badgeColor: '#FF3D5A'
+      });
+    }
   };
 
   const deleteProduct = (id: string) => {
@@ -857,6 +944,9 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         stats,
         isLoaded,
         supabaseStatus,
+        inventoryAlertConfig,
+        updateInventoryAlertConfig,
+        getProductLowStockThreshold,
         addProduct,
         updateProduct,
         deleteProduct,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -43,7 +43,8 @@ import {
   Truck,
   FileText,
   RotateCcw,
-  CreditCard
+  CreditCard,
+  Bell
 } from 'lucide-react';
 import { useAdminProducts } from '@/context/AdminProductContext';
 import { useToast } from '@/context/ToastContext';
@@ -68,7 +69,11 @@ export default function AdminPage() {
     subscribers,
     activityEvents,
     stats,
+    isLoaded,
     supabaseStatus,
+    inventoryAlertConfig,
+    updateInventoryAlertConfig,
+    getProductLowStockThreshold,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -133,15 +138,86 @@ export default function AdminPage() {
   // Delete Confirmation State
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  // Security Passcode Change Form
-  // Lock Session helper
+  // Inventory Low-Stock Notification State & Settings Form
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [lowThresholdInput, setLowThresholdInput] = useState<number>(
+    inventoryAlertConfig.lowStockThreshold
+  );
+  const [criticalThresholdInput, setCriticalThresholdInput] = useState<number>(
+    inventoryAlertConfig.criticalStockThreshold
+  );
+  const [notifyDashboardInput, setNotifyDashboardInput] = useState<boolean>(
+    inventoryAlertConfig.notifyOnDashboard
+  );
+  const [notifyToastInput, setNotifyToastInput] = useState<boolean>(
+    inventoryAlertConfig.notifyToastOnLowStock
+  );
+  const hasShownInitialLowStockToast = useRef(false);
+
+  useEffect(() => {
+    setLowThresholdInput(inventoryAlertConfig.lowStockThreshold);
+    setCriticalThresholdInput(inventoryAlertConfig.criticalStockThreshold);
+    setNotifyDashboardInput(inventoryAlertConfig.notifyOnDashboard);
+    setNotifyToastInput(inventoryAlertConfig.notifyToastOnLowStock);
+  }, [inventoryAlertConfig]);
+
+  // All low-stock & out-of-stock products based on configured thresholds
+  const allLowStockAlerts = useMemo(() => {
+    return products
+      .filter((p) => {
+        const qty = p.stockCount ?? 20;
+        const threshold = getProductLowStockThreshold(p);
+        return qty <= threshold || !p.inStock || p.badge === 'out';
+      })
+      .sort((a, b) => (a.stockCount ?? 0) - (b.stockCount ?? 0));
+  }, [products, getProductLowStockThreshold]);
+
+  useEffect(() => {
+    if (
+      isLoaded &&
+      !hasShownInitialLowStockToast.current &&
+      inventoryAlertConfig.notifyToastOnLowStock &&
+      allLowStockAlerts.length > 0
+    ) {
+      hasShownInitialLowStockToast.current = true;
+      showToast(
+        'Low Inventory Alert ⚠️',
+        `${allLowStockAlerts.length} product(s) are at or below your stock threshold (${inventoryAlertConfig.lowStockThreshold} units).`,
+        'info'
+      );
+    }
+  }, [
+    isLoaded,
+    inventoryAlertConfig.notifyToastOnLowStock,
+    inventoryAlertConfig.lowStockThreshold,
+    allLowStockAlerts.length,
+    showToast
+  ]);
+
+  const handleSaveInventoryAlertConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanLow = Math.max(1, Math.floor(Number(lowThresholdInput) || 1));
+    const cleanCrit = Math.max(0, Math.min(cleanLow, Math.floor(Number(criticalThresholdInput) || 0)));
+
+    updateInventoryAlertConfig({
+      lowStockThreshold: cleanLow,
+      criticalStockThreshold: cleanCrit,
+      notifyOnDashboard: notifyDashboardInput,
+      notifyToastOnLowStock: notifyToastInput
+    });
+    showToast(
+      'Alert Settings Saved 🔔',
+      `Admin will be notified when stock reaches ≤ ${cleanLow} units (Critical: ≤ ${cleanCrit}).`,
+      'success'
+    );
+  };
 
   // Filtered Products for Catalog Table
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
       if (stockFilter === 'instock' && (!p.inStock || p.badge === 'out')) return false;
-      if (stockFilter === 'low' && ((p.stockCount ?? 20) > 25 || !p.inStock)) return false;
+      if (stockFilter === 'low' && ((p.stockCount ?? 20) > getProductLowStockThreshold(p) || !p.inStock)) return false;
       if (stockFilter === 'out' && p.inStock && p.badge !== 'out') return false;
 
       if (searchQuery.trim()) {
@@ -153,7 +229,7 @@ export default function AdminPage() {
       }
       return true;
     });
-  }, [products, selectedCategory, stockFilter, searchQuery]);
+  }, [products, selectedCategory, stockFilter, searchQuery, getProductLowStockThreshold]);
 
   // Filtered Orders
   const filteredOrders = useMemo(() => {
@@ -244,8 +320,8 @@ export default function AdminPage() {
 
   // Low Stock Items for Quick Restock Widget
   const lowStockItems = useMemo(() => {
-    return products.filter((p) => (p.stockCount ?? 20) <= 25 || !p.inStock || p.badge === 'out').slice(0, 6);
-  }, [products]);
+    return allLowStockAlerts.slice(0, 6);
+  }, [allLowStockAlerts]);
 
   return (
     <AdminAuthGate>
@@ -336,6 +412,160 @@ export default function AdminPage() {
               >
                 <Sparkles size={14} color="#FF7A1A" /> New Campaign
               </button>
+
+              {/* Low-Stock Notification Bell */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAlertsOpen((prev) => !prev)}
+                  title="Low-Stock Inventory Notifications"
+                  style={{
+                    position: 'relative',
+                    background: allLowStockAlerts.length > 0 ? 'rgba(255,61,90,0.16)' : 'rgba(255,255,255,0.1)',
+                    border: `1px solid ${allLowStockAlerts.length > 0 ? 'rgba(255,61,90,0.45)' : 'rgba(255,255,255,0.2)'}`,
+                    color: '#fff',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '100px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Bell size={16} color={allLowStockAlerts.length > 0 ? '#FF8FA3' : '#fff'} />
+                  {allLowStockAlerts.length > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-5px',
+                        right: '-5px',
+                        minWidth: '18px',
+                        height: '18px',
+                        borderRadius: '100px',
+                        background: '#FF3D5A',
+                        color: '#fff',
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0 4px',
+                        border: '2px solid #0B1E3D'
+                      }}
+                    >
+                      {allLowStockAlerts.length}
+                    </span>
+                  )}
+                </button>
+
+                {isAlertsOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '44px',
+                      width: '360px',
+                      maxHeight: '420px',
+                      overflowY: 'auto',
+                      background: '#fff',
+                      color: '#0F172A',
+                      borderRadius: '16px',
+                      border: '1px solid #E2E8F0',
+                      boxShadow: '0 20px 45px rgba(11,30,61,0.25)',
+                      zIndex: 120,
+                      padding: '16px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A' }}>
+                          Inventory Alerts ({allLowStockAlerts.length})
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: '#64748B' }}>
+                          Threshold: ≤ {inventoryAlertConfig.lowStockThreshold} units
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAlertsOpen(false);
+                          setActiveTab('settings');
+                        }}
+                        style={{
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          color: '#0B63F6',
+                          background: '#EFF6FF',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '5px 10px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Configure
+                      </button>
+                    </div>
+
+                    {allLowStockAlerts.length === 0 ? (
+                      <div style={{ padding: '20px', textAlign: 'center', fontSize: '12.5px', color: '#1EA672', fontWeight: 700, background: '#ECFDF5', borderRadius: '10px' }}>
+                        All products are above your low-stock threshold.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {allLowStockAlerts.slice(0, 8).map((item) => {
+                          const qty = item.stockCount ?? 0;
+                          const isCrit = qty <= inventoryAlertConfig.criticalStockThreshold;
+                          return (
+                            <div
+                              key={item.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '10px',
+                                padding: '10px',
+                                borderRadius: '10px',
+                                background: isCrit ? '#FEF2F2' : '#FFF7ED',
+                                border: `1px solid ${isCrit ? '#FECACA' : '#FED7AA'}`
+                              }}
+                            >
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {item.name}
+                                </div>
+                                <div style={{ fontSize: '11px', color: isCrit ? '#DC2626' : '#EA580C', fontWeight: 700 }}>
+                                  {qty} units left (Alert ≤ {getProductLowStockThreshold(item)})
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  restockProduct(item.id, 10);
+                                  showToast('Restocked +10 📦', `Added 10 units to ${item.name.slice(0, 22)}...`, 'success');
+                                }}
+                                style={{
+                                  padding: '4px 9px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #CBD5E1',
+                                  background: '#fff',
+                                  fontSize: '11px',
+                                  fontWeight: 800,
+                                  color: '#0F172A',
+                                  cursor: 'pointer',
+                                  flexShrink: 0
+                                }}
+                              >
+                                +10
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Supabase Status Pill */}
               <div
@@ -497,6 +727,87 @@ export default function AdminPage() {
           {/* ========================================================= */}
           {activeTab === 'dashboard' && (
             <div>
+              {/* Configurable Low-Stock Alert Banner */}
+              {inventoryAlertConfig.notifyOnDashboard && allLowStockAlerts.length > 0 && (
+                <div
+                  style={{
+                    marginBottom: '22px',
+                    padding: '16px 20px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #FEF2F2 0%, #FFF7ED 100%)',
+                    border: '1.5px solid #FECACA',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '12px',
+                        background: '#FEE2E2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#DC2626',
+                        flexShrink: 0
+                      }}
+                    >
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#991B1B' }}>
+                        Low Inventory Alert: {allLowStockAlerts.length} item(s) need attention
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: '#B45309', fontWeight: 600 }}>
+                        Triggered when stock reaches ≤ {inventoryAlertConfig.lowStockThreshold} units (Critical ≤ {inventoryAlertConfig.criticalStockThreshold}).
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStockFilter('low');
+                        setActiveTab('products');
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        background: '#DC2626',
+                        color: '#fff',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View &amp; Restock
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('settings')}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        background: '#fff',
+                        color: '#0F172A',
+                        border: '1px solid #E2E8F0',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Configure Threshold
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Financial & Operations KPI Cards Grid */}
               <div
                 style={{
@@ -720,7 +1031,7 @@ export default function AdminPage() {
                               </div>
                               <div style={{ fontSize: '11.5px', color: 'var(--gray-500)', marginTop: '2px' }}>
                                 SKU: {prod.sku} · Current Stock:{' '}
-                                <strong style={{ color: (prod.stockCount ?? 0) <= 10 ? '#FF3D5A' : '#FF7A1A' }}>
+                                <strong style={{ color: (prod.stockCount ?? 0) <= inventoryAlertConfig.criticalStockThreshold ? '#FF3D5A' : '#FF7A1A' }}>
                                   {prod.stockCount ?? 0} units
                                 </strong>
                               </div>
@@ -1371,7 +1682,7 @@ export default function AdminPage() {
                     <tbody>
                       {filteredProducts.map((p) => {
                         const discountPct = p.wasPrice && p.wasPrice > p.price ? Math.round(((p.wasPrice - p.price) / p.wasPrice) * 100) : null;
-                        const isLowStock = p.inStock && (p.stockCount ?? 20) <= 25;
+                        const isLowStock = p.inStock && (p.stockCount ?? 20) <= getProductLowStockThreshold(p);
                         const isOut = !p.inStock || p.badge === 'out';
 
                         return (
@@ -1908,6 +2219,137 @@ export default function AdminPage() {
               </h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Inventory Low-Stock Notification Settings */}
+                <div
+                  style={{
+                    background: '#fff',
+                    padding: '24px',
+                    borderRadius: '20px',
+                    border: '1.5px solid #FF7A1A',
+                    boxShadow: '0 8px 30px rgba(255, 122, 26, 0.08)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
+                    <div
+                      style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '12px',
+                        background: 'rgba(255, 122, 26, 0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#FF7A1A'
+                      }}
+                    >
+                      <Bell size={22} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
+                        Inventory Low-Stock Alert Configuration
+                      </h3>
+                      <span style={{ fontSize: '12.5px', color: 'var(--gray-500)' }}>
+                        Configure when the admin is notified as item quantities get low
+                      </span>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSaveInventoryAlertConfig} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
+                          Low-Stock Warning Threshold (Units)
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={lowThresholdInput}
+                          onChange={(e) => setLowThresholdInput(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            border: '1.5px solid var(--gray-200)',
+                            fontSize: '14px',
+                            fontWeight: 700
+                          }}
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--gray-500)', display: 'block', marginTop: '4px' }}>
+                          Notify when product quantity is ≤ this number (unless overridden per product)
+                        </span>
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
+                          Critical / Urgent Threshold (Units)
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={lowThresholdInput}
+                          value={criticalThresholdInput}
+                          onChange={(e) => setCriticalThresholdInput(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            border: '1.5px solid var(--gray-200)',
+                            fontSize: '14px',
+                            fontWeight: 700
+                          }}
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--gray-500)', display: 'block', marginTop: '4px' }}>
+                          Highlighted in urgent red when stock drops ≤ this number
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 14px', borderRadius: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--navy)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={notifyDashboardInput}
+                          onChange={(e) => setNotifyDashboardInput(e.target.checked)}
+                          style={{ width: '16px', height: '16px', accentColor: '#FF7A1A' }}
+                        />
+                        <span>Show Low-Stock Alert Banner on Admin Dashboard</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--navy)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={notifyToastInput}
+                          onChange={(e) => setNotifyToastInput(e.target.checked)}
+                          style={{ width: '16px', height: '16px', accentColor: '#FF7A1A' }}
+                        />
+                        <span>Show Pop-Up Toast Notification when opening Admin Portal with low stock</span>
+                      </label>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: allLowStockAlerts.length > 0 ? '#DC2626' : '#1EA672' }}>
+                        Currently {allLowStockAlerts.length} product(s) trigger this alert.
+                      </span>
+
+                      <button
+                        type="submit"
+                        style={{
+                          padding: '10px 20px',
+                          borderRadius: '10px',
+                          background: '#FF7A1A',
+                          color: '#fff',
+                          border: 'none',
+                          fontSize: '13px',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Save Alert Settings
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
                 {/* Security Passcode Settings */}
                 <div
                   style={{
