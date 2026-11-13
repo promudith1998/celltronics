@@ -10,14 +10,62 @@ import {
   Headphones,
   Award,
   ShieldCheck,
-  Mail
+  Mail,
+  Flame,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { subscribeNewsletterInDb } from '@/lib/supabaseService';
+import { PRODUCTS } from '@/data/products';
+import { useAdminProducts } from '@/context/AdminProductContext';
+import { ProductCard } from '@/components/product/ProductCard';
 
 export default function HomePage() {
   const { showToast } = useToast();
+  const { products: adminProducts } = useAdminProducts();
+  const ALL_PRODUCTS = adminProducts.length > 0 ? adminProducts : PRODUCTS;
   const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  // Curated Best Sellers across diverse categories (Charger, Glass, Power Bank, Audio, Case, Cable, Mount, Dock)
+  const bestSellerPreferredIds = [
+    'ugreen-65w-gan-fast-charger',
+    'torras-ultraglass-screen-protector',
+    'esr-10000mah-magsafe-power-bank',
+    'anker-soundcore-space-q45-headphones',
+    'esr-halolock-kickstand-case',
+    'baseus-usb-c-braided-cable-2m',
+    'samsung-wireless-car-mount-charger-15w',
+    'belkin-boostcharge-pro-3in1-magsafe'
+  ];
+
+  const bestSellers = bestSellerPreferredIds
+    .map((id) => ALL_PRODUCTS.find((p) => p.id === id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  // Fallback if admin deleted any preferred ID
+  if (bestSellers.length < 4) {
+    const existingIds = new Set(bestSellers.map((p) => p.id));
+    ALL_PRODUCTS.filter((p) => !existingIds.has(p.id) && (p.badge === 'best' || p.rating >= 4.7))
+      .slice(0, 8 - bestSellers.length)
+      .forEach((p) => bestSellers.push(p));
+  }
+
+  const bestSellerIds = new Set(bestSellers.map((p) => p.id));
+
+  // Latest Device Accessories: strictly excludes any product shown in Best Sellers (zero duplication)
+  const latestDeviceAccessories = ALL_PRODUCTS.filter(
+    (p) =>
+      !bestSellerIds.has(p.id) &&
+      p.compatibleDevices.some(
+        (d) =>
+          d.includes('iPhone 17') ||
+          d.includes('iPhone 16') ||
+          d.includes('Galaxy S26') ||
+          d.includes('Galaxy S25') ||
+          d.includes('Pixel 10') ||
+          d.includes('Pixel 9')
+      )
+  ).slice(0, 8);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -611,6 +659,60 @@ export default function HomePage() {
                 SHOP NOW
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ======================================================== */}
+      {/* 5B. BEST SELLERS PRODUCT GRID                            */}
+      {/* ======================================================== */}
+      <section style={{ padding: '36px 0 40px', background: '#F8FAFC', borderTop: '1px solid #EEF2F6', borderBottom: '1px solid #EEF2F6' }}>
+        <div className="wrap">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '22px', gap: '12px', flexWrap: 'wrap' }}>
+            <div>
+              <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#FF3D5A', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <Flame size={14} color="#FF3D5A" /> TOP RATED BY CANADIANS
+              </span>
+              <h2 style={{ fontFamily: 'var(--font-space), sans-serif', fontSize: '22px', fontWeight: 800, color: '#0B1E3D', margin: '4px 0 0', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                BEST SELLERS
+              </h2>
+            </div>
+            <Link href="/shop" style={{ fontSize: '13px', fontWeight: 700, color: '#0B63F6', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              View All Best Sellers <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="product-grid">
+            {bestSellers.map((prod) => (
+              <ProductCard key={prod.id} product={prod} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ======================================================== */}
+      {/* 5C. LATEST DEVICE ACCESSORIES (Zero Duplication)         */}
+      {/* ======================================================== */}
+      <section style={{ padding: '40px 0 36px', background: '#FFFFFF' }}>
+        <div className="wrap">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '22px', gap: '12px', flexWrap: 'wrap' }}>
+            <div>
+              <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#0B63F6', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <Sparkles size={14} color="#0B63F6" /> NEW FLAGSHIP GEAR
+              </span>
+              <h2 style={{ fontFamily: 'var(--font-space), sans-serif', fontSize: '22px', fontWeight: 800, color: '#0B1E3D', margin: '4px 0 0', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                LATEST DEVICE ACCESSORIES
+              </h2>
+            </div>
+            <Link href="/shop?sort=new" style={{ fontSize: '13px', fontWeight: 700, color: '#0B63F6', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              Explore Flagship Collection <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="product-grid">
+            {latestDeviceAccessories.map((prod) => (
+              <ProductCard key={prod.id} product={prod} />
+            ))}
           </div>
         </div>
       </section>
