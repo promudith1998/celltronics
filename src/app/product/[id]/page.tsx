@@ -36,7 +36,7 @@ interface ProductPageProps {
 }
 
 export default function ProductDetailPage() {
-  const routeParams = useParams<{ id: string }>();
+  const routeParams = useParams();
   const id = Array.isArray(routeParams?.id) ? routeParams.id[0] : (routeParams?.id as string);
   const { products } = useAdminProducts();
   const product = products.find((p) => p.id === id) || PRODUCTS.find((p) => p.id === id);

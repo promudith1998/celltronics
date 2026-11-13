@@ -177,9 +177,9 @@ export const Header: React.FC = () => {
     { name: 'Phone Cases', href: '/shop/phone-cases', icon: Smartphone },
     { name: 'Screen Protectors', href: '/shop/screen-protectors', icon: Layers },
     { name: 'Chargers', href: '/shop/chargers', icon: Zap },
-    { name: 'Cables', href: '/shop/cables', icon: Cable },
-    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging },
-    { name: 'Audio', href: '/shop/audio', icon: Headphones },
+    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1200' },
+    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1360' },
+    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1480' },
     { name: 'Deals', href: '/deals', isDeals: true, icon: Flame }
   ];
 
@@ -579,14 +579,14 @@ export const Header: React.FC = () => {
 
       {/* Main Desktop Navigation Bar */}
       <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff', position: 'relative' }}>
-        <div className="navrow wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} ref={navContainerRef}>
+        <div className="navrow wrap">
+          <div className="nav-links-track" ref={navContainerRef}>
             {/* SHOP BY CATEGORY BUTTON & MEGA DROPDOWN */}
             <div
               className="nav-item-wrapper"
               onMouseEnter={() => handleMenuEnter('categories')}
               onMouseLeave={handleMenuLeave}
-              style={{ position: 'relative' }}
+              style={{ position: 'relative', flexShrink: 0 }}
             >
               <button
                 type="button"
@@ -596,21 +596,25 @@ export const Header: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '8px',
+                  gap: '7px',
                   background: activeDropdown === 'categories' ? '#0B63F6' : '#0B1E3D',
                   color: '#fff',
-                  padding: '10px 16px',
+                  padding: '7px 13px',
                   borderRadius: '6px',
                   fontWeight: 700,
-                  fontSize: '12.5px',
+                  fontSize: '12px',
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                   border: 'none',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  height: '34px',
+                  boxSizing: 'border-box'
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
                   <Menu size={14} />
                   <span>CATEGORIES</span>
                 </span>
@@ -618,7 +622,8 @@ export const Header: React.FC = () => {
                   size={13}
                   style={{
                     transform: activeDropdown === 'categories' ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.2s ease'
+                    transition: 'transform 0.2s ease',
+                    flexShrink: 0
                   }}
                 />
               </button>
@@ -1084,7 +1089,7 @@ export const Header: React.FC = () => {
               className="nav-item-wrapper"
               onMouseEnter={() => handleMenuEnter('devices')}
               onMouseLeave={handleMenuLeave}
-              style={{ position: 'relative' }}
+              style={{ position: 'relative', flexShrink: 0 }}
             >
               <button
                 type="button"
@@ -1095,22 +1100,30 @@ export const Header: React.FC = () => {
                   gap: '6px',
                   background: activeDropdown === 'devices' ? 'var(--blue-light)' : 'transparent',
                   color: activeDropdown === 'devices' ? 'var(--blue)' : '#0B1E3D',
-                  padding: '10px 14px',
+                  padding: '7px 11px',
                   borderRadius: '6px',
                   fontWeight: 700,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   border: 'none',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  height: '34px',
+                  boxSizing: 'border-box'
                 }}
               >
-                <Smartphone size={15} color="#0B63F6" />
-                <span>ACCESSORIES BY DEVICE</span>
+                <Smartphone size={14} color="#0B63F6" style={{ flexShrink: 0 }} />
+                <span style={{ whiteSpace: 'nowrap' }}>
+                  <span className="nav-long-word">ACCESSORIES </span>
+                  <span>BY DEVICE</span>
+                </span>
                 <ChevronDown
-                  size={14}
+                  size={13}
                   style={{
                     transform: activeDropdown === 'devices' ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.2s ease'
+                    transition: 'transform 0.2s ease',
+                    flexShrink: 0
                   }}
                 />
               </button>
@@ -1271,10 +1284,10 @@ export const Header: React.FC = () => {
               return (
                 <div
                   key={link.name}
-                  className="nav-item-wrapper"
+                  className={`nav-item-wrapper ${link.hideClass || ''}`}
                   onMouseEnter={() => handleMenuEnter(link.name)}
                   onMouseLeave={handleMenuLeave}
-                  style={{ position: 'relative' }}
+                  style={{ position: 'relative', flexShrink: 0 }}
                 >
                   <Link
                     href={link.href}
@@ -1284,13 +1297,16 @@ export const Header: React.FC = () => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
-                      fontSize: '13px',
+                      fontSize: '12px',
                       fontWeight: 700,
                       color: link.isDeals ? '#FF3D5A' : isMenuOpen ? 'var(--blue)' : '#0B1E3D',
-                      padding: '10px 10px',
+                      padding: '7px 7px',
                       textDecoration: 'none',
                       whiteSpace: 'nowrap',
-                      borderBottom: isMenuOpen ? '2.5px solid var(--blue)' : undefined
+                      flexShrink: 0,
+                      height: '34px',
+                      boxSizing: 'border-box',
+                      borderBottom: isMenuOpen ? '2px solid var(--blue)' : undefined
                     }}
                   >
                     <span>{link.name}</span>
@@ -1450,26 +1466,32 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Prominent Wholesale & Retail Partner Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <Link
               href="/wholesale"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
                 background: pathname === '/wholesale' ? '#0B63F6' : '#EFF6FF',
                 color: pathname === '/wholesale' ? '#fff' : '#0B63F6',
                 border: '1.5px solid #BFDBFE',
-                padding: '7px 14px',
+                padding: '6px 13px',
                 borderRadius: '100px',
-                fontSize: '12.5px',
+                fontSize: '11.5px',
                 fontWeight: 800,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '34px',
+                boxSizing: 'border-box',
                 transition: 'all 0.15s ease'
               }}
             >
-              <Briefcase size={14} />
-              <span>WHOLESALE / B2B</span>
+              <Briefcase size={13} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>
+                <span className="nav-long-btn">BECOME A </span>RETAIL PARTNER
+              </span>
             </Link>
 
             <Link
@@ -1477,20 +1499,26 @@ export const Header: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
                 background: pathname === '/retail-partners' ? '#FF7A1A' : '#FFF7ED',
                 color: pathname === '/retail-partners' ? '#fff' : '#C2410C',
                 border: '1.5px solid #FED7AA',
-                padding: '7px 14px',
+                padding: '6px 13px',
                 borderRadius: '100px',
-                fontSize: '12.5px',
+                fontSize: '11.5px',
                 fontWeight: 800,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                height: '34px',
+                boxSizing: 'border-box',
                 transition: 'all 0.15s ease'
               }}
             >
-              <Store size={14} />
-              <span>RETAIL PARTNERS</span>
+              <Store size={13} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>
+                <span className="nav-long-btn">OWN A </span>CELLCENTRAL STORE
+              </span>
             </Link>
           </div>
         </div>
@@ -1571,7 +1599,7 @@ export const Header: React.FC = () => {
                   gap: '6px'
                 }}
               >
-                <Briefcase size={14} /> Wholesale
+                <Briefcase size={14} /> Become a Retail Partner
               </Link>
               <Link
                 href="/retail-partners"
@@ -1591,7 +1619,7 @@ export const Header: React.FC = () => {
                   gap: '6px'
                 }}
               >
-                <Store size={14} /> Retail Partners
+                <Store size={14} /> Own a CellCentral Store
               </Link>
             </div>
 

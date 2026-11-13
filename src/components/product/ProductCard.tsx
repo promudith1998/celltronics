@@ -45,20 +45,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toggleWishlist(product);
   };
 
-  const getProductImage = (p: Product) => {
-    if (p.imageUrl) return p.imageUrl;
-    switch (p.iconType) {
-      case 'case': return '/images/products/case-clear-magsafe.jpg';
-      case 'screen': return '/images/products/screen-protector-tray.jpg';
-      case 'charger': return '/images/products/charger-gan-65w.jpg';
-      case 'cable': return '/images/products/cable-braided-100w.jpg';
-      case 'power': return '/images/products/powerbank-magsafe.jpg';
-      case 'audio': return '/images/products/earbuds-anc.jpg';
-      case 'mount': return '/images/products/car-mount-magsafe.jpg';
-      default: return '/images/products/case-clear-magsafe.jpg';
-    }
-  };
-
   return (
     <div className="pcard">
       {/* Product Media Area */}
@@ -74,21 +60,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             padding: '16px'
           }}
         >
-          <img
-            src={getProductImage(product)}
-            alt={product.name}
-            style={{ width: '100%', height: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }}
-          />
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              style={{ width: '100%', height: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }}
+            />
+          ) : (
+            <ProductIcon type={product.iconType} size="72%" />
+          )}
         </Link>
 
-        {/* Badges */}
-        <div className="pcard-badges">
-          {product.badge && (
+        {/* Single Clean Primary Badge */}
+        {product.badge && (
+          <div className="pcard-badges">
             <span className={`badge badge-${product.badge}`}>
               {product.badgeText || product.badge.toUpperCase()}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Wishlist Button */}
         <button
@@ -145,20 +135,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         <StarRating rating={product.rating} reviews={product.reviewCount} size={11} />
 
-        <div className="pcard-price">
+        <div
+          className="pcard-price"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginTop: '6px',
+            marginBottom: '4px'
+          }}
+        >
           {outOfStock ? (
             <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--gray-400)' }}>Currently Unavailable</span>
           ) : (
             <>
               <span className="price-now">${product.price.toFixed(2)}</span>
-              {product.wasPrice && (
+              {product.wasPrice && product.wasPrice > product.price && (
                 <>
-                  <span className="price-was">${product.wasPrice.toFixed(2)}</span>
-                  {product.badge === 'sale' && (
-                    <span className="price-off">
-                      Save ${(product.wasPrice - product.price).toFixed(2)}
-                    </span>
-                  )}
+                  <span className="price-was" style={{ marginLeft: '2px' }}>${product.wasPrice.toFixed(2)}</span>
+                  <span className="price-off">
+                    Save ${(product.wasPrice - product.price).toFixed(2)}
+                  </span>
                 </>
               )}
             </>
@@ -170,13 +168,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className={`pcard-add ${justAdded ? 'added' : ''}`}
           disabled={outOfStock}
           onClick={handleAddToCart}
-          style={
-            outOfStock
+          style={{
+            marginTop: 'auto',
+            ...(outOfStock
               ? { opacity: 0.6, cursor: 'not-allowed' }
               : justAdded
               ? { background: '#1EA672', color: '#fff' }
-              : undefined
-          }
+              : {})
+          }}
         >
           {outOfStock ? (
             'OUT OF STOCK'

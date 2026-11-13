@@ -77,11 +77,11 @@ export const ProductIcon: React.FC<ProductIconProps> = ({
           <rect x="85" y="32" width="30" height="7" rx="3.5" fill="#000000" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
           <circle cx="107" cy="35.5" r="1.8" fill="#1E293B" />
 
-          {/* 9H+ Diamond Hardness Shield Badge in center */}
+          {/* Diamond Glass Shield Emblem in center (no hardcoded hardness text) */}
           <g transform="translate(100, 102) scale(0.9)">
             <circle cx="0" cy="0" r="22" fill="#0B1E3D" fillOpacity="0.85" stroke="url(#borderGlow)" strokeWidth="2" />
-            <path d="M -8 -4 L 0 -11 L 8 -4 L 0 11 Z" fill="url(#brandGrad)" />
-            <text x="0" y="4" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="var(--font-mono)">9H+</text>
+            <path d="M -9 -3 L 0 -12 L 9 -3 L 0 12 Z" fill="url(#brandGrad)" />
+            <path d="M -4 -3 L 0 -7 L 4 -3 L 0 5 Z" fill="#FFFFFF" opacity="0.45" />
           </g>
 
           {/* Alignment guide corner markers */}
@@ -166,9 +166,9 @@ export const ProductIcon: React.FC<ProductIconProps> = ({
           {/* Charger Main Block */}
           <rect x="52" y="38" width="96" height="124" rx="18" fill="url(#chargerBody)" stroke="url(#brandGrad)" strokeWidth="2.5" />
 
-          {/* Silkscreen GaN III Brand Label */}
-          <text x="100" y="68" fill="#FFFFFF" fontSize="13" fontWeight="800" textAnchor="middle" fontFamily="var(--font-mono)">65W GaN</text>
-          <text x="100" y="80" fill="#94A3B8" fontSize="8" fontWeight="600" textAnchor="middle" letterSpacing="0.08em">FAST CHARGE</text>
+          {/* Universal GaN Fast Charge Icon (no hardcoded wattage) */}
+          <path d="M103 50 L93 66 L101 66 L97 80 L108 63 L100 63 Z" fill="url(#portGrad)" />
+          <text x="100" y="86" fill="#94A3B8" fontSize="7.5" fontWeight="700" textAnchor="middle" letterSpacing="0.1em">GaN PD</text>
 
           {/* Port 1: USB-C PD */}
           <rect x="74" y="92" width="52" height="14" rx="7" fill="#0A0F1D" stroke="url(#brandGrad)" strokeWidth="1.5" />
