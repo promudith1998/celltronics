@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
             Administrator Verified
           </h2>
           <p style={{ fontSize: '13.5px', color: '#64748B', margin: '0 0 24px', lineHeight: 1.5 }}>
-            Your 2-factor authentication session is active. You can proceed directly to the dashboard.
+            Your administrator session is active and verified. You can proceed directly to the dashboard.
           </p>
 
           <button

@@ -69,7 +69,6 @@ export default function AdminPage() {
     activityEvents,
     stats,
     supabaseStatus,
-    adminPasscode,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -86,7 +85,6 @@ export default function AdminPage() {
     updatePromoCode,
     deletePromoCode,
     togglePromoCode,
-    setAdminPasscode,
     checkDatabaseConnection,
     syncCatalogToSupabase,
     resetToDefaults,
@@ -136,9 +134,7 @@ export default function AdminPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Security Passcode Change Form
-  const [currentPassInput, setCurrentPassInput] = useState('');
-  const [newPassInput, setNewPassInput] = useState('');
-  const [confirmPassInput, setConfirmPassInput] = useState('');
+  // Lock Session helper
 
   // Filtered Products for Catalog Table
   const filteredProducts = useMemo(() => {
@@ -237,30 +233,6 @@ export default function AdminPage() {
       }
     };
     reader.readAsText(file);
-  };
-
-  // Handle Change Passcode
-  const handleChangePasscode = (e: React.FormEvent) => {
-    e.preventDefault();
-    const activePass = adminPasscode || 'admin123';
-    if (currentPassInput !== activePass && currentPassInput !== 'admin123') {
-      showToast('Passcode Error ❌', 'Current passcode is incorrect.', 'error');
-      return;
-    }
-    if (newPassInput.length < 6) {
-      showToast('Passcode Error ❌', 'New passcode must be at least 6 characters.', 'error');
-      return;
-    }
-    if (newPassInput !== confirmPassInput) {
-      showToast('Passcode Error ❌', 'New passcodes do not match.', 'error');
-      return;
-    }
-
-    setAdminPasscode(newPassInput);
-    setCurrentPassInput('');
-    setNewPassInput('');
-    setConfirmPassInput('');
-    showToast('Security Key Changed 🔐', 'Master administrator passcode has been updated.', 'success');
   };
 
   // Lock Session helper
@@ -1963,90 +1935,36 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
-                        Admin Gate Security &amp; Master Passcode
+                        Admin Gate Security (Server-Verified)
                       </h3>
                       <span style={{ fontSize: '12.5px', color: 'var(--gray-500)' }}>
-                        Control the master key required to unlock the Admin Operations Portal
+                        Authentication is enforced server-side via HttpOnly signed sessions
                       </span>
                     </div>
                   </div>
 
-                  <form onSubmit={handleChangePasscode} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '440px' }}>
-                    <div>
-                      <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
-                        Current Passcode
-                      </label>
-                      <input
-                        type="password"
-                        value={currentPassInput}
-                        onChange={(e) => setCurrentPassInput(e.target.value)}
-                        placeholder="Enter current passcode"
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1.5px solid var(--gray-200)',
-                          fontSize: '13.5px'
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
-                        New Security Passcode (Min 6 chars)
-                      </label>
-                      <input
-                        type="password"
-                        value={newPassInput}
-                        onChange={(e) => setNewPassInput(e.target.value)}
-                        placeholder="Enter new master passcode"
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1.5px solid var(--gray-200)',
-                          fontSize: '13.5px'
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)', display: 'block', marginBottom: '6px' }}>
-                        Confirm New Passcode
-                      </label>
-                      <input
-                        type="password"
-                        value={confirmPassInput}
-                        onChange={(e) => setConfirmPassInput(e.target.value)}
-                        placeholder="Re-type new passcode"
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1.5px solid var(--gray-200)',
-                          fontSize: '13.5px'
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      style={{
-                        alignSelf: 'flex-start',
-                        padding: '10px 20px',
-                        borderRadius: '10px',
-                        background: '#0B63F6',
-                        color: '#fff',
-                        border: 'none',
-                        fontSize: '13px',
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        marginTop: '4px'
-                      }}
-                    >
-                      Update Master Passcode
-                    </button>
-                  </form>
+                  <div
+                    style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      fontSize: '13px',
+                      color: '#334155',
+                      lineHeight: 1.6
+                    }}
+                  >
+                    <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#0F172A' }}>
+                      Server-Side Credential Protection Active
+                    </p>
+                    <p style={{ margin: 0 }}>
+                      Admin credentials are stored as salted scrypt hashes in server-only environment variables
+                      (<code style={{ background: '#E2E8F0', padding: '1px 6px', borderRadius: '4px' }}>ADMIN_USERNAME</code> and{' '}
+                      <code style={{ background: '#E2E8F0', padding: '1px 6px', borderRadius: '4px' }}>ADMIN_PASSWORD_HASH</code>)
+                      and cannot be viewed or modified from browser storage or DevTools. To rotate the admin password,
+                      update <code style={{ background: '#E2E8F0', padding: '1px 6px', borderRadius: '4px' }}>.env.local</code> on the server and restart.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Supabase Database Card */}

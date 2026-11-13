@@ -275,7 +275,6 @@ interface AdminProductContextType {
   stats: AdminStats;
   isLoaded: boolean;
   supabaseStatus: SupabaseStatus;
-  adminPasscode: string;
 
   // Product Operations
   addProduct: (product: Omit<Product, 'id'>) => Product;
@@ -304,7 +303,6 @@ interface AdminProductContextType {
 
   // Activity & Security
   addActivityEvent: (event: Omit<StoreActivityEvent, 'id' | 'timestamp'>) => void;
-  setAdminPasscode: (passcode: string) => void;
 
   // Supabase Database Sync Operations
   checkDatabaseConnection: () => Promise<SupabaseStatus>;
@@ -324,7 +322,6 @@ const STORAGE_KEYS = {
   CAMPAIGNS: 'cellcentral_campaigns_v2',
   PROMOS: 'cellcentral_promocodes_v2',
   ORDERS: 'cellcentral_orders_v2',
-  PASSCODE: 'cellcentral_admin_passcode_v1',
   ACTIVITIES: 'cellcentral_admin_activities_v1'
 };
 
@@ -336,7 +333,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>([]);
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [activityEvents, setActivityEvents] = useState<StoreActivityEvent[]>(INITIAL_ACTIVITIES);
-  const [adminPasscode, setAdminPasscodeState] = useState<string>('admin123');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [supabaseStatus, setSupabaseStatus] = useState<SupabaseStatus>({
     connected: false,
@@ -406,9 +402,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const storedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
       if (storedOrders) setOrders(JSON.parse(storedOrders));
-
-      const storedPasscode = localStorage.getItem(STORAGE_KEYS.PASSCODE);
-      if (storedPasscode) setAdminPasscodeState(storedPasscode);
 
       const storedActivities = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
       if (storedActivities) setActivityEvents(JSON.parse(storedActivities));
@@ -774,18 +767,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   };
 
-  // Passcode operations
-  const setAdminPasscode = (newPass: string) => {
-    setAdminPasscodeState(newPass);
-    localStorage.setItem(STORAGE_KEYS.PASSCODE, newPass);
-    addActivityEvent({
-      type: 'system',
-      title: 'Admin Security Passcode Updated',
-      description: 'Master access code successfully changed in settings',
-      badgeColor: '#FF7A1A'
-    });
-  };
-
   // Database sync
   const syncCatalogToSupabase = async (): Promise<{ success: boolean; count: number; message: string }> => {
     const res = await seedProductsToDb(products);
@@ -832,7 +813,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
     localStorage.removeItem(STORAGE_KEYS.CAMPAIGNS);
     localStorage.removeItem(STORAGE_KEYS.PROMOS);
     localStorage.removeItem(STORAGE_KEYS.ORDERS);
-    localStorage.removeItem(STORAGE_KEYS.PASSCODE);
   };
 
   const exportBackupJSON = (): string => {
@@ -877,7 +857,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         stats,
         isLoaded,
         supabaseStatus,
-        adminPasscode,
         addProduct,
         updateProduct,
         deleteProduct,
@@ -896,7 +875,6 @@ export const AdminProductProvider: React.FC<{ children: React.ReactNode }> = ({ 
         togglePromoCode,
         validatePromoCode,
         addActivityEvent,
-        setAdminPasscode,
         checkDatabaseConnection: checkDb,
         syncCatalogToSupabase,
         refreshFromSupabase,
