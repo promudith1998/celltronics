@@ -57,12 +57,14 @@ export const Header: React.FC = () => {
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hoverOpenedRef = useRef<string | null>(null);
 
   const handleMenuEnter = (menuKey: string) => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current);
       dropdownTimeoutRef.current = null;
     }
+    hoverOpenedRef.current = menuKey;
     setActiveDropdown(menuKey);
   };
 
@@ -71,6 +73,7 @@ export const Header: React.FC = () => {
       clearTimeout(dropdownTimeoutRef.current);
     }
     dropdownTimeoutRef.current = setTimeout(() => {
+      hoverOpenedRef.current = null;
       setActiveDropdown(null);
     }, 180);
   };
@@ -79,6 +82,12 @@ export const Header: React.FC = () => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current);
     }
+    if (hoverOpenedRef.current === menuKey) {
+      hoverOpenedRef.current = null;
+      setActiveDropdown(menuKey);
+      return;
+    }
+    hoverOpenedRef.current = null;
     setActiveDropdown((prev) => (prev === menuKey ? null : menuKey));
   };
 
@@ -86,6 +95,7 @@ export const Header: React.FC = () => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current);
     }
+    hoverOpenedRef.current = null;
     setActiveDropdown(null);
   };
 

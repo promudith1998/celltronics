@@ -619,12 +619,7 @@ nav.mainnav {
   flex-wrap: nowrap;
   flex-shrink: 1;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.nav-links-track::-webkit-scrollbar {
-  display: none;
+  overflow: visible;
 }
 
 @media (max-width: 1480px) {
