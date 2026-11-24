@@ -306,7 +306,7 @@ export const LiveTransactionTester: React.FC<LiveTransactionTesterProps> = ({ on
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(240px, 1fr) minmax(260px, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '16px',
           alignItems: 'start',
         }}

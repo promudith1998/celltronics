@@ -2704,7 +2704,7 @@ export default function AdminPage() {
                     </div>
                   )}
 
-                  <LiveTransactionTester onOrderCreated={() => refreshOrdersFromDb?.()} />
+                  <LiveTransactionTester onOrderCreated={() => refreshOrders()} />
                 </div>
 
                 {/* Local JSON Backup & Recovery */}
