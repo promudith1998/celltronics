@@ -11,6 +11,11 @@ import {
  * Returns a configured PayPal Server SDK client singleton.
  * Configured per the official getting-started-guide-buy-button-nextjs reference.
  */
+function isLiveEnvironment(env?: string): boolean {
+  const normalized = (env || '').trim().toLowerCase();
+  return normalized === 'production' || normalized === 'live';
+}
+
 function getPayPalClient(): Client | null {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -24,10 +29,9 @@ function getPayPalClient(): Client | null {
       oAuthClientId: clientId,
       oAuthClientSecret: clientSecret,
     },
-    environment:
-      process.env.NEXT_PUBLIC_PAYPAL_ENVIRONMENT === 'production'
-        ? Environment.Production
-        : Environment.Sandbox,
+    environment: isLiveEnvironment(process.env.NEXT_PUBLIC_PAYPAL_ENVIRONMENT)
+      ? Environment.Production
+      : Environment.Sandbox,
   });
 }
 
@@ -165,10 +169,10 @@ export async function checkPayPalConnectivity(): Promise<{
   const clientIdMasked =
     clientId.length > 8 ? `${clientId.slice(0, 4)}••••${clientId.slice(-4)}` : '••••';
 
-  const host =
-    environment === 'production'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
+  const isLive = isLiveEnvironment(environment);
+  const host = isLive
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
   try {
     const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');

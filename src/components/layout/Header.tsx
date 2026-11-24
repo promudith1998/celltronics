@@ -143,17 +143,15 @@ export const Header: React.FC = () => {
   // Close search and menus on click outside or Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node) &&
-        mobileSearchRef.current &&
-        !mobileSearchRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      const inDesktopSearch = searchRef.current?.contains(target);
+      const inMobileSearch = mobileSearchRef.current?.contains(target);
+      if (!inDesktopSearch && !inMobileSearch) {
         setIsSearchOpen(false);
       }
       if (
         navContainerRef.current &&
-        !navContainerRef.current.contains(event.target as Node)
+        !navContainerRef.current.contains(target)
       ) {
         closeAllMenus();
       }
@@ -162,6 +160,8 @@ export const Header: React.FC = () => {
       if (event.key === 'Escape') {
         closeAllMenus();
         setIsSearchOpen(false);
+        setIsMobileMenuOpen(false);
+        setIsMobileSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -187,10 +187,10 @@ export const Header: React.FC = () => {
     { name: 'Phone Cases', href: '/shop/phone-cases', icon: Smartphone },
     { name: 'Screen Protectors', href: '/shop/screen-protectors', icon: Layers },
     { name: 'Chargers', href: '/shop/chargers', icon: Zap },
-    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1200' },
-    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1360' },
-    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1480' },
-    { name: 'Deals', href: '/deals', isDeals: true, icon: Flame }
+    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1100' },
+    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1220', alignRight: true },
+    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1320', alignRight: true },
+    { name: 'Deals', href: '/deals', isDeals: true, icon: Flame, alignRight: true }
   ];
 
   const categorySubmenus: Record<string, {
@@ -330,335 +330,335 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="site">
-      <div className="header-row wrap">
-        {/* Mobile Menu Hamburger Toggle */}
-        <button
-          className="mobile-toggle"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-        >
-          {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+    <>
+      <header className="site">
+        {/* Top Signature Brand Gradient Accent */}
+        <div className="header-accent-bar" aria-hidden="true" />
 
-        {/* Brand Logo matching Home Page (1).png */}
-        <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-          <Image
-            src="/images/logo.png"
-            alt="CellCentral Logo"
-            width={140}
-            height={38}
-            className="logo-mark"
-            priority
-          />
-          <div className="logo-text-group">
-            <div className="logo-word" style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-              <span style={{ color: '#0B63F6' }}>CELL</span>
-              <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
-            </div>
-            <div className="logo-sub" style={{ fontSize: '8.5px', fontWeight: 800, letterSpacing: '0.14em', color: '#0B1E3D' }}>
-              MOBILE ACCESSORIES
-            </div>
-          </div>
-        </Link>
-
-        {/* Desktop Search Bar */}
-        <div className="search-bar" ref={searchRef}>
-          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Search mobile accessories, cases, chargers (e.g. iPhone 16 Case, 65W GaN)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => searchQuery.trim().length > 1 && setIsSearchOpen(true)}
-            />
-            <button type="submit" className="search-btn" aria-label="Search">
-              <Search size={15} color="#fff" />
-            </button>
-          </form>
-
-          {/* Autocomplete Search Dropdown */}
-          {isSearchOpen && searchResults.length > 0 && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 8px)',
-                left: 0,
-                right: 0,
-                background: '#fff',
-                borderRadius: '12px',
-                boxShadow: '0 10px 30px rgba(11,30,61,0.18)',
-                border: '1px solid var(--gray-200)',
-                padding: '12px',
-                zIndex: 50
-              }}
-            >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--gray-400)', textTransform: 'uppercase', marginBottom: '8px', padding: '0 8px' }}>
-                Suggested Products
-              </div>
-              {searchResults.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.id}`}
-                  onClick={() => setIsSearchOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px',
-                    borderRadius: '8px',
-                    transition: 'background 0.15s'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <div>
-                    <div style={{ fontSize: '11px', color: 'var(--gray-400)', fontWeight: 600 }}>{item.brand}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--navy)' }}>{item.name}</div>
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--blue)', fontSize: '13px' }}>
-                    ${item.price.toFixed(2)}
-                  </div>
-                </Link>
-              ))}
-              <div style={{ borderTop: '1px solid var(--gray-100)', marginTop: '8px', paddingTop: '8px', textAlign: 'center' }}>
-                <Link
-                  href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`}
-                  onClick={() => setIsSearchOpen(false)}
-                  style={{ fontSize: '12px', fontWeight: 700, color: 'var(--blue)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                >
-                  View all results for &quot;{searchQuery}&quot; <ArrowRight size={13} />
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Header Action Buttons (Account, Wishlist, Cart) */}
-        <div className="header-actions">
-          {/* Mobile Search Button Toggle */}
-          <button
-            className="mobile-search-toggle"
-            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-            aria-label="Toggle Search"
-          >
-            <Search size={20} />
-          </button>
-
-          {/* Account / Warranty */}
-          <Link
-            href="/warranty-registration"
-            className="h-action h-action-warranty"
-            title="Register Product Warranty"
-          >
-            <FileCheck2 size={19} color="#0B63F6" />
-            <span className="action-label" style={{ fontWeight: 700 }}>Warranty</span>
-          </Link>
-
-          {/* Wishlist */}
-          <Link
-            href="/wishlist"
-            className="h-action h-action-wishlist"
-            title="My Wishlist"
-          >
-            <Heart size={19} />
-            <span className="action-label">Wishlist</span>
-            {wishlistCount > 0 && <span className="cart-count" style={{ background: 'var(--pink)' }}>{wishlistCount}</span>}
-          </Link>
-
-          {/* Cart */}
-          <button
-            onClick={openDrawer}
-            className="h-action"
-            aria-label="View Shopping Cart"
-            title="Shopping Cart"
-          >
-            <ShoppingBag size={19} />
-            <span className="action-label">Cart</span>
-            <span className="cart-count" style={{ background: '#FF3D5A' }}>{itemCount}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Expandable Search Bar */}
-      {isMobileSearchOpen && (
-        <div className="mobile-search-bar active" ref={mobileSearchRef}>
-          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                background: 'var(--gray-50)',
-                border: '1.5px solid var(--blue-light)',
-                borderRadius: '100px',
-                padding: '4px 6px 4px 14px'
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Search products, brands, models..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: '13.5px',
-                  padding: '6px 0',
-                  outline: 'none',
-                  color: 'var(--navy)'
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  background: 'var(--navy)',
-                  color: '#fff',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <Search size={14} />
-              </button>
-            </div>
+        <div className="header-row wrap">
+          {/* Left: Mobile Hamburger + Brand Logo */}
+          <div className="header-left">
             <button
               type="button"
-              onClick={() => setIsMobileSearchOpen(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--gray-400)',
-                padding: '6px',
-                cursor: 'pointer'
-              }}
+              className={`mobile-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+              aria-expanded={isMobileMenuOpen}
             >
-              <X size={20} />
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-          </form>
 
-          {/* Autocomplete for Mobile Search */}
-          {isSearchOpen && searchResults.length > 0 && (
-            <div
-              style={{
-                marginTop: '10px',
-                background: '#fff',
-                borderRadius: '10px',
-                border: '1px solid var(--gray-200)',
-                padding: '10px',
-                boxShadow: '0 8px 24px rgba(11,30,61,0.12)'
-              }}
-            >
-              {searchResults.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.id}`}
+            <Link href="/" className="logo">
+              <div className="logo-mark-frame">
+                <Image
+                  src="/images/logo.png"
+                  alt="CellCentral Logo"
+                  width={120}
+                  height={40}
+                  className="logo-mark"
+                  priority
+                />
+              </div>
+              <div className="logo-text-group">
+                <div className="logo-word">
+                  <span className="c1">CELL</span>
+                  <span className="c2">CENTRAL</span>
+                </div>
+                <div className="logo-sub">MOBILE ACCESSORIES</div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Center: Desktop Search Bar */}
+          <div className="search-bar" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+              <Search size={16} color="#0B63F6" style={{ flexShrink: 0, opacity: 0.75 }} />
+              <input
+                type="text"
+                placeholder="Search cases, 65W GaN chargers, MagSafe, screen protectors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery.trim().length > 1 && setIsSearchOpen(true)}
+                aria-label="Search mobile accessories"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
                   onClick={() => {
-                    setIsMobileSearchOpen(false);
+                    setSearchQuery('');
                     setIsSearchOpen(false);
                   }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 6px',
-                    borderBottom: '1px solid var(--gray-100)',
-                    textDecoration: 'none'
-                  }}
+                  aria-label="Clear search"
                 >
-                  <div>
-                    <div style={{ fontSize: '11px', color: 'var(--gray-400)', fontWeight: 600 }}>{item.brand}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--navy)' }}>{item.name}</div>
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--blue)', fontSize: '13px' }}>
-                    ${item.price.toFixed(2)}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                  <X size={12} />
+                </button>
+              )}
+              <button type="submit" className="search-btn" aria-label="Search">
+                <Search size={16} color="#fff" />
+              </button>
+            </form>
 
-      {/* Main Desktop Navigation Bar */}
-      <nav className="mainnav" style={{ borderTop: '1px solid var(--gray-200)', background: '#fff', position: 'relative' }}>
-        <div className="navrow wrap">
-          <div className="nav-links-track" ref={navContainerRef}>
-            {/* SHOP BY CATEGORY BUTTON & MEGA DROPDOWN */}
-            <div
-              className="nav-item-wrapper"
-              onMouseEnter={() => handleMenuEnter('categories')}
-              onMouseLeave={handleMenuLeave}
-              style={{ position: 'relative', flexShrink: 0 }}
-            >
-              <button
-                type="button"
-                onClick={() => handleMenuToggle('categories')}
-                className="navcat"
+            {/* Autocomplete Search Dropdown */}
+            {isSearchOpen && searchResults.length > 0 && (
+              <div
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '7px',
-                  background: activeDropdown === 'categories' ? '#0B63F6' : '#0B1E3D',
-                  color: '#fff',
-                  padding: '7px 13px',
-                  borderRadius: '6px',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                  height: '34px',
-                  boxSizing: 'border-box'
+                  position: 'absolute',
+                  top: 'calc(100% + 10px)',
+                  left: 0,
+                  right: 0,
+                  background: '#fff',
+                  borderRadius: '14px',
+                  boxShadow: '0 16px 40px rgba(11,30,61,0.2)',
+                  border: '1px solid var(--gray-200)',
+                  padding: '12px',
+                  zIndex: 80
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                  <Menu size={14} />
-                  <span>CATEGORIES</span>
-                </span>
-                <ChevronDown
-                  size={13}
+                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--gray-400)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', padding: '0 8px' }}>
+                  Suggested Products
+                </div>
+                {searchResults.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/product/${item.id}`}
+                    onClick={() => setIsSearchOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      transition: 'background 0.15s'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '11px', color: 'var(--gray-400)', fontWeight: 700 }}>{item.brand}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--blue)', fontSize: '13px', flexShrink: 0 }}>
+                      ${item.price.toFixed(2)}
+                    </div>
+                  </Link>
+                ))}
+                <div style={{ borderTop: '1px solid var(--gray-100)', marginTop: '8px', paddingTop: '8px', textAlign: 'center' }}>
+                  <Link
+                    href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`}
+                    onClick={() => setIsSearchOpen(false)}
+                    style={{ fontSize: '12px', fontWeight: 700, color: 'var(--blue)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    View all results for &quot;{searchQuery}&quot; <ArrowRight size={13} />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Header Action Buttons */}
+          <div className="header-actions">
+            {/* Mobile Search Button Toggle */}
+            <button
+              type="button"
+              className={`mobile-search-toggle ${isMobileSearchOpen ? 'active' : ''}`}
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              aria-label="Toggle Search"
+              aria-expanded={isMobileSearchOpen}
+            >
+              {isMobileSearchOpen ? <X size={18} /> : <Search size={18} />}
+            </button>
+
+            {/* Warranty */}
+            <Link
+              href="/warranty-registration"
+              className="h-action h-action-warranty"
+              title="Register Product Warranty"
+            >
+              <FileCheck2 size={18} />
+              <span className="action-label">Warranty</span>
+            </Link>
+
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              className="h-action h-action-wishlist"
+              title="My Wishlist"
+            >
+              <Heart size={18} />
+              <span className="action-label">Wishlist</span>
+              {wishlistCount > 0 && (
+                <span className="h-badge-inline pink">{wishlistCount}</span>
+              )}
+            </Link>
+
+            {/* Cart */}
+            <button
+              type="button"
+              onClick={openDrawer}
+              className="h-action h-action-cart"
+              aria-label="View Shopping Cart"
+              title="Shopping Cart"
+            >
+              <ShoppingBag size={18} />
+              <span className="action-label">Cart</span>
+              <span className="h-badge-inline">{itemCount}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Expandable Search Bar */}
+        {isMobileSearchOpen && (
+          <div className="mobile-search-bar active" ref={mobileSearchRef}>
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'var(--gray-50)',
+                  border: '1.5px solid var(--blue)',
+                  borderRadius: '100px',
+                  padding: '4px 5px 4px 14px',
+                  boxShadow: '0 0 0 3px rgba(11,99,246,0.1)'
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Search cases, chargers, models..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
                   style={{
-                    transform: activeDropdown === 'categories' ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.2s ease',
-                    flexShrink: 0
+                    flex: 1,
+                    border: 'none',
+                    background: 'transparent',
+                    fontSize: '14px',
+                    padding: '6px 0',
+                    outline: 'none',
+                    color: 'var(--navy)',
+                    minWidth: 0
                   }}
                 />
-              </button>
-
-              {/* Mega Dropdown for All Categories */}
-              {activeDropdown === 'categories' && (
-                <div
+                <button
+                  type="submit"
                   style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    paddingTop: '6px',
-                    zIndex: 100,
-                    width: '920px'
+                    background: 'linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%)',
+                    color: '#fff',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: 'none',
+                    cursor: 'pointer',
+                    flexShrink: 0
                   }}
+                  aria-label="Submit search"
                 >
-                  <div
+                  <Search size={15} />
+                </button>
+              </div>
+            </form>
+
+            {/* Autocomplete for Mobile Search */}
+            {isSearchOpen && searchResults.length > 0 && (
+              <div
+                style={{
+                  marginTop: '10px',
+                  background: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid var(--gray-200)',
+                  padding: '8px 10px',
+                  boxShadow: '0 10px 26px rgba(11,30,61,0.14)'
+                }}
+              >
+                {searchResults.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/product/${item.id}`}
+                    onClick={() => {
+                      setIsMobileSearchOpen(false);
+                      setIsSearchOpen(false);
+                    }}
                     style={{
-                      background: '#ffffff',
-                      borderRadius: '16px',
-                      boxShadow: '0 20px 50px rgba(11,30,61,0.22)',
-                      border: '1px solid var(--gray-200)',
-                      padding: '24px'
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      padding: '8px 6px',
+                      borderBottom: '1px solid var(--gray-100)',
+                      textDecoration: 'none'
                     }}
                   >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '11px', color: 'var(--gray-400)', fontWeight: 700 }}>{item.brand}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--blue)', fontSize: '13px', flexShrink: 0 }}>
+                      ${item.price.toFixed(2)}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Main Desktop Navigation Bar (Vibrant Deep Navy) */}
+        <nav className="mainnav" aria-label="Primary Navigation">
+          <div className="navrow wrap">
+            <div className="nav-links-track" ref={navContainerRef}>
+              {/* SHOP BY CATEGORY BUTTON & MEGA DROPDOWN */}
+              <div
+                className="nav-item-wrapper"
+                onMouseEnter={() => handleMenuEnter('categories')}
+                onMouseLeave={handleMenuLeave}
+                style={{ position: 'relative', flexShrink: 0 }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleMenuToggle('categories')}
+                  className={`navcat ${activeDropdown === 'categories' ? 'open' : ''}`}
+                  aria-expanded={activeDropdown === 'categories'}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                    <Menu size={14} />
+                    <span>CATEGORIES</span>
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    style={{
+                      transform: activeDropdown === 'categories' ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s ease',
+                      flexShrink: 0
+                    }}
+                  />
+                </button>
+
+                {/* Mega Dropdown for All Categories */}
+                {activeDropdown === 'categories' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      paddingTop: '10px',
+                      zIndex: 100,
+                      width: 'min(900px, calc(100vw - 48px))'
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: '#ffffff',
+                        borderRadius: '16px',
+                        boxShadow: '0 22px 54px rgba(11,30,61,0.26)',
+                        border: '1px solid var(--gray-200)',
+                        padding: '24px'
+                      }}
+                    >
                     {/* Header bar */}
                     <div
                       style={{
@@ -1094,62 +1094,46 @@ export const Header: React.FC = () => {
               )}
             </div>
 
-            {/* SHOP BY DEVICE DROPDOWN */}
-            <div
-              className="nav-item-wrapper"
-              onMouseEnter={() => handleMenuEnter('devices')}
-              onMouseLeave={handleMenuLeave}
-              style={{ position: 'relative', flexShrink: 0 }}
-            >
-              <button
-                type="button"
-                onClick={() => handleMenuToggle('devices')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: activeDropdown === 'devices' ? 'var(--blue-light)' : 'transparent',
-                  color: activeDropdown === 'devices' ? 'var(--blue)' : '#0B1E3D',
-                  padding: '7px 11px',
-                  borderRadius: '6px',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                  height: '34px',
-                  boxSizing: 'border-box'
-                }}
+              {/* SHOP BY DEVICE DROPDOWN */}
+              <div
+                className="nav-item-wrapper"
+                onMouseEnter={() => handleMenuEnter('devices')}
+                onMouseLeave={handleMenuLeave}
+                style={{ position: 'relative', flexShrink: 0 }}
               >
-                <Smartphone size={14} color="#0B63F6" style={{ flexShrink: 0 }} />
-                <span style={{ whiteSpace: 'nowrap' }}>
-                  <span className="nav-long-word">ACCESSORIES </span>
-                  <span>BY DEVICE</span>
-                </span>
-                <ChevronDown
-                  size={13}
-                  style={{
-                    transform: activeDropdown === 'devices' ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.2s ease',
-                    flexShrink: 0
-                  }}
-                />
-              </button>
-
-              {/* Mega Dropdown for Device Families */}
-              {activeDropdown === 'devices' && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    paddingTop: '6px',
-                    zIndex: 100,
-                    width: '740px'
-                  }}
+                <button
+                  type="button"
+                  onClick={() => handleMenuToggle('devices')}
+                  className={`nav-device-btn ${activeDropdown === 'devices' ? 'open' : ''}`}
+                  aria-expanded={activeDropdown === 'devices'}
                 >
+                  <Smartphone size={14} color="#3FA9FF" style={{ flexShrink: 0 }} />
+                  <span style={{ whiteSpace: 'nowrap' }}>
+                    <span className="nav-long-word">ACCESSORIES </span>
+                    <span>BY DEVICE</span>
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    style={{
+                      transform: activeDropdown === 'devices' ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s ease',
+                      flexShrink: 0
+                    }}
+                  />
+                </button>
+
+                {/* Mega Dropdown for Device Families */}
+                {activeDropdown === 'devices' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      paddingTop: '10px',
+                      zIndex: 100,
+                      width: 'min(740px, calc(100vw - 48px))'
+                    }}
+                  >
                   <div
                     style={{
                       background: '#ffffff',
@@ -1285,96 +1269,69 @@ export const Header: React.FC = () => {
               )}
             </div>
 
-            {/* Standard Category Navigation Links with Interactive Hover Submenus */}
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              const isMenuOpen = activeDropdown === link.name;
-              const submenu = categorySubmenus[link.name];
+              {/* Standard Category Navigation Links with Interactive Hover Submenus */}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                const isMenuOpen = activeDropdown === link.name;
+                const submenu = categorySubmenus[link.name];
 
-              return (
-                <div
-                  key={link.name}
-                  className={`nav-item-wrapper ${link.hideClass || ''}`}
-                  onMouseEnter={() => handleMenuEnter(link.name)}
-                  onMouseLeave={handleMenuLeave}
-                  style={{ position: 'relative', flexShrink: 0 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={closeAllMenus}
-                    className={`navlink ${link.isDeals ? 'deals' : ''} ${isActive ? 'active' : ''}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      color: link.isDeals ? '#FF3D5A' : isMenuOpen ? 'var(--blue)' : '#0B1E3D',
-                      padding: '7px 7px',
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      height: '34px',
-                      boxSizing: 'border-box',
-                      borderBottom: isMenuOpen ? '2px solid var(--blue)' : undefined
-                    }}
+                return (
+                  <div
+                    key={link.name}
+                    className={`nav-item-wrapper ${link.hideClass || ''}`}
+                    onMouseEnter={() => handleMenuEnter(link.name)}
+                    onMouseLeave={handleMenuLeave}
+                    style={{ position: 'relative', flexShrink: 0 }}
                   >
-                    <span>{link.name}</span>
-                    {link.isDeals ? (
-                      <span
-                        style={{
-                          background: '#FF3D5A',
-                          color: '#fff',
-                          fontSize: '9px',
-                          fontWeight: 800,
-                          padding: '1px 5px',
-                          borderRadius: '100px',
-                          marginLeft: '2px'
-                        }}
-                      >
-                        HOT
-                      </span>
-                    ) : (
-                      <span
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleMenuToggle(link.name);
-                        }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '2px',
-                          cursor: 'pointer'
-                        }}
-                        title={`Browse ${link.name} subcategories`}
-                      >
-                        <ChevronDown
-                          size={12}
-                          style={{
-                            opacity: 0.55,
-                            transform: isMenuOpen ? 'rotate(180deg)' : 'none',
-                            transition: 'transform 0.18s ease'
-                          }}
-                        />
-                      </span>
-                    )}
-                  </Link>
-
-                  {/* Flyout Submenu for this Category */}
-                  {isMenuOpen && submenu && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: link.isDeals ? 'auto' : '0',
-                        right: link.isDeals ? 0 : 'auto',
-                        paddingTop: '6px',
-                        zIndex: 100,
-                        width: '380px'
-                      }}
+                    <Link
+                      href={link.href}
+                      onClick={closeAllMenus}
+                      className={`navlink ${link.isDeals ? 'deals' : ''} ${isActive ? 'active' : ''} ${isMenuOpen ? 'open' : ''}`}
                     >
+                      <span>{link.name}</span>
+                      {link.isDeals ? (
+                        <span className="nav-hot-badge">HOT</span>
+                      ) : (
+                        <span
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleMenuToggle(link.name);
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '1px',
+                            cursor: 'pointer'
+                          }}
+                          title={`Browse ${link.name} subcategories`}
+                        >
+                          <ChevronDown
+                            size={12}
+                            style={{
+                              opacity: 0.72,
+                              transform: isMenuOpen ? 'rotate(180deg)' : 'none',
+                              transition: 'transform 0.18s ease'
+                            }}
+                          />
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Flyout Submenu for this Category */}
+                    {isMenuOpen && submenu && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: link.alignRight ? 'auto' : '0',
+                          right: link.alignRight ? 0 : 'auto',
+                          paddingTop: '10px',
+                          zIndex: 100,
+                          width: 'min(380px, calc(100vw - 48px))'
+                        }}
+                      >
                       <div
                         style={{
                           background: '#ffffff',
@@ -1475,66 +1432,80 @@ export const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Prominent Wholesale & Retail Partner Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            {/* Prominent Wholesale & Retail Partner Buttons */}
+            <div className="nav-b2b-group">
+              <Link
+                href="/wholesale"
+                className={`nav-b2b-btn partner ${pathname === '/wholesale' ? 'active' : ''}`}
+              >
+                <Briefcase size={13} style={{ flexShrink: 0 }} />
+                <span className="nav-cta-full">BECOME A RETAIL PARTNER</span>
+                <span className="nav-cta-short">RETAIL PARTNER</span>
+              </Link>
+
+              <Link
+                href="/retail-partners"
+                className={`nav-b2b-btn store ${pathname === '/retail-partners' ? 'active' : ''}`}
+              >
+                <Store size={13} style={{ flexShrink: 0 }} />
+                <span className="nav-cta-full">OWN A CELLCENTRAL STORE</span>
+                <span className="nav-cta-short">OWN A STORE</span>
+              </Link>
+            </div>
+          </div>
+        </nav>
+
+        {/* Mobile / Tablet Vibrant Quick-Category Strip (<= 979px) */}
+        <div className="mobile-cat-strip" aria-label="Quick Categories">
+          <div className="mobile-cat-scroll">
             <Link
-              href="/wholesale"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: pathname === '/wholesale' ? '#0B63F6' : '#EFF6FF',
-                color: pathname === '/wholesale' ? '#fff' : '#0B63F6',
-                border: '1.5px solid #BFDBFE',
-                padding: '6px 13px',
-                borderRadius: '100px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                height: '34px',
-                boxSizing: 'border-box',
-                transition: 'all 0.15s ease'
-              }}
+              href="/deals"
+              className="mobile-cat-pill deals"
             >
-              <Briefcase size={13} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>
-                <span className="nav-long-btn">BECOME A </span>RETAIL PARTNER
-              </span>
+              <Flame size={13} />
+              <span>Deals</span>
+              <span style={{ background: 'rgba(255,255,255,0.22)', padding: '1px 5px', borderRadius: '100px', fontSize: '9px', fontWeight: 800 }}>HOT</span>
             </Link>
 
+            {navLinks
+              .filter((l) => !l.isDeals)
+              .map((link) => {
+                const Icon = link.icon;
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`mobile-cat-pill ${isActive ? 'active' : ''}`}
+                  >
+                    <Icon size={13} color={isActive ? '#fff' : '#3FA9FF'} />
+                    <span>{link.name}</span>
+                  </Link>
+                );
+              })}
+
             <Link
-              href="/retail-partners"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: pathname === '/retail-partners' ? '#FF7A1A' : '#FFF7ED',
-                color: pathname === '/retail-partners' ? '#fff' : '#C2410C',
-                border: '1.5px solid #FED7AA',
-                padding: '6px 13px',
-                borderRadius: '100px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                height: '34px',
-                boxSizing: 'border-box',
-                transition: 'all 0.15s ease'
-              }}
+              href="/warranty-registration"
+              className={`mobile-cat-pill ${pathname === '/warranty-registration' ? 'active' : ''}`}
             >
-              <Store size={13} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>
-                <span className="nav-long-btn">OWN A </span>CELLCENTRAL STORE
-              </span>
+              <FileCheck2 size={13} color="#3FA9FF" />
+              <span>Warranty</span>
+            </Link>
+
+            <Link href="/wholesale" className="mobile-cat-pill partner">
+              <Briefcase size={13} />
+              <span>Retail Partner</span>
+            </Link>
+
+            <Link href="/retail-partners" className="mobile-cat-pill store">
+              <Store size={13} />
+              <span>Own a Store</span>
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Mobile Drawer Navigation Backdrop & Drawer */}
+      {/* Mobile Drawer Navigation Backdrop & Drawer (Rendered outside sticky header stacking context) */}
       {isMobileMenuOpen && (
         <>
           <div
@@ -1542,137 +1513,181 @@ export const Header: React.FC = () => {
             onClick={() => setIsMobileMenuOpen(false)}
             aria-label="Close navigation overlay"
           />
-          <div className="mobile-menu-drawer">
-            {/* Drawer Header */}
+          <div className="mobile-menu-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation Menu">
+            {/* Vibrant Branded Navy Drawer Header */}
+            <div style={{ height: '3.5px', background: 'var(--grad-brand)', flexShrink: 0 }} />
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '18px 20px',
-                borderBottom: '1px solid var(--gray-100)',
-                background: '#fff'
+                padding: '15px 18px',
+                background: 'linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%)',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                flexShrink: 0
               }}
             >
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <Image
-                  src="/images/logo.png"
-                  alt="CellCentral Logo"
-                  width={120}
-                  height={32}
-                  style={{ objectFit: 'contain' }}
-                />
+              <Link
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}
+              >
+                <div
+                  style={{
+                    width: '48px',
+                    height: '30px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#fff',
+                    borderRadius: '8px',
+                    padding: '2px 3px'
+                  }}
+                >
+                  <Image
+                    src="/images/logo.png"
+                    alt="CellCentral Logo"
+                    width={90}
+                    height={30}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: '49% center' }}
+                  />
+                </div>
                 <div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                    <span style={{ color: '#0B63F6' }}>CELL</span>
+                  <div style={{ fontFamily: 'var(--font-space), sans-serif', fontSize: '17px', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
+                    <span style={{ color: '#3FA9FF' }}>CELL</span>
                     <span style={{ color: '#FF7A1A' }}>CENTRAL</span>
+                  </div>
+                  <div style={{ fontSize: '7.5px', fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(255,255,255,0.75)', marginTop: '3px' }}>
+                    MOBILE ACCESSORIES
                   </div>
                 </div>
               </Link>
 
               <button
+                type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-label="Close Menu"
                 style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  background: 'var(--gray-50)',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  color: '#fff'
                 }}
               >
-                <X size={18} color="var(--navy)" />
+                <X size={18} />
               </button>
             </div>
 
+            {/* Quick Drawer Search */}
+            <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--gray-100)', background: '#fff', flexShrink: 0 }}>
+              <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--gray-50)',
+                    border: '1.5px solid rgba(11,99,246,0.25)',
+                    borderRadius: '100px',
+                    padding: '3px 4px 3px 14px'
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Search cases, chargers, models..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      flex: 1,
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '6px 0',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      color: 'var(--navy)',
+                      minWidth: 0
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    aria-label="Search"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%)',
+                      border: 'none',
+                      color: '#fff',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Search size={14} />
+                  </button>
+                </div>
+              </form>
+            </div>
+
             {/* B2B & Wholesale Quick Action Banners */}
-            <div style={{ padding: '14px 20px', background: 'var(--gray-50)', borderBottom: '1px solid var(--gray-100)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ padding: '12px 18px', background: 'var(--gray-50)', borderBottom: '1px solid var(--gray-200)', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
               <Link
                 href="/wholesale"
                 onClick={() => setIsMobileMenuOpen(false)}
                 style={{
-                  background: '#0B63F6',
+                  background: 'var(--blue)',
                   color: '#fff',
-                  padding: '10px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  fontSize: '12px',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
                   fontWeight: 800,
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
+                  justifyContent: 'space-between',
+                  boxShadow: '0 3px 10px rgba(11,99,246,0.28)'
                 }}
               >
-                <Briefcase size={14} /> Become a Retail Partner
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Briefcase size={15} /> Become a Retail Partner
+                </span>
+                <ChevronRight size={15} />
               </Link>
               <Link
                 href="/retail-partners"
                 onClick={() => setIsMobileMenuOpen(false)}
                 style={{
-                  background: '#FF7A1A',
+                  background: 'var(--orange)',
                   color: '#fff',
-                  padding: '10px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  fontSize: '12px',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
                   fontWeight: 800,
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
+                  justifyContent: 'space-between',
+                  boxShadow: '0 3px 10px rgba(255,122,26,0.28)'
                 }}
               >
-                <Store size={14} /> Own a CellCentral Store
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Store size={15} /> Own a CellCentral Store
+                </span>
+                <ChevronRight size={15} />
               </Link>
             </div>
 
-            {/* Quick Drawer Search */}
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--gray-100)' }}>
-              <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    width: '100%',
-                    background: 'var(--gray-50)',
-                    border: '1.5px solid var(--gray-200)',
-                    borderRadius: '100px',
-                    padding: '8px 36px 8px 14px',
-                    fontSize: '13px',
-                    outline: 'none',
-                    color: 'var(--navy)'
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    position: 'absolute',
-                    right: '6px',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--gray-400)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Search size={16} />
-                </button>
-              </form>
-            </div>
-
-            {/* Shop by Device Section */}
-            <div style={{ padding: '16px 20px', flex: 1, overflowY: 'auto' }}>
+            {/* Scrollable Body: Shop by Device, Categories & Support */}
+            <div style={{ padding: '16px 18px', flex: 1, overflowY: 'auto' }}>
               <div
                 style={{
                   fontSize: '11px',
@@ -1696,9 +1711,10 @@ export const Header: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
+                      padding: '11px 12px',
+                      borderRadius: '10px',
                       background: 'var(--gray-50)',
+                      border: '1px solid var(--gray-100)',
                       textDecoration: 'none',
                       color: 'var(--navy)',
                       fontWeight: 700,
@@ -1741,11 +1757,11 @@ export const Header: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
+                        padding: '11px 12px',
+                        borderRadius: '10px',
                         textDecoration: 'none',
-                        background: isActive ? 'var(--gray-100)' : 'transparent',
-                        color: link.isDeals ? '#FF3D5A' : 'var(--navy)',
+                        background: isActive ? 'rgba(11,99,246,0.08)' : 'transparent',
+                        color: link.isDeals ? '#FF3D5A' : isActive ? 'var(--blue)' : 'var(--navy)',
                         fontWeight: 700,
                         fontSize: '14px'
                       }}
@@ -1757,11 +1773,11 @@ export const Header: React.FC = () => {
                       {link.isDeals ? (
                         <span
                           style={{
-                            background: '#FF3D5A',
+                            background: 'linear-gradient(90deg, var(--red), var(--pink))',
                             color: '#fff',
                             fontSize: '9.5px',
                             fontWeight: 800,
-                            padding: '2px 6px',
+                            padding: '2px 7px',
                             borderRadius: '100px',
                             textTransform: 'uppercase'
                           }}
@@ -1799,10 +1815,10 @@ export const Header: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
+                    padding: '11px 12px',
+                    borderRadius: '10px',
                     color: 'var(--navy)',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: '13.5px',
                     textDecoration: 'none'
                   }}
@@ -1821,10 +1837,10 @@ export const Header: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
+                    padding: '11px 12px',
+                    borderRadius: '10px',
                     color: 'var(--navy)',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: '13.5px',
                     textDecoration: 'none'
                   }}
@@ -1842,22 +1858,23 @@ export const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Drawer Footer */}
+            {/* Branded Navy Drawer Footer */}
             <div
               style={{
-                padding: '16px 20px',
-                borderTop: '1px solid var(--gray-100)',
-                background: 'var(--gray-50)',
+                padding: '14px 18px',
+                background: 'var(--navy)',
+                borderTop: '2px solid var(--blue)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px'
+                gap: '7px',
+                flexShrink: 0
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
-                <Truck size={14} color="#0B63F6" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#fff' }}>
+                <Truck size={14} color="#3FA9FF" />
                 <span>Free Canadian Shipping over $49</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#fff' }}>
                 <Shield size={14} color="#FF7A1A" />
                 <span>1-Year Canadian Warranty on all products</span>
               </div>
@@ -1865,6 +1882,6 @@ export const Header: React.FC = () => {
           </div>
         </>
       )}
-    </header>
+    </>
   );
 };
