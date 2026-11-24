@@ -186,10 +186,10 @@ export const Header: React.FC = () => {
   const navLinks = [
     { name: 'Phone Cases', href: '/shop/phone-cases', icon: Smartphone },
     { name: 'Screen Protectors', href: '/shop/screen-protectors', icon: Layers },
-    { name: 'Chargers', href: '/shop/chargers', icon: Zap },
-    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1100' },
-    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1220', alignRight: true },
-    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1320', alignRight: true },
+    { name: 'Chargers', href: '/shop/chargers', icon: Zap, hideClass: 'nav-hide-1080' },
+    { name: 'Cables', href: '/shop/cables', icon: Cable, hideClass: 'nav-hide-1160' },
+    { name: 'Power Banks', href: '/shop/power-banks', icon: BatteryCharging, hideClass: 'nav-hide-1260', alignRight: true },
+    { name: 'Audio', href: '/shop/audio', icon: Headphones, hideClass: 'nav-hide-1380', alignRight: true },
     { name: 'Deals', href: '/deals', isDeals: true, icon: Flame, alignRight: true }
   ];
 

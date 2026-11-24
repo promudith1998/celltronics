@@ -826,17 +826,16 @@ nav.mainnav::after {
 .nav-links-track {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   flex-wrap: nowrap;
-  flex: 0 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
   overflow: visible;
 }
 
 .nav-b2b-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex: none;
 }
 
@@ -844,15 +843,15 @@ nav.mainnav::after {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 7px;
+  gap: 6px;
   background: var(--blue);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0 13px;
-  height: 36px;
+  padding: 0 11px;
+  height: 35px;
   border-radius: 8px;
   flex: none;
   white-space: nowrap;
@@ -878,12 +877,12 @@ nav.mainnav::after {
 .nav-device-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   border: 1px solid rgba(63, 169, 255, 0.32);
-  padding: 0 11px;
-  height: 36px;
+  padding: 0 10px;
+  height: 35px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 12px;
@@ -906,11 +905,11 @@ nav.mainnav::after {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.92);
-  padding: 0 9px;
-  height: 36px;
+  padding: 0 8px;
+  height: 35px;
   border-radius: 8px;
   white-space: nowrap;
   flex: none;
@@ -957,11 +956,11 @@ nav.mainnav::after {
 .nav-b2b-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 13px;
-  height: 34px;
+  gap: 5px;
+  padding: 0 11px;
+  height: 33px;
   border-radius: 100px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-decoration: none;
@@ -1079,11 +1078,7 @@ nav.mainnav::after {
 /* ========================================================= */
 /* ========= PROGRESSIVE NAV BREAKPOINTS (ZERO OVERLAP) ==== */
 /* ========================================================= */
-@media (max-width: 1559px) {
-  .nav-long-word {
-    display: none !important;
-  }
-
+@media (max-width: 1719px) {
   .nav-cta-full {
     display: none !important;
   }
@@ -1093,31 +1088,42 @@ nav.mainnav::after {
   }
 }
 
-@media (max-width: 1320px) {
-  .nav-hide-1320 {
+@media (max-width: 1559px) {
+  .nav-long-word {
     display: none !important;
   }
 }
 
-@media (max-width: 1219px) {
-  .nav-hide-1220 {
+@media (max-width: 1380px) {
+  .nav-hide-1380 {
     display: none !important;
   }
 }
 
-@media (max-width: 1099px) {
-  .nav-hide-1100 {
+@media (max-width: 1259px) {
+  .nav-hide-1260 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1159px) {
+  .nav-hide-1160 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1079px) {
+  .nav-hide-1080 {
     display: none !important;
   }
 
   .navlink {
     padding: 0 7px;
-    font-size: 12px;
   }
 
   .nav-b2b-btn {
     padding: 0 10px;
-    font-size: 11px;
+    font-size: 10.5px;
   }
 }
 
@@ -3074,14 +3080,19 @@ footer.site {
   }
 }
 
-@media (min-width: 1680px) {
+@media (min-width: 1760px) {
   .search-bar {
     max-width: 760px;
   }
 
   .navlink {
-    padding: 0 12px;
-    font-size: 13px;
+    padding: 0 11px;
+    font-size: 12.5px;
+  }
+
+  .nav-b2b-btn {
+    padding: 0 13px;
+    font-size: 11.5px;
   }
 
   .hero-grid-custom {
@@ -3327,7 +3338,7 @@ footer.site {
 
 @media (max-width: 640px) {
   .wrap {
-    padding: 0 16px;
+    padding-inline: 16px;
   }
 
   .cat-icons-grid {
@@ -3466,7 +3477,7 @@ footer.site {
 
 @media (max-width: 520px) {
   .wrap {
-    padding: 0 14px;
+    padding-inline: 14px;
   }
 
   .header-row {
