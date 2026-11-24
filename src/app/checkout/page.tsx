@@ -49,6 +49,14 @@ export default function CheckoutPage() {
 
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [paymentReceipt, setPaymentReceipt] = useState<{
+    captureId?: string | null;
+    status?: string | null;
+    amountPaid?: string | null;
+    currency?: string | null;
+    payerEmail?: string | null;
+    environment?: string | null;
+  } | null>(null);
 
   const expressFee = shippingMethod === 'express' ? 9.99 : 0;
   const grandTotal = total + expressFee;
@@ -57,13 +65,42 @@ export default function CheckoutPage() {
     const finalOrderNumber = capturedOrderId.startsWith('DEMO-')
       ? `CC-${Math.floor(100000 + Math.random() * 900000)}`
       : capturedOrderId;
+
+    const resolvedPayerEmail =
+      email ||
+      details?.payerEmail ||
+      details?.payer?.emailAddress ||
+      details?.payer?.email_address ||
+      'customer@cellcentral.ca';
+
+    const resolvedPayerName =
+      `${firstName} ${lastName}`.trim() ||
+      details?.payerName ||
+      [details?.payer?.name?.givenName, details?.payer?.name?.surname].filter(Boolean).join(' ') ||
+      details?.payer?.name?.given_name ||
+      'CellCentral Customer';
+
+    const captureId =
+      details?.captureId ||
+      details?.purchaseUnits?.[0]?.payments?.captures?.[0]?.id ||
+      details?.purchase_units?.[0]?.payments?.captures?.[0]?.id ||
+      null;
+
     setOrderNumber(finalOrderNumber);
+    setPaymentReceipt({
+      captureId,
+      status: details?.captureStatus || details?.status || 'COMPLETED',
+      amountPaid: details?.capturedAmount || grandTotal.toFixed(2),
+      currency: details?.capturedCurrency || 'CAD',
+      payerEmail: resolvedPayerEmail,
+      environment: details?.environment || null,
+    });
     setOrderPlaced(true);
 
     createOrderInDb({
       orderNumber: finalOrderNumber,
-      customerEmail: email || details?.payer?.email_address || 'customer@cellcentral.ca',
-      customerName: `${firstName} ${lastName}`.trim() || details?.payer?.name?.given_name || 'CellCentral Customer',
+      customerEmail: resolvedPayerEmail,
+      customerName: resolvedPayerName,
       shippingAddress: {
         address: address || 'Canadian Shipping Address',
         city: city || 'Toronto',
@@ -146,7 +183,7 @@ export default function CheckoutPage() {
           Thank you for your order!
         </h1>
         <p style={{ color: 'var(--gray-700)', fontSize: '15px', marginBottom: '20px' }}>
-          Order confirmation has been sent to <b>{email || 'your email'}</b>.
+          Order confirmation has been sent to <b>{email || paymentReceipt?.payerEmail || 'your email'}</b>.
         </p>
 
         <div
@@ -163,6 +200,20 @@ export default function CheckoutPage() {
             <span style={{ fontSize: '13px', color: 'var(--gray-400)', fontWeight: 600 }}>Order Number:</span>
             <span className="mono" style={{ fontWeight: 700, color: 'var(--navy)' }}>{orderNumber}</span>
           </div>
+          {paymentReceipt?.captureId && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--gray-200)', paddingBottom: '12px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--gray-400)', fontWeight: 600 }}>PayPal Transaction ID:</span>
+              <span className="mono" style={{ fontWeight: 700, color: 'var(--blue)' }}>{paymentReceipt.captureId}</span>
+            </div>
+          )}
+          {paymentReceipt?.amountPaid && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--gray-200)', paddingBottom: '12px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--gray-400)', fontWeight: 600 }}>Amount Paid:</span>
+              <span className="mono" style={{ fontWeight: 700, color: '#1EA672' }}>
+                ${paymentReceipt.amountPaid} {paymentReceipt.currency || 'CAD'} ({paymentReceipt.status || 'COMPLETED'})
+              </span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--gray-200)', paddingBottom: '12px', marginBottom: '12px' }}>
             <span style={{ fontSize: '13px', color: 'var(--gray-400)', fontWeight: 600 }}>Shipping to:</span>
             <span style={{ fontWeight: 600, color: 'var(--navy)', textAlign: 'right' }}>

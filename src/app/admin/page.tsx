@@ -58,6 +58,7 @@ import { PromoCodeModal } from '@/components/admin/PromoCodeModal';
 import { AdminAuthGate } from '@/components/admin/AdminAuthGate';
 import { AdminAnalyticsChart } from '@/components/admin/AdminAnalyticsChart';
 import { OrderDetailsModal } from '@/components/admin/OrderDetailsModal';
+import { LiveTransactionTester } from '@/components/admin/LiveTransactionTester';
 
 export default function AdminPage() {
   const {
@@ -2702,6 +2703,8 @@ export default function AdminPage() {
                       Click <strong>&quot;Test PayPal Connectivity&quot;</strong> to verify live connection to PayPal servers and validate your API credentials from <code>.env.local</code>.
                     </div>
                   )}
+
+                  <LiveTransactionTester onOrderCreated={() => refreshOrdersFromDb?.()} />
                 </div>
 
                 {/* Local JSON Backup & Recovery */}

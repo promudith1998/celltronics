@@ -2,18 +2,50 @@ import {
   Client,
   Environment,
   OrdersController,
+  PaymentsController,
   CheckoutPaymentIntent,
   PaypalWalletContextShippingPreference,
   PaypalExperienceUserAction,
 } from '@paypal/paypal-server-sdk';
 
-/**
- * Returns a configured PayPal Server SDK client singleton.
- * Configured per the official getting-started-guide-buy-button-nextjs reference.
- */
 function isLiveEnvironment(env?: string): boolean {
   const normalized = (env || '').trim().toLowerCase();
   return normalized === 'production' || normalized === 'live';
+}
+
+export function getPayPalEnvironmentName(): 'live' | 'sandbox' {
+  return isLiveEnvironment(process.env.NEXT_PUBLIC_PAYPAL_ENVIRONMENT) ? 'live' : 'sandbox';
+}
+
+/**
+ * Extracts human-readable error details from PayPal Server SDK ApiError responses.
+ */
+export function formatPayPalError(error: any, fallback: string): string {
+  if (!error) return fallback;
+
+  let parsed: any = error?.result;
+  if (!parsed && typeof error?.body === 'string') {
+    try {
+      parsed = JSON.parse(error.body);
+    } catch {
+      parsed = null;
+    }
+  }
+
+  if (parsed) {
+    const firstDetail = Array.isArray(parsed.details) ? parsed.details[0] : null;
+    const issue = firstDetail?.issue ? `[${firstDetail.issue}] ` : '';
+    const desc =
+      firstDetail?.description ||
+      parsed.error_description ||
+      parsed.message ||
+      error.message ||
+      fallback;
+    const debug = parsed.debug_id ? ` (debug_id: ${parsed.debug_id})` : '';
+    return `${issue}${desc}${debug}`;
+  }
+
+  return error?.message || fallback;
 }
 
 function getPayPalClient(): Client | null {
@@ -59,6 +91,11 @@ export async function createPayPalOrder(
   referenceId?: string,
   customer?: CustomerShippingInfo
 ): Promise<string> {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+    throw new Error('Invalid payment amount. Amount must be greater than 0.');
+  }
+
   const client = getPayPalClient();
 
   if (!client) {
@@ -85,40 +122,44 @@ export async function createPayPalOrder(
       }
     : undefined;
 
-  const { result } = await ordersController.createOrder({
-    body: {
-      intent: CheckoutPaymentIntent.Capture,
-      purchaseUnits: [
-        {
-          referenceId: referenceId || `CC-${Date.now()}`,
-          amount: {
-            currencyCode: currency,
-            value: Number(amount).toFixed(2),
+  try {
+    const { result } = await ordersController.createOrder({
+      body: {
+        intent: CheckoutPaymentIntent.Capture,
+        purchaseUnits: [
+          {
+            referenceId: referenceId || `CC-${Date.now()}`,
+            amount: {
+              currencyCode: currency,
+              value: numericAmount.toFixed(2),
+            },
+            shipping,
           },
-          shipping,
-        },
-      ],
-      paymentSource: {
-        paypal: {
-          experienceContext: {
-            brandName: 'CellCentral Mobile Accessories',
-            shippingPreference: PaypalWalletContextShippingPreference.NoShipping,
-            userAction: PaypalExperienceUserAction.PayNow,
+        ],
+        paymentSource: {
+          paypal: {
+            experienceContext: {
+              brandName: 'CellCentral Mobile Accessories',
+              shippingPreference: PaypalWalletContextShippingPreference.NoShipping,
+              userAction: PaypalExperienceUserAction.PayNow,
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!result.id) {
-    throw new Error('PayPal order creation failed: missing order ID');
+    if (!result.id) {
+      throw new Error('PayPal order creation failed: missing order ID');
+    }
+
+    return result.id;
+  } catch (error: any) {
+    throw new Error(formatPayPalError(error, 'PayPal order creation failed'));
   }
-
-  return result.id;
 }
 
 /**
- * Captures an approved PayPal order
+ * Captures an approved PayPal order and returns normalized receipt details alongside raw result
  * @param orderId PayPal Order ID
  */
 export async function capturePayPalOrder(orderId: string): Promise<any> {
@@ -130,13 +171,74 @@ export async function capturePayPalOrder(orderId: string): Promise<any> {
       id: orderId,
       status: 'COMPLETED',
       simulated: true,
+      environment: 'demo',
       captureId: `CAPTURE-${Date.now()}`,
+      captureStatus: 'COMPLETED',
     };
   }
 
   const ordersController = new OrdersController(client);
-  const { result } = await ordersController.captureOrder({ id: orderId });
-  return result;
+  try {
+    const { result } = await ordersController.captureOrder({
+      id: orderId,
+      prefer: 'return=representation',
+    });
+
+    const capture = result.purchaseUnits?.[0]?.payments?.captures?.[0];
+    const captureStatus = capture?.status || result.status;
+
+    if (captureStatus === 'DECLINED' || captureStatus === 'FAILED') {
+      const reason = capture?.statusDetails?.reason || 'Payment was declined by PayPal.';
+      throw new Error(`PayPal capture ${captureStatus}: ${reason}`);
+    }
+
+    const payerGiven = result.payer?.name?.givenName || '';
+    const payerSurname = result.payer?.name?.surname || '';
+    const payerName = `${payerGiven} ${payerSurname}`.trim() || undefined;
+
+    return {
+      ...result,
+      environment: getPayPalEnvironmentName(),
+      captureId: capture?.id || null,
+      captureStatus: captureStatus || null,
+      capturedAmount: capture?.amount?.value || null,
+      capturedCurrency: capture?.amount?.currencyCode || 'CAD',
+      payerEmail: result.payer?.emailAddress || null,
+      payerName: payerName || null,
+      createTime: capture?.createTime || result.createTime || new Date().toISOString(),
+    };
+  } catch (error: any) {
+    throw new Error(formatPayPalError(error, 'Failed to capture PayPal order'));
+  }
+}
+
+/**
+ * Issues a full refund for a captured PayPal payment (Admin-only action)
+ */
+export async function refundPayPalCapture(captureId: string, noteToPayer?: string): Promise<any> {
+  const client = getPayPalClient();
+  if (!client) {
+    throw new Error('PayPal credentials are not configured.');
+  }
+
+  const paymentsController = new PaymentsController(client);
+  try {
+    const { result } = await paymentsController.refundCapturedPayment({
+      captureId,
+      prefer: 'return=representation',
+      body: noteToPayer ? { noteToPayer } : undefined,
+    });
+    return {
+      ...result,
+      refundId: result.id,
+      status: result.status,
+      amount: result.amount?.value || null,
+      currency: result.amount?.currencyCode || 'CAD',
+      environment: getPayPalEnvironmentName(),
+    };
+  } catch (error: any) {
+    throw new Error(formatPayPalError(error, 'Failed to refund PayPal capture'));
+  }
 }
 
 /**

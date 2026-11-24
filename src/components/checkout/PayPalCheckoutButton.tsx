@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -17,6 +17,7 @@ export interface PayPalCustomerInfo {
 interface PayPalCheckoutButtonProps {
   amount: number;
   currency?: string;
+  referenceId?: string;
   customer?: PayPalCustomerInfo;
   onSuccess: (orderId: string, details?: any) => void;
   onError?: (err: any) => void;
@@ -26,12 +27,13 @@ interface PayPalCheckoutButtonProps {
 async function apiCreateOrder(
   amountVal: string,
   currencyVal: string,
-  customer?: PayPalCustomerInfo
+  customer?: PayPalCustomerInfo,
+  referenceId?: string
 ): Promise<string> {
   const res = await fetch('/api/paypal/create-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount: amountVal, currency: currencyVal, customer }),
+    body: JSON.stringify({ amount: amountVal, currency: currencyVal, customer, referenceId }),
   });
   const data = await res.json();
   if (!res.ok || !data.id) {
@@ -56,6 +58,7 @@ async function apiCaptureOrder(orderId: string): Promise<any> {
 export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
   amount,
   currency = 'CAD',
+  referenceId,
   customer,
   onSuccess,
   onError,
@@ -63,6 +66,23 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  // Keep refs to the latest props so PayPalButtons' cached createOrder/onApprove
+  // closures ALWAYS use the current amount, customer details, and callbacks
+  // without forcing the PayPal iframe to re-mount on every keystroke.
+  const amountRef = useRef(amount);
+  const currencyRef = useRef(currency);
+  const referenceIdRef = useRef(referenceId);
+  const customerRef = useRef(customer);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  amountRef.current = amount;
+  currencyRef.current = currency;
+  referenceIdRef.current = referenceId;
+  customerRef.current = customer;
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const isConfigured = Boolean(clientId && clientId !== 'your_sandbox_client_id_here');
@@ -139,10 +159,31 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
         </div>
       )}
 
+      {isProcessing && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            background: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            color: '#1D4ED8',
+            fontSize: '13px',
+            fontWeight: 600,
+            marginBottom: '12px',
+          }}
+        >
+          <Loader2 size={16} className="animate-spin" />
+          <span>Capturing PayPal payment securely... Please do not close this window.</span>
+        </div>
+      )}
+
       {isConfigured ? (
         <PayPalScriptProvider options={scriptOptions}>
           <PayPalButtons
-            disabled={disabled}
+            disabled={disabled || isProcessing}
             style={{
               layout: 'vertical',
               color: 'gold',
@@ -153,24 +194,31 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
             createOrder={async () => {
               try {
                 setErrorMessage('');
-                const id = await apiCreateOrder(amount.toFixed(2), currency, customer);
+                const id = await apiCreateOrder(
+                  amountRef.current.toFixed(2),
+                  currencyRef.current,
+                  customerRef.current,
+                  referenceIdRef.current
+                );
                 return id;
               } catch (err: any) {
                 setErrorMessage(err.message || 'Could not initiate PayPal order.');
+                if (onErrorRef.current) onErrorRef.current(err);
                 throw err;
               }
             }}
             onApprove={async (data) => {
               try {
                 setIsProcessing(true);
+                setErrorMessage('');
                 const orderId = data.orderID;
                 const details = await apiCaptureOrder(orderId);
                 setIsProcessing(false);
-                onSuccess(orderId, details);
+                onSuccessRef.current(orderId, details);
               } catch (err: any) {
                 setIsProcessing(false);
                 setErrorMessage(err.message || 'Payment capture failed.');
-                if (onError) onError(err);
+                if (onErrorRef.current) onErrorRef.current(err);
               }
             }}
             onCancel={(data) => {
@@ -188,8 +236,12 @@ export const PayPalCheckoutButton: React.FC<PayPalCheckoutButtonProps> = ({
               ) {
                 return;
               }
-              setErrorMessage('PayPal reported an error during checkout.');
-              if (onError) onError(err);
+              setErrorMessage(
+                err?.message && !errStr.includes('zoid')
+                  ? `PayPal error: ${err.message}`
+                  : 'PayPal reported an error during checkout.'
+              );
+              if (onErrorRef.current) onErrorRef.current(err);
             }}
           />
         </PayPalScriptProvider>
